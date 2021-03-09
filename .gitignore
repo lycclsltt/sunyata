@@ -1,0 +1,15 @@
+build
+dist
+pub.sh
+agileutil.egg-info
+__pycache__
+test.py
+.idea
+MANIFEST.in
+setup.cfg
+*.pyc
+upload.sh
+*.log
+restart.sh
+*.ini
+test.py
