@@ -9,7 +9,7 @@ from agileutil.sanic import SanicApp, SanicController
 
 class TestController(SanicController):
 
-    def handle(self):
+    async def handle(self):
         self.logInfo("info")
         self.logError("error")
         self.logWarn("warn")
@@ -43,8 +43,10 @@ from sanic.response import text
 from sanic.views import HTTPMethodView
 import ujson
 from agileutil.log import Log
-from decouple import config
-
+try:
+    from decouple import config
+except:
+    pass
 
 class SanicController(HTTPMethodView):
     def __init__(self):
@@ -70,7 +72,7 @@ class SanicController(HTTPMethodView):
     async def deal(self, req):
         self.req = req
         ret = await self.handle()
-        return text(ret)
+        return text(str(ret))  
 
     async def handle(self):
         return ''
@@ -182,7 +184,7 @@ class SanicApp(object):
 
     def initApp(self):
         if self.app == None:
-            self.app = Sanic()
+            self.app = Sanic(name='agileutil')
 
     def initLog(self):
         if self.logger == None and self.log != '':

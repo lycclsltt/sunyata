@@ -102,8 +102,10 @@ class Model(OrmModel):
         return self.getOrm().data(self.fieldMap).insert()
 
     @classmethod
-    def filter(cls, field, cmp, val):
+    def filter(cls, field, cmp, val, raw = False):
         rows = cls.getOrm().where(field, cmp, val).get()
+        if raw:
+            return rows
         querySet = OrmQuerySet()
         for row in rows:
             obj = cls()
@@ -124,8 +126,10 @@ class Model(OrmModel):
         return self.getOrm().where(self.primaryKey, '=', getattr(self, self.primaryKey)).delete()
 
     @classmethod
-    def all(cls):
+    def all(cls, raw = False):
         rows = cls.getOrm().get()
+        if raw:
+            return rows
         querySet = OrmQuerySet()
         for row in rows:
             obj = cls()
