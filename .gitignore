@@ -13,3 +13,5 @@ upload.sh
 restart.sh
 *.ini
 test.py
+test_server.py
+test_client.py
