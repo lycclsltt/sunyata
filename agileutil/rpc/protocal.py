@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.transport import ZMQTransport
+from agileutil.rpc.transport import ZMQTransport, TcpTransport
 from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
 import json
 from abc import ABCMeta, abstractmethod
@@ -28,7 +28,8 @@ class HttpProtocal(RpcProtocal):
 class TcpProtocal(RpcProtocal):
     
     def __init__(self, host, port, serializeType = 'bin'):
-        self.transport = ZMQTransport(host, port)
+        #self.transport = ZMQTransport(host, port)
+        self.transport = TcpTransport(host, port)
         self.serializeType = serializeType
 
     def serialize(self, obj):

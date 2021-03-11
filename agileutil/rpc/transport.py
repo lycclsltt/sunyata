@@ -1,6 +1,8 @@
 #coding=utf-8
 
 import zmq
+from socket import *
+import struct
 
 class RpcTransport(object): pass
 
@@ -30,3 +32,64 @@ class ZMQTransport(RpcTransport):
 
     def send(self, msg: bytes):
         self.socket.send(msg)
+
+
+class TcpTransport(RpcTransport):
+
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.socket = None
+
+    def bind(self):
+        self.socket = socket(AF_INET, SOCK_STREAM)
+        self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.socket.bind( (self.host, self.port) )
+        self.socket.listen(100)
+
+    def connect(self):
+        if self.socket == None:
+            self.socket = socket(AF_INET, SOCK_STREAM)
+            self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.socket.connect( (self.host, self.port) )
+
+    def accept(self):
+        cli, addr = self.socket.accept()
+        return cli, addr
+
+    def send(self, msg: bytes, conn = None):
+        if conn == None:
+            conn = self.socket
+        newbyte = struct.pack("i", len(msg))
+        conn.sendall(newbyte)
+        conn.sendall(msg)
+
+    def recv(self, conn = None):
+        #每次读一个完整的字节，再接收前4个字节，再取body
+        if conn == None:
+            conn = self.socket
+        toread = 4
+        readn = 0
+        lengthbyte = b''
+        while 1:
+            bufsize = toread - readn
+            if bufsize <= 0:
+                break
+            bytearr = conn.recv(bufsize)
+            lengthbyte = lengthbyte + bytearr
+            readn = readn + len(bytearr)
+        toread = struct.unpack("i", lengthbyte)[0]
+        readn = 0
+        msg = b''
+        while 1:
+            bufsize = toread - readn
+            if bufsize <= 0:
+                break
+            bytearr = conn.recv(bufsize)
+            msg = msg + bytearr
+            readn = readn + len(bytearr)
+        return msg
+
+    def close(self):
+        self.socket.close()
+        self.socket = None

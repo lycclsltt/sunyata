@@ -3,6 +3,8 @@
 from agileutil.rpc.protocal import TcpProtocal
 import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
+import queue
+import threading
 
 
 class RpcServer(object):
@@ -23,14 +25,13 @@ class RpcServer(object):
         return resp
 
 
-class TcpRpcServer(RpcServer):
-
+class SimpleTcpRpcServer(RpcServer):
+    
     def __init__(self, host, port):
         RpcServer.__init__(self)
         self.host = host
         self.port = port
         self.protocal = TcpProtocal(host, port)
-        self.worker = multiprocessing.cpu_count()
     
     def serve(self):
         self.protocal.transport.bind()
@@ -40,3 +41,34 @@ class TcpRpcServer(RpcServer):
             func, args = self.protocal.parseRequest(request)
             resp = self.run(func, args)
             self.protocal.transport.send(self.protocal.serialize(resp))
+
+
+class TcpRpcServer(SimpleTcpRpcServer):
+
+    def __init__(self, host, port, workers = multiprocessing.cpu_count()):
+        SimpleTcpRpcServer.__init__(self, host, port)
+        self.worker = workers
+        self.queueMaxSize = 100000
+        self.queue = queue.Queue(self.queueMaxSize)
+
+    def handle(self):
+        while 1:
+            conn = self.queue.get()
+            msg = self.protocal.transport.recv(conn)
+            request = self.protocal.unserialize(msg)
+            func, args = self.protocal.parseRequest(request)
+            resp = self.run(func, args)
+            self.protocal.transport.send(self.protocal.serialize(resp), conn)
+            conn.close()
+
+    def startWorkers(self):
+        for i in range(self.worker):
+            t = threading.Thread(target=self.handle)
+            t.start()
+
+    def serve(self):
+        self.startWorkers()
+        self.protocal.transport.bind()
+        while 1:
+            conn, _ = self.protocal.transport.accept()
+            self.queue.put(conn)

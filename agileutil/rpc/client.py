@@ -26,5 +26,7 @@ class TcpRpcClient(RpcClient):
         respmsg = self.protocal.transport.recv()
         resp = self.protocal.unserialize(respmsg)
         if isinstance(resp, FuncNotFoundException):
+            self.protocal.transport.close()
             raise resp
+        self.protocal.transport.close()
         return resp
