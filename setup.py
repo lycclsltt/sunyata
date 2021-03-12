@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '12.95.1'
+DEFINE_VERSION = '12.95.3'
 from setuptools import setup
 import platform
 system = platform.system()
@@ -45,5 +45,5 @@ setup(name='agileutil',
           'Programming Language :: Python :: 3.8',
       ],
       keywords='agileutil',
-      packages=['agileutil'],
+      packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm'],
       include_package_data=True)
