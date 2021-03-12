@@ -5,6 +5,8 @@ import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
 import queue
 import threading
+import select
+import socket
 
 
 class RpcServer(object):
@@ -72,6 +74,62 @@ class TcpRpcServer(SimpleTcpRpcServer):
         while 1:
             conn, _ = self.protocal.transport.accept()
             self.queue.put(conn)
+
+
+class AsyncTcpRpcServer(TcpRpcServer):
+
+    def __init__(self, host, port):
+        TcpRpcServer.__init__(self, host, port)
+        self.host = host
+        self.port = port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.addr = (self.host, self.port)
+        self.timeout = 10
+        self.epoll = select.epoll()
+        self.fdToSocket = {self.socket.fileno():self.socket}
+        self.fdResp = {}
+
+    def bind(self):
+        self.socket.bind(self.addr)
+        self.socket.listen(10)
+        self.socket.setblocking(False)
+        self.epoll.register(self.socket.fileno(), select.EPOLLIN)
+
+    def serve(self):
+        self.bind()
+        while 1:
+            events = self.epoll.poll(self.timeout)
+            if not events:
+                print("epoll超时无活动连接，重新轮询......")
+                continue
+            print("有" , len(events), "个新事件，开始处理......")
+            for fd, event in events:
+                socket = self.fdToSocket[fd]
+                if socket == self.socket:
+                    conn, addr = self.socket.accept()
+                    print("新连接：" , addr)
+                    conn.setblocking(False)
+                    self.epoll.register(conn.fileno(), select.EPOLLIN)
+                    self.fdToSocket[conn.fileno()] = conn
+                elif event & select.EPOLLHUP:
+                    print('client close')
+                    self.epoll.unregister(fd)
+                    self.fdToSocket[fd].close()
+                    del self.fdToSocket[fd]
+                elif event & select.EPOLLIN:
+                    msg = self.protocal.transport.recv(socket)
+                    request = self.protocal.unserialize(msg)
+                    func, args = self.protocal.parseRequest(request)
+                    resp = self.run(func, args)
+                    self.fdResp[fd] = resp
+                    self.epoll.modify(fd, select.EPOLLOUT)
+                elif event & select.EPOLLOUT:
+                    if fd in self.fdResp:
+                        resp = self.fdResp[fd]
+                        self.protocal.transport.send(self.protocal.serialize(resp), socket)
+                        self.epoll.modify(fd, select.EPOLLIN)
+                        socket.close()
 
 
 class UdpRpcServer(RpcServer):
