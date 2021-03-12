@@ -10,7 +10,7 @@ pip install agileutil
 ## RPC
 Agileutil provides a simple RPC call.Its underlying infrastructure is based on TCP and the pickle serialization facility.
 
-### Rpc server
+### TCP RPC server
 ```python
 from agileutil.rpc.server import TcpRpcServer
 
@@ -21,7 +21,7 @@ nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
 nationServer.regist(sayHello)
 nationServer.serve()
 ```
-### Rpc client
+### TCP RPC client
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -29,6 +29,28 @@ c = TcpRpcClient('127.0.0.1', 9988)
 resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
+
+### UDP RPC server
+If you want to use UDP, just change TcpRpcServer to UdpRpcServer.
+```python
+from agileutil.rpc.server import UdpRpcServer
+
+def sayHello(name): 
+    return 'hello ' + name
+
+s = UdpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+s.serve()
+```
+### UDP RPC client
+```python
+from agileutil.rpc.client import UdpRpcClient
+cli = UdpRpcClient('127.0.0.1', 9988)
+for i in range(5000):
+    resp = cli.call(func = 'sayHello', args =('xiaoming') )
+    print(resp)
+```
+
 
 ## ORM
 Define a table named Nation with two filed: id(int, promary key) and name(varchar).
