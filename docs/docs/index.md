@@ -50,7 +50,7 @@ As same as TcpRpcServer, use TcpRpcClient object.
 from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient('127.0.0.1', 9988)
-resp = c.call(func = 'sayHello', args = ('zhangsan'))
+resp = c.call(func = 'rows'))
 print('resp', resp)
 ```
 
