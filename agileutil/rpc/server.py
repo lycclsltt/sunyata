@@ -7,6 +7,10 @@ import queue
 import threading
 import select
 import socket
+import tornado.ioloop
+from tornado.iostream import IOStream
+import struct
+import functools
 
 
 class RpcServer(object):
@@ -53,27 +57,24 @@ class TcpRpcServer(SimpleTcpRpcServer):
         self.queueMaxSize = 100000
         self.queue = queue.Queue(self.queueMaxSize)
 
-    def handle(self):
+    def handle(self, conn):
         while 1:
-            conn = self.queue.get()
-            msg = self.protocal.transport.recv(conn)
-            request = self.protocal.unserialize(msg)
-            func, args = self.protocal.parseRequest(request)
-            resp = self.run(func, args)
-            self.protocal.transport.send(self.protocal.serialize(resp), conn)
-            conn.close()
-
-    def startWorkers(self):
-        for i in range(self.worker):
-            t = threading.Thread(target=self.handle)
-            t.start()
+            try:
+                msg = self.protocal.transport.recv(conn)
+                request = self.protocal.unserialize(msg)
+                func, args = self.protocal.parseRequest(request)
+                resp = self.run(func, args)
+                self.protocal.transport.send(self.protocal.serialize(resp), conn)
+            except Exception as ex:
+                conn.close()
+                return
 
     def serve(self):
-        self.startWorkers()
         self.protocal.transport.bind()
         while 1:
             conn, _ = self.protocal.transport.accept()
-            self.queue.put(conn)
+            t = threading.Thread(target=self.handle, args=(conn,) )
+            t.start()
 
 
 class AsyncTcpRpcServer(TcpRpcServer):
@@ -101,19 +102,15 @@ class AsyncTcpRpcServer(TcpRpcServer):
         while 1:
             events = self.epoll.poll(self.timeout)
             if not events:
-                print("epoll超时无活动连接，重新轮询......")
                 continue
-            print("有" , len(events), "个新事件，开始处理......")
             for fd, event in events:
                 socket = self.fdToSocket[fd]
                 if socket == self.socket:
                     conn, addr = self.socket.accept()
-                    print("新连接：" , addr)
                     conn.setblocking(False)
                     self.epoll.register(conn.fileno(), select.EPOLLIN)
                     self.fdToSocket[conn.fileno()] = conn
                 elif event & select.EPOLLHUP:
-                    print('client close')
                     self.epoll.unregister(fd)
                     self.fdToSocket[fd].close()
                     del self.fdToSocket[fd]
@@ -130,6 +127,65 @@ class AsyncTcpRpcServer(TcpRpcServer):
                         self.protocal.transport.send(self.protocal.serialize(resp), socket)
                         self.epoll.modify(fd, select.EPOLLIN)
                         socket.close()
+
+
+class TornadoTcpRpcServer(TcpRpcServer):
+
+    def __init__(self, host, port):
+        TcpRpcServer.__init__(self, host, port)
+
+    async def handleConnection(self, connection, address):
+        stream = IOStream(connection)
+        while 1:
+            try:
+                toread = 4
+                readn = 0
+                lengthbyte = b''
+                while 1:
+                    bufsize = toread - readn
+                    if bufsize <= 0:
+                        break
+                    bytearr = await stream.read_bytes(bufsize, partial=True)
+                    lengthbyte = lengthbyte + bytearr
+                    readn = readn + len(bytearr)
+                toread = struct.unpack("i", lengthbyte)[0]
+                readn = 0
+                msg = b''
+                while 1:
+                    bufsize = toread - readn
+                    if bufsize <= 0:
+                        break
+                    bytearr = await stream.read_bytes(bufsize, partial=True)
+                    msg = msg + bytearr
+                    readn = readn + len(bytearr)
+                request = self.protocal.unserialize(msg)
+                func, args = self.protocal.parseRequest(request)
+                resp = self.run(func, args)
+                await stream.write( self.protocal.transport.getSendByte( self.protocal.serialize(resp) ) )
+            except Exception as ex:
+                connection.close()
+                break
+
+
+    def connectionReady(self, sock, fd, events):
+        while True:
+            try:
+                connection, address = sock.accept()
+                connection.setblocking(0)
+                io_loop = tornado.ioloop.IOLoop.current()
+                io_loop.spawn_callback(self.handleConnection, connection, address)
+            except BlockingIOError:
+                return
+            
+
+    def serve(self):
+        self.protocal.transport.bind()
+        self.protocal.transport.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.protocal.transport.socket.setblocking(0)
+        self.ioLoop = tornado.ioloop.IOLoop.current()
+        callback = functools.partial(self.connectionReady, self.protocal.transport.socket)
+        self.ioLoop.add_handler(self.protocal.transport.socket.fileno(), callback, self.ioLoop.READ)
+        self.ioLoop.start()
 
 
 class UdpRpcServer(RpcServer):

@@ -64,6 +64,11 @@ class TcpTransport(RpcTransport):
         conn.sendall(newbyte)
         conn.sendall(msg)
 
+    def getSendByte(self, msg: bytes, conn = None):
+        newbyte = struct.pack("i", len(msg))
+        ret = newbyte + msg
+        return ret
+
     def recv(self, conn = None):
         #每次读一个完整的字节，再接收前4个字节，再取body
         if conn == None:

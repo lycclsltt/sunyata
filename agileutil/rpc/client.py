@@ -9,13 +9,18 @@ class RpcClient(object): pass
 
 class TcpRpcClient(RpcClient):
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, keepconnect = True):
         self.host = host
         self.port = port
+        self.keepconnect = keepconnect
         self.protocal = TcpProtocal(host, port)
 
     def call(self, func, args):
-        self.protocal.transport.connect()
+        try:
+            self.protocal.transport.connect()
+        except Exception as ex:
+            pass
+
         package = {
             'func' : func,
             'args' : args,
@@ -25,10 +30,15 @@ class TcpRpcClient(RpcClient):
         respmsg = self.protocal.transport.recv()
         resp = self.protocal.unserialize(respmsg)
         if isinstance(resp, FuncNotFoundException):
-            self.protocal.transport.close()
+            if not self.keepconnect:
+                self.protocal.transport.close()
             raise resp
-        self.protocal.transport.close()
+        if not self.keepconnect:
+            self.protocal.transport.close()
         return resp
+
+    def close(self):
+        self.protocal.transport.close()
 
 
 class UdpRpcClient(RpcClient):
