@@ -15,7 +15,8 @@ class TcpRpcClient(RpcClient):
         self.keepconnect = keepconnect
         self.protocal = TcpProtocal(host, port)
 
-    def call(self, func, args):
+    def call(self, func, args = ()):
+        if args == None: args = ()
         try:
             self.protocal.transport.connect()
         except Exception as ex:
@@ -29,12 +30,10 @@ class TcpRpcClient(RpcClient):
         self.protocal.transport.send(msg)
         respmsg = self.protocal.transport.recv()
         resp = self.protocal.unserialize(respmsg)
-        if isinstance(resp, FuncNotFoundException):
-            if not self.keepconnect:
-                self.protocal.transport.close()
+        if isinstance(resp, Exception):
+            if not self.keepconnect: self.protocal.transport.close()
             raise resp
-        if not self.keepconnect:
-            self.protocal.transport.close()
+        if not self.keepconnect: self.protocal.transport.close()
         return resp
 
     def close(self):

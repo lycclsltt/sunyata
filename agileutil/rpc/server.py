@@ -24,11 +24,17 @@ class RpcServer(object):
         self.funcList = self.funcMap.keys()
 
     def run(self, func, args):
-        if func not in self.funcList:
-            return FuncNotFoundException('func not found')
-        funcobj = self.funcMap[func]
-        resp = funcobj(args)
-        return resp
+        try:
+            if func not in self.funcList:
+                return FuncNotFoundException('func not found')
+            funcobj = self.funcMap[func]
+            if len(args) == 0:
+                resp = funcobj()
+            else:
+                resp = funcobj(args)
+            return resp
+        except Exception as ex:
+            return Exception('server exception, ' + str(ex))
 
 
 class SimpleTcpRpcServer(RpcServer):
@@ -63,7 +69,7 @@ class TcpRpcServer(SimpleTcpRpcServer):
                 msg = self.protocal.transport.recv(conn)
                 request = self.protocal.unserialize(msg)
                 func, args = self.protocal.parseRequest(request)
-                resp = self.run(func, args)
+                resp = self.run(func, args)                    
                 self.protocal.transport.send(self.protocal.serialize(resp), conn)
             except Exception as ex:
                 conn.close()
