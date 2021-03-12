@@ -51,7 +51,6 @@ for i in range(5000):
     print(resp)
 ```
 
-
 ## ORM
 Define a table named Nation with two filed: id(int, promary key) and name(varchar).
 ```python
