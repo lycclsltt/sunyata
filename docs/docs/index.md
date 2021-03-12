@@ -173,3 +173,34 @@ sql = "insert into nation(name) values('test')"
 effetc = db.update(sql)
 print(effetc, db.lastrowid())
 ```
+
+## Log
+
+Agileutil provides a thread-safe logging tool.It's very simple to use.
+```python
+from agileutil.log import Log
+
+logger = Log('./debug.log')
+logger.info('info')
+logger.warning('warning')
+logger.error('error')
+```
+
+### Log rotate
+The log will be stored for 7 days as follows.One log file is generated per day.
+```
+logger = Log('./debug.log', logSaveDays=7)
+logger.info('info')
+```
+Of course, you can also force logs not to be rotated.
+```
+logger = Log('./debug.log', isRotate=False)
+logger.info('info')
+```
+
+### Error log
+By default, ERROR level logs are highlighted in red.
+Runtime information is appended to the original log.
+```
+logger.error('runtimee exception raise')
+```
