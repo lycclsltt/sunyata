@@ -181,7 +181,7 @@ Agileutil provides a thread-safe logging tool.It's very simple to use.
 from agileutil.log import Log
 
 logger = Log('./debug.log')
-logger.info('info')
+logger.info(123, '456')
 logger.warning('warning')
 logger.error('error')
 ```
