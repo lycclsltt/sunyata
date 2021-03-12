@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal
 import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
 import queue
@@ -72,3 +72,37 @@ class TcpRpcServer(SimpleTcpRpcServer):
         while 1:
             conn, _ = self.protocal.transport.accept()
             self.queue.put(conn)
+
+
+class UdpRpcServer(RpcServer):
+
+    def __init__(self, host, port, workers = multiprocessing.cpu_count()):
+        RpcServer.__init__(self)
+        self.protocal = UdpProtocal(host, port)
+        self.worker = workers
+        self.queueMaxSize = 100000
+        self.queue = queue.Queue(self.queueMaxSize)
+
+    def startWorkers(self):
+        for i in range(self.worker):
+            t = threading.Thread(target=self.handle)
+            t.start()
+
+    def handle(self):
+        while 1:
+            body = self.queue.get()
+            addr = body.get('addr')
+            msg = body.get('msg')
+            request = self.protocal.unserialize(msg)
+            func, args = self.protocal.parseRequest(request)
+            resp = self.run(func, args)
+            self.protocal.transport.send(self.protocal.serialize(resp), addr = addr)
+    
+    def serve(self):
+        self.startWorkers()
+        self.protocal.transport.bind()
+        while 1:
+            msg, cliAddr = self.protocal.transport.recv()
+            self.queue.put({'msg' : msg, 'addr' : cliAddr})
+
+            

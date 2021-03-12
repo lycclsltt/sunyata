@@ -93,3 +93,33 @@ class TcpTransport(RpcTransport):
     def close(self):
         self.socket.close()
         self.socket = None
+
+
+class UdpTransport(RpcTransport):
+    
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.socket = None
+        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+
+    def bind(self):
+        self.socket.bind( (self.host, self.port) )
+
+    def send(self, msg: bytes, conn = None, addr = None):
+        if conn == None:
+            conn = self.socket
+        if addr == None:
+            addr = (self.host, self.port)
+        conn.sendto(msg, addr)
+
+    def recv(self, conn = None):
+        if conn == None:
+            conn = self.socket
+        msg, addr = conn.recvfrom(100000)
+        return msg, addr
+
+    def close(self):
+        self.socket.close()
+        self.socket = None

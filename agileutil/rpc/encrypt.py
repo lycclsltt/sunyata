@@ -14,7 +14,6 @@ class Encrypt(object):
         if len(bytearr) < keyLength:
             return False, b''
         header = bytearr[:keyLength]
-        print('header:', header)
         if header != cls.PRIVATE_KEY:
             return False, b''
         return True, bytearr[keyLength:]
