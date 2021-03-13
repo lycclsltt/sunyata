@@ -25,6 +25,7 @@ class TcpRpcClient(RpcClient):
         self.keepconnect = keepconnect
         self.protocal = TcpProtocal(host, port)
 
+    @retryTimes(retryTimes=3)
     def call(self, func, args = ()):
         if args == None: args = ()
         try:
@@ -93,6 +94,7 @@ class UdpRpcClient(RpcClient):
         self.port = port
         self.protocal = UdpProtocal(host, port)
 
+    @retryTimes(retryTimes=3)
     def call(self, func, args):
         package = {
             'func' : func,
