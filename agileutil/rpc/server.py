@@ -9,6 +9,7 @@ import select
 import socket
 import tornado.ioloop
 from tornado.iostream import IOStream
+from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
 import functools
 
@@ -18,6 +19,8 @@ class RpcServer(object):
     def __init__(self):
         self.funcMap = {}
         self.funcList = []
+        self.discoveryConfig = None
+        self.discovery = None
 
     def regist(self, func):
         self.funcMap[ func.__name__ ] = func
@@ -35,6 +38,10 @@ class RpcServer(object):
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))
+
+    def setDiscoverConfig(self, config: DiscoveryConfig):
+        self.discoveryConfig = config
+        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort)
 
 
 class SimpleTcpRpcServer(RpcServer):
@@ -62,6 +69,7 @@ class TcpRpcServer(SimpleTcpRpcServer):
         self.worker = workers
         self.queueMaxSize = 100000
         self.queue = queue.Queue(self.queueMaxSize)
+        
 
     def handle(self, conn):
         while 1:
@@ -77,6 +85,8 @@ class TcpRpcServer(SimpleTcpRpcServer):
 
     def serve(self):
         self.protocal.transport.bind()
+        if self.discovery and self.discoveryConfig:
+            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
             conn, _ = self.protocal.transport.accept()
             t = threading.Thread(target=self.handle, args=(conn,) )

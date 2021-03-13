@@ -2,10 +2,20 @@
 
 from agileutil.rpc.protocal import TcpProtocal, UdpProtocal
 from agileutil.rpc.exception import FuncNotFoundException
+from agileutil.rpc.discovery import DiscoveryConfig
+from agileutil.rpc.discovery import ConsulRpcDiscovery
+from agileutil.wrap import retry
 
+class RpcClient(object): 
 
-class RpcClient(object): pass
+    def __init__(self):
+        self.discoveryConfig = None
+        self.discovery = None
 
+    def setDiscoveryConfig(self, config: DiscoveryConfig):
+        self.discoveryConfig = config
+        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort)
+        
 
 class TcpRpcClient(RpcClient):
 
@@ -38,6 +48,42 @@ class TcpRpcClient(RpcClient):
 
     def close(self):
         self.protocal.transport.close()
+
+class DisconfTcpRpcClient(TcpRpcClient):
+
+    def __init__(self, discoveryConfig:DiscoveryConfig):
+        TcpRpcClient.__init__(self, host='', port=0)
+        self.setDiscoveryConfig(discoveryConfig)
+        self.instanceIndex = 0
+        self.protocalMap = {}
+        self.isSync = False
+        self.syncInterval = 30
+
+    def getInstance(self):
+        instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
+        instanceLength  = len(instanceList)
+        if instanceLength == 0:
+            raise Exception('no instance found')
+        index = self.instanceIndex % instanceLength
+        self.instanceIndex = self.instanceIndex + 1
+        return instanceList[index]
+
+    def getProtocalInstance(self, instance):
+        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
+        if key in self.protocalMap:
+            return self.protocalMap.get(key)
+        self.protocalMap[key] =  TcpProtocal(instance.address, instance.port)
+        return self.protocalMap[key]
+
+    def refreshProtocal(self):
+        instance = self.getInstance()
+        self.protocal = self.getProtocalInstance(instance)
+
+    @retry
+    def call(self, func, args = ()):
+        self.refreshProtocal()
+        return super().call(func, args)
+        
 
 
 class UdpRpcClient(RpcClient):
