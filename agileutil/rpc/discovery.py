@@ -30,11 +30,11 @@ class ConsulRpcDiscovery(RpcDiscovery):
 
     def doHeartbeat(self, service, address, port, interval):
         while 1:
-            time.sleep(interval)
             try:
                 self.consulApi.ttlHeartbeat(service, address, port)
             except:
                 pass
+            time.sleep(interval)
 
     def regist(self, service, address, port, ttlHeartBeat = True):
         self.consulApi.registService(serviceName = service, address = address, port=port)

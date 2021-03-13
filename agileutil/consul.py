@@ -22,7 +22,7 @@ class ConsulApi(object):
         self.port = port
         self.baseUrl = 'http://%s:%s' % (self.host, self.port)
         self.token = None
-        self.timeout=10
+        self.timeout = 5
 
     def put(self, k: str, v: str):
         url = self.baseUrl + '/v1/kv/%s' % k        
@@ -35,7 +35,7 @@ class ConsulApi(object):
         r = requests.get(url, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
-        print(r.text)
+        #print(r.text)
         return json.loads(r.text)
 
     def genInstanceID(self, service: str, host: str, port: int):
@@ -104,19 +104,3 @@ class ConsulApi(object):
         r = requests.put(url, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
-        
-
-'''
-ca = ConsulApi('192.168.19.103', 8500)
-#ilist = ca.getServiceInstanceList('s3')
-#for i in ilist: print(i.address, i.port)
-ca.registService('s6', port=9988, address='127.0.0.1')
-ca.registService('s6', port=82, address='127.0.0.2')
-ca.registService('s6', port=83, address='127.0.0.3')
-while 1:
-    time.sleep(5)
-    ca.ttlHeartbeat('s6', port=9988, address='127.0.0.1')
-    print(ca.getServiceInstanceList('s6'))
-#ca.deregistService('s1', )
-#ca.deregistService('s3', address='127.0.0.3', port=83)
-'''

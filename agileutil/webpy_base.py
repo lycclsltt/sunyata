@@ -77,17 +77,16 @@ class WebPyBase:
             v = ''
             try:
                 v = web.ctx.session[k]
-                print('[session] get %s from %s' % (str(v), str(k)))
             except Exception as ex:
-                print('[session] v = web.ctx.session[k] exception:', ex)
+                pass
             return v
         else:
             #set
             try:
                 web.ctx.session[k] = v
-                print('[session] set %s to %s' % (str(k), str(v)))
+                #print('[session] set %s to %s' % (str(k), str(v)))
             except Exception as ex:
-                print('[session] web.ctx.session[k] = v exception:', ex)
+                #print('[session] web.ctx.session[k] = v exception:', ex)
 
     def kill_session(self):
         web.ctx.session.kill()

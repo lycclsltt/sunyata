@@ -4,7 +4,7 @@ from agileutil.rpc.protocal import TcpProtocal, UdpProtocal
 from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.discovery import ConsulRpcDiscovery
-from agileutil.wrap import retry
+from agileutil.wrap import retry, retryTimes
 
 class RpcClient(object): 
 
@@ -79,7 +79,7 @@ class DisconfTcpRpcClient(TcpRpcClient):
         instance = self.getInstance()
         self.protocal = self.getProtocalInstance(instance)
 
-    @retry
+    @retryTimes(retryTimes=3)
     def call(self, func, args = ()):
         self.refreshProtocal()
         return super().call(func, args)

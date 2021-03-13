@@ -18,9 +18,9 @@ def stdout_log(func):
         begin = time.time()
         ret = func(*args, **kwargs)
         cost = time.time() - begin
-        print('[%s] call %s() method, args:%s, return:%s, cost:%s seconds' %
-              (dt.current_time(), func.__name__, str(args), str(ret),
-               round(cost, 3)))
+        #print('[%s] call %s() method, args:%s, return:%s, cost:%s seconds' %
+        #      (dt.current_time(), func.__name__, str(args), str(ret),
+        #       round(cost, 3)))
         return ret
 
     return wrapper
@@ -39,9 +39,10 @@ def safe(func):
         try:
             ret = func(*args, **kwargs)
         except Exception as ex:
-            print(
-                '[%s] catch exception when call %s() method, args:%s, ex:%s' %
-                (dt.current_time(), func.__name__, str(args), str(ex)))
+            pass
+            #print(
+            #    '[%s] catch exception when call %s() method, args:%s, ex:%s' %
+            #    (dt.current_time(), func.__name__, str(args), str(ex)))
         return ret
 
     return wrapper
@@ -63,10 +64,10 @@ def retryTimes(retryTimes=2):
                     return ret
                 except Exception as ex:
                     lastEx = ex
-                    print(
-                        '[%s] catch exception when call %s() method, args:%s, ex:%s, ready retry'
-                        %
-                        (dt.current_time(), func.__name__, str(args), str(ex)))
+                    #print(
+                    #    '[%s] catch exception when call %s() method, args:%s, ex:%s, ready retry'
+                    #    %
+                    #    (dt.current_time(), func.__name__, str(args), str(ex)))
             raise lastEx
 
         return wrapper
@@ -89,9 +90,9 @@ def retry(func):
                 return ret
             except Exception as ex:
                 lastEx = ex
-                print(
-                    '[%s] catch exception when call %s() method, args:%s, ex:%s, ready retry'
-                    % (dt.current_time(), func.__name__, str(args), str(ex)))
+                #print(
+                #    '[%s] catch exception when call %s() method, args:%s, ex:%s, ready retry'
+                #    % (dt.current_time(), func.__name__, str(args), str(ex)))
         raise lastEx
 
     return wrapper
