@@ -75,6 +75,80 @@ for i in range(5000):
     print(resp)
 ```
 
+## Service discovery
+Currently only Consul based service registration and discovery is supported.Future plans support ETCD.
+
+### Health check
+If the server process is Down, The client will make requests to other healthy server instances(This health Check is based on Consul's Check mechanism implementation).
+
+### Quick start
+The first step, you need a DiscoveryConfig object to specify Consul's address port and your service name, which needs to be globally unique.
+
+```python
+from agileutil.rpc.discovery import DiscoveryConfig
+
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+```
+Note:
+ - The parameters consulHost and consulPort specify the address and port of consul.
+
+ - The parameter ServiceName is used to mark the service, which should be globally unique. Service registration discovery is implemented by the service name
+ - The serviceHost and servicePort parameters specify the address and port for the current server to listen on.You need to ensure that the address and port can be connected by the client.
+
+The second step，the setDiscoverConfig() method needs to be called before the serve() method, as follows:
+```python
+s = TcpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+s.setDiscoverConfig(disconf)
+s.serve()
+```
+### Complete server-side example
+```python
+from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc.discovery import DiscoveryConfig
+from agileutil.util import local_ip
+
+def sayHello(): 
+    return 'hello '
+
+s = TcpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+s.setDiscoverConfig(disconf)
+s.serve()
+```
+
+### Complete client-side example 
+Initialize a DisconfTCPRPCClient object from the DisconfTCPRPCClient object
+```python
+from agileutil.rpc.client import TcpRpcClient, DisconfTcpRpcClient
+from agileutil.rpc.discovery import DiscoveryConfig
+
+cli = DisconfTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
+for i in range(10):
+    resp = cli.call(func = 'sayHello')
+    print(resp)
+```
+
 ## ORM
 Define a table named Nation with two filed: id(int, promary key) and name(varchar).
 ```python
