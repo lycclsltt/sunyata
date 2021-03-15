@@ -11,6 +11,30 @@ class RpcClient(object):
     def __init__(self):
         self.discoveryConfig = None
         self.discovery = None
+        self.instanceIndex = 0
+        self.protocalMap = {}
+        self.isSync = False
+        self.syncInterval = 30
+
+    def getInstance(self):
+        instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
+        instanceLength  = len(instanceList)
+        if instanceLength == 0:
+            raise Exception('no instance found')
+        index = self.instanceIndex % instanceLength
+        self.instanceIndex = self.instanceIndex + 1
+        return instanceList[index]
+
+    def getProtocalInstance(self, instance):
+        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
+        if key in self.protocalMap:
+            return self.protocalMap.get(key)
+        self.protocalMap[key] =  TcpProtocal(instance.address, instance.port)
+        return self.protocalMap[key]
+
+    def refreshProtocal(self):
+        instance = self.getInstance()
+        self.protocal = self.getProtocalInstance(instance)
 
     def setDiscoveryConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
@@ -20,6 +44,7 @@ class RpcClient(object):
 class TcpRpcClient(RpcClient):
 
     def __init__(self, host, port, keepconnect = True):
+        RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.keepconnect = keepconnect
@@ -50,35 +75,11 @@ class TcpRpcClient(RpcClient):
     def close(self):
         self.protocal.transport.close()
 
-class DisconfTcpRpcClient(TcpRpcClient):
+class DiscoveryTcpRpcClient(TcpRpcClient):
 
     def __init__(self, discoveryConfig:DiscoveryConfig):
         TcpRpcClient.__init__(self, host='', port=0)
         self.setDiscoveryConfig(discoveryConfig)
-        self.instanceIndex = 0
-        self.protocalMap = {}
-        self.isSync = False
-        self.syncInterval = 30
-
-    def getInstance(self):
-        instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
-        instanceLength  = len(instanceList)
-        if instanceLength == 0:
-            raise Exception('no instance found')
-        index = self.instanceIndex % instanceLength
-        self.instanceIndex = self.instanceIndex + 1
-        return instanceList[index]
-
-    def getProtocalInstance(self, instance):
-        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
-        if key in self.protocalMap:
-            return self.protocalMap.get(key)
-        self.protocalMap[key] =  TcpProtocal(instance.address, instance.port)
-        return self.protocalMap[key]
-
-    def refreshProtocal(self):
-        instance = self.getInstance()
-        self.protocal = self.getProtocalInstance(instance)
 
     @retryTimes(retryTimes=3)
     def call(self, func, args = ()):

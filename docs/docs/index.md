@@ -138,12 +138,12 @@ s.serve()
 ```
 
 ### Complete client-side example 
-Initialize a DisconfTCPRPCClient object from the DisconfTCPRPCClient object
+Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object
 ```python
-from agileutil.rpc.client import TcpRpcClient, DisconfTcpRpcClient
+from agileutil.rpc.client import DiscoveryTcpRpcClient
 from agileutil.rpc.discovery import DiscoveryConfig
 
-cli = DisconfTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
+cli = DiscoveryTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
 for i in range(10):
     resp = cli.call(func = 'sayHello')
     print(resp)
