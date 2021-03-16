@@ -138,12 +138,12 @@ s.serve()
 ```
 
 ### Complete client-side example 
-Initialize a DisconfTCPRPCClient object from the DisconfTCPRPCClient object
+Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object
 ```python
-from agileutil.rpc.client import TcpRpcClient, DisconfTcpRpcClient
+from agileutil.rpc.client import DiscoveryTcpRpcClient
 from agileutil.rpc.discovery import DiscoveryConfig
 
-cli = DisconfTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
+cli = DiscoveryTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
 for i in range(10):
     resp = cli.call(func = 'sayHello')
     print(resp)
@@ -278,3 +278,8 @@ Runtime information is appended to the original log.
 ```
 logger.error('runtimee exception raise')
 ```
+
+## Thanks
+[![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
+
+[![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)

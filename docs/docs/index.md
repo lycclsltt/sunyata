@@ -278,3 +278,8 @@ Runtime information is appended to the original log.
 ```
 logger.error('runtimee exception raise')
 ```
+
+## Thanks
+[![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
+
+[![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)
