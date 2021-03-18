@@ -223,22 +223,21 @@ obj.delete()
 ```
 
 ## PoolDB
-PoolDB is a database connection pool class.It is easy to use.ORM function was developed base on PoolDB.
-If you want to do CRUD on database without orm, you can use this class.
+PooolDB实现了数据库连接池，并且ORM功能是基于PoolDB实现的。对于常用的数据库操作，如果不使用ORM，直接使用PoolDB也是可以的。
 
-### Define PoolDB object.
+### 定义 PoolDB 对象.
 ```python
 from agileutil.db4 import PoolDB
 db = PoolDB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2', min_conn_num=10)
 db.connect()
 ```
-### Search
+### 查询记录
 ```python
 sql = 'select * from nation'
 rows = db.query(sql)
 print(rows)
 ```
-### Update (include delete, update, create)
+### 删除、修改、插入记录
 ```python
 sql = "insert into nation(name) values('test')"
 effect, lastid = db.update(sql)
@@ -250,28 +249,27 @@ print(effect,lastid)
 ```
 
 ## DB
-DB is a database class without connection pool.Its use is similar to that of PoolDB.
-### Define DB object.
+DB 是一个操作数据库的类，和PoolDB的区别是，它不支持数据库连接池，因此更建议使用PoolDB.它的用法和PoolDB是相似的。
+### 定义DB对象
 ```python
 from agileutil.db import DB
 db = DB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2')
 ```
-### Search
+### 查询记录
 ```python
 sql = 'select * from nation'
 rows = db.query(sql)
 print(rows)
 ```
-### Update (include delete, update, create)
+### 修改、删除、插入记录
 ```python
 sql = "insert into nation(name) values('test')"
 effetc = db.update(sql)
 print(effetc, db.lastrowid())
 ```
 
-## Log
-
-Agileutil provides a thread-safe logging tool.It's very simple to use.
+## 日志
+Agileutil提供了一个线程安全的Log对象，使用起来非常简单。
 ```python
 from agileutil.log import Log
 
@@ -281,26 +279,25 @@ logger.warning('warning')
 logger.error('error')
 ```
 
-### Log rotate
-The log will be stored for 7 days as follows.One log file is generated per day.
+### 日志切割
+默认日志按天分割，保留最近7天的，你也可以指定日志保留的天数。
 ```
 logger = Log('./debug.log', logSaveDays=7)
 logger.info('info')
 ```
-Of course, you can also force logs not to be rotated.
+当然，也可以强制不切割日志，通过isRotate参数。
 ```
 logger = Log('./debug.log', isRotate=False)
 logger.info('info')
 ```
 
-### Error log
-By default, ERROR level logs are highlighted in red.
-Runtime information is appended to the original log.
+### ERROR级别日志
+默认的，ERROR级别的日志，在日志文件中会被标红表示，更加醒目，便于排查问题。
 ```
 logger.error('runtimee exception raise')
 ```
 
-## Thanks
+## 致谢
 [![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
 
 [![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)
