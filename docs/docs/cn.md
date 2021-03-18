@@ -1,22 +1,23 @@
 # Agileutil
 
-### Documentation
-[Chinese document](docs/docs/cn.md)
+### 文档
+[英文文档](docs/docs/index.md)
 
+Agileutil是一个Python3+ RPC框架。提供了rpc/http/orm/log等通用功能，提供了微服务相关的底层服务，使开发者专注于业务开发。
 
-Agileutil is a Python 3 rpc framework that’s written to develop fast. It allows the usage of the rpc/http/orm package, which makes your code speedy and includes many commonly used functions. Agileutil aspires to be simple.
-
-
-
-## Install
+## 安装
 ```
 pip install agileutil
 ```
 
 ## RPC
-Agileutil provides a simple RPC call.Its underlying infrastructure is based on TCP and the pickle serialization facility.
 
-### TCP RPC server
+基于TCP协议和Pickle序列化方式实现的远程调用。下面是一个基于TCP协议的服务端例子。
+- 创建一个TcpRpcServer对象, 指定监听端口和地址
+- 调用regist()方法，将提供服务的方法注册到服务端
+- 调用serve()方法，开始处理客户端请求
+
+### TCP RPC 服务端
 ```python
 from agileutil.rpc.server import TcpRpcServer
 
@@ -27,7 +28,10 @@ nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
 nationServer.regist(sayHello)
 nationServer.serve()
 ```
-### TCP RPC client
+### TCP RPC 客户端
+客户端例子：
+- 创建TcpRpcClient对象，指定RPC服务端地址
+- 通过call()方法，指定服务端方法名称和参数
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -36,9 +40,8 @@ resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
 
-### Tornado RPC server
-TCP server have two choice, These are TcpRpcServer and TornadoTcpRpcServer.
-The TronadoTcpServer class was based on Tornado, a python high-performance net libiary.
+### Tornado RPC 服务端
+TornadoTcpRpcServer同样是基于TCP协议的RPC服务端，只是底层是基于Tornado高性能网络库实现。你同样可以使用上面例子中的TcpRpcServer(一个基于多线程的并发服务器)
 ```python
 from agileutil.rpc.server import TornadoTcpRpcServer
 
@@ -50,8 +53,8 @@ s.regist(rows)
 s.serve()
 ```
 
-### Tornado RPC client
-As same as TcpRpcServer, use TcpRpcClient object.
+### Tornado RPC 客户端
+客户端仍然使用TcpRpcClient对象。
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -60,8 +63,12 @@ resp = c.call(func = 'rows'))
 print('resp', resp)
 ```
 
-### UDP RPC server
-If you want to use UDP, just change TcpRpcServer to UdpRpcServer.
+### UDP RPC 服务端
+如果想要使用UDP协议，将TcpRpcServer替换为UdpRpcServer即可。一个UDP RPC服务端的例子如下，与TCP类似：
+- 创建UdpRpcServer对象，指定监听的地址和端口
+- 调用regist()方法，将需要被客户端请求的方法注册进去
+- 调用serve()方法开始处理客户端请求
+- 返回的内容和调用本地方法没有差别，框架内部通过序列化和反序列化，将数据转化为程序内的对象（字典、列表、内置类型、各种类对象等等）
 ```python
 from agileutil.rpc.server import UdpRpcServer
 
@@ -72,7 +79,11 @@ s = UdpRpcServer('0.0.0.0', 9988)
 s.regist(sayHello)
 s.serve()
 ```
-### UDP RPC client
+### UDP RPC 客户端
+一个UDP客户端的例子：
+- 创建UdpRpcClient对象，指定服务端地址和端口
+- 调用call()方法，并指定服务端的方法名称和参数
+- 返回的内容和调用本地方法没有差别，框架内部通过序列化和反序列化，将数据转化为程序内的对象（字典、列表、内置类型、各种类对象等等）
 ```python
 from agileutil.rpc.client import UdpRpcClient
 cli = UdpRpcClient('127.0.0.1', 9988)
@@ -81,14 +92,17 @@ for i in range(5000):
     print(resp)
 ```
 
-## Service discovery
-Currently only Consul based service registration and discovery is supported.Future plans support ETCD.
+## 服务发现
+Agileutil既支持客户端与服务端直连，也支持服务注册发现。
+目前仅支持基于Consul的服务发现。未来计划支持etcd。
 
-### Health check
-If the server process is Down, The client will make requests to other healthy server instances(This health Check is based on Consul's Check mechanism implementation).
 
-### Quick start
-The first step, you need a DiscoveryConfig object to specify Consul's address port and your service name, which needs to be globally unique.
+### 监控检查
+基于Consul的Check机制。服务注册后，自动添加一个定期的健康检查（默认为TCP端口检查，未来计划支持HTTP健康检查）。一旦服务进程挂掉，那么客户端将请求到其他健康的服务节点上。同时客户端也存在重试机制（由于健康检查存在时间间隔，可能服务端进程挂掉后，仍需等待一段时间才被Consul发现，这时客户端如果请求到挂掉的服务节点上失败后，客户端会尝试请求其他服务节点进行重试）。
+
+### 快速开始
+第一步，你需要定义一个DiscoverConfig对象。
+指定用于服务注册发现的Consul的地址和端口。同时通过serviceName参数指定一个全局唯一的服务名称（用于标记服务端服务）。并同时指定服务端监听的地址和端口。
 
 ```python
 from agileutil.rpc.discovery import DiscoveryConfig
@@ -101,13 +115,13 @@ disconf = DiscoveryConfig(
     servicePort = 9988
 )
 ```
-Note:
- - The parameters consulHost and consulPort specify the address and port of consul.
+说明:
+ - consulHost 和 consulPort 参数指定Consul的地址和端口
+ - ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一
+ - serviceHost和servicePort参数指定服务端监听的端口和地址
 
- - The parameter ServiceName is used to mark the service, which should be globally unique. Service registration discovery is implemented by the service name
- - The serviceHost and servicePort parameters specify the address and port for the current server to listen on.You need to ensure that the address and port can be connected by the client.
 
-The second step，the setDiscoverConfig() method needs to be called before the serve() method, as follows:
+第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入，之后调用serve()方法，开始处理请求
 ```python
 s = TcpRpcServer('0.0.0.0', 9988)
 s.regist(sayHello)
@@ -121,7 +135,7 @@ disconf = DiscoveryConfig(
 s.setDiscoverConfig(disconf)
 s.serve()
 ```
-### Complete server-side example
+### 完整的服务端示例
 ```python
 from agileutil.rpc.server import TcpRpcServer
 from agileutil.rpc.discovery import DiscoveryConfig
@@ -143,7 +157,7 @@ s.setDiscoverConfig(disconf)
 s.serve()
 ```
 
-### Complete client-side example 
+### 完整的客户端示例 
 Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object
 ```python
 from agileutil.rpc.client import DiscoveryTcpRpcClient
@@ -156,7 +170,7 @@ for i in range(10):
 ```
 
 ## ORM
-Define a table named Nation with two filed: id(int, promary key) and name(varchar).
+定义一个nation表，包含两个字段：id字段和name字段
 ```python
 CREATE TABLE `nation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -164,8 +178,9 @@ CREATE TABLE `nation` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
 ```
-First call Model.init() method and set min_conn_num param's value for database connection pool,
-then define a class which was extend Model class.
+- 首先调用Model.init()方法，设置mysql连接地址等信息
+- 然后为nation表定一个Nation类，并继承自Model类
+- 指定字段类型
 ```python
 from agileutil.orm import Model, IntField, CharField
 
@@ -177,31 +192,31 @@ class Nation(Model):
     id = IntField()      #field type int
     name = CharField()   #field type char
 ```
-### Create
+### 创建记录
 ```python
 Nation(name='test').create()
 ```
-### Read one
+### 查询一条记录
 ```python
 obj = Nation.filter('name', '=', 'test').first()
 print(obj.name, obj.id)
 ```
-### Read list
+### 查询多条记录
 ```python
 objs = Nation.filter('name', '=', 'test')
 for obj in objs: print(obj.name, obj.id)
 ```
-### Update
+### 修改记录
 ```python
 obj = Nation.filter('name', '=', 'test').first()
 obj.name = 'test update'
 obj.update()
 ```
-### Delete
+### 删除记录
 ```python
 Nation.filter('name', '=', 'test').delete()
 ```
-Delete by object
+另一种删除的方式
 ```python
 obj = Nation.filter('name', '=', 'test').first()
 obj.delete()

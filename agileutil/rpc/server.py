@@ -93,6 +93,15 @@ class TcpRpcServer(SimpleTcpRpcServer):
             t.start()
 
 
+class HttpRpcServer(RpcServer):
+
+    def __init__(self, host, port):
+        RpcServer.__init__(self)
+        self.host = host
+        self.port = port
+        #self.protocal = TcpProtocal(host, port)
+
+
 class AsyncTcpRpcServer(TcpRpcServer):
 
     def __init__(self, host, port):
