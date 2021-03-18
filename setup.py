@@ -21,7 +21,7 @@ if platform.python_version()[0:1] == '3':
     webpy = 'web.py==0.40.dev1'
 requireList = [
     'pexpect', 'ujson', 'requests', 'python-decouple', 'PyMySQL==0.10.1',
-    'DBUtils==1.3', 'IPy'
+    'DBUtils==1.3', 'IPy', 'sanic==20.12.2'
 ]
 #if requireList == 'Linux':
 #    requireList.append('japronto')
@@ -29,8 +29,8 @@ requireList = [
 
 setup(name='agileutil',
       version=DEFINE_VERSION,
-      description='python lib',
-      author='lyc',
+      description='Python3 RPC Framework',
+      author='tank',
       license='MIT',
       platforms="any",
       install_requires=requireList,
