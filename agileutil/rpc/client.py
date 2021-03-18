@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal
 from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.discovery import ConsulRpcDiscovery
@@ -104,6 +104,28 @@ class UdpRpcClient(RpcClient):
         msg = self.protocal.serialize(package)
         self.protocal.transport.send(msg)
         respmsg, _ = self.protocal.transport.recv()
+        resp = self.protocal.unserialize(respmsg)
+        if isinstance(resp, FuncNotFoundException):
+            raise resp
+        return resp
+
+
+class HttpRpcClient(RpcClient):
+
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.protocal = HttpProtocal(host, port)
+
+
+    @retryTimes(retryTimes=3)
+    def call(self, func, args):
+        package = {
+            'func' : func,
+            'args' : args,
+        }
+        msg = self.protocal.serialize(package)
+        respmsg = self.protocal.transport.send(msg)
         resp = self.protocal.unserialize(respmsg)
         if isinstance(resp, FuncNotFoundException):
             raise resp

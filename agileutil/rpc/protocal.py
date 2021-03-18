@@ -1,9 +1,12 @@
 #coding=utf-8
 
-from agileutil.rpc.transport import ZMQTransport, TcpTransport, UdpTransport
+from agileutil.rpc.transport import ZMQTransport, TcpTransport, UdpTransport, HttpTransport
 from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
 import json
 from abc import ABCMeta, abstractmethod
+from agileutil.sanic import SanicApp
+from multiprocessing import cpu_count
+import requests
 
 
 class RpcProtocal(object):
@@ -45,8 +48,13 @@ class UdpProtocal(RpcProtocal):
 
 class HttpProtocal(RpcProtocal):
 
-    def __init__(self):
-        pass
+    def __init__(self, host, port, worker = cpu_count(), serializeType = 'bin', timeout = 10, poolConnection=5, poolMaxSize = 20, maxRetries = 3):
+        RpcProtocal.__init__(self)
+        self.host = host
+        self.port = port
+        self.worker = worker
+        self.serializeType = serializeType
+        self.transport = HttpTransport(host, port, worker, timeout, poolConnection, poolMaxSize, maxRetries)
 
 
 class TcpProtocal(RpcProtocal):

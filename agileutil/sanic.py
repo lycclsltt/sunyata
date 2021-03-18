@@ -39,7 +39,7 @@ app.run()
 
 import multiprocessing
 from sanic import Sanic
-from sanic.response import text
+from sanic.response import text, raw
 from sanic.views import HTTPMethodView
 import ujson
 from agileutil.log import Log
@@ -53,6 +53,7 @@ class SanicController(HTTPMethodView):
         self.req = None
         self.logger = None
         self.paramMap = None
+        self.isRaw = False
 
     async def get(self, req):
         return await self.deal(req)
@@ -72,6 +73,8 @@ class SanicController(HTTPMethodView):
     async def deal(self, req):
         self.req = req
         ret = await self.handle()
+        if self.isRaw:
+            return raw(ret)
         return text(str(ret))  
 
     async def handle(self):

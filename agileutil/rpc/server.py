@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal
 import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
 import queue
@@ -12,6 +12,7 @@ from tornado.iostream import IOStream
 from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
 import functools
+from agileutil.sanic import SanicController
 
 
 class RpcServer(object):
@@ -93,13 +94,40 @@ class TcpRpcServer(SimpleTcpRpcServer):
             t.start()
 
 
-class HttpRpcServer(RpcServer):
+class HttpRpcServerController(SanicController):
+    
+    callBack = None
 
-    def __init__(self, host, port):
+    async def handle(self):
+        self.isRaw = True
+        body = self.body()
+        return self.callBack(body)
+
+    @classmethod
+    def setCallback(cls, callBack):
+        cls.callBack = callBack
+
+
+class HttpRpcServer(RpcServer, SanicController):
+
+    def __init__(self, host, port, workers = multiprocessing.cpu_count()):
         RpcServer.__init__(self)
         self.host = host
         self.port = port
-        #self.protocal = TcpProtocal(host, port)
+        self.worker = workers
+        self.protocal = HttpProtocal(host, port, workers)
+        HttpRpcServerController.setCallback(self.handle)
+        self.protocal.transport.app.route('/', HttpRpcServerController)
+        
+    def handle(self, msg):
+        request = self.protocal.unserialize(msg)
+        func, args = self.protocal.parseRequest(request)
+        resp = self.run(func, args)
+        resp = self.protocal.serialize(resp)
+        return resp
+
+    def serve(self):
+        self.protocal.transport.app.run()
 
 
 class AsyncTcpRpcServer(TcpRpcServer):

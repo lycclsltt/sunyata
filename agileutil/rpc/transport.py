@@ -3,6 +3,11 @@
 import zmq
 from socket import *
 import struct
+from agileutil.sanic import SanicApp
+from multiprocessing import cpu_count
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 
 class RpcTransport(object): pass
 
@@ -128,3 +133,31 @@ class UdpTransport(RpcTransport):
     def close(self):
         self.socket.close()
         self.socket = None
+
+
+class HttpTransport(RpcTransport):
+
+    def __init__(self, host, port, worker=cpu_count(), timeout = 10, poolConnection=5, poolMaxSize=20, maxRetries=3):
+        self.host = host
+        self.port = port
+        self.worker = worker
+        self.timeout = timeout
+        self.app = SanicApp(host=host, port=port, worker_num=worker)
+        self.poolConnection = poolConnection
+        self.poolMaxSize = poolMaxSize
+        self.maxRetries = maxRetries
+        self.requestSession = requests.Session()
+        self.requestSession.mount('http://', requests.adapters.HTTPAdapter(pool_connections=self.poolConnection, pool_maxsize=self.poolMaxSize, max_retries=self.maxRetries))
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+    def makeUrl(self):
+        return "http://%s:%s/" % (self.host, self.port)
+
+    def send(self, msg):
+        url = self.makeUrl()
+        headers = {
+            'Content-type' : 'application/octet-strea'
+        }
+        r = self.requestSession.post(url, headers = headers, data=msg, timeout = self.timeout)
+        resp = r.content
+        return resp

@@ -54,6 +54,29 @@ resp = c.call(func = 'rows'))
 print('resp', resp)
 ```
 
+### HTTP RPC Server
+Agileutil provides a simple RPC call.Its underlying infrastructure is based on HTTP and the pickle serialization facility.
+```python
+from agileutil.rpc.server import HttpRpcServer
+
+def sayHello(name):
+    return 'hello ' + name
+
+s = HttpRpcServer('0.0.0.0', 9988, workers=1)
+s.regist(sayHello)
+s.serve()
+```
+
+### HTTP RPC Client
+```python
+from agileutil.rpc.client import HttpRpcClient
+
+cli = HttpRpcClient('127.0.0.1', 9988)
+for i in range(10):
+    resp = cli.call(func = 'sayHello', args=('zhangsan'))
+    print('resp', resp)
+```
+
 ### UDP RPC server
 If you want to use UDP, just change TcpRpcServer to UdpRpcServer.
 ```python
