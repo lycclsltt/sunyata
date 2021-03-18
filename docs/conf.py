@@ -21,6 +21,9 @@ project = 'agileutil'
 copyright = '2021, tank'
 author = 'tank'
 
+# The full version, including alpha/beta/rc tags
+release = 'v0.0.1'
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -55,4 +58,4 @@ source_parsers = {
   '.md': 'recommonmark.parser.CommonMarkParser',
 }
 
-source_suffix = ['.rst', '.md']
+source_suffix = ['.md']
