@@ -1,9 +1,7 @@
 # Agileutil
 
-### 文档
-[英文文档](docs/docs/index.md)
 
-Agileutil是一个Python3+ RPC框架。提供了rpc/http/orm/log等通用功能，提供了微服务相关的底层服务，使开发者专注于业务开发。
+Agileutil是一个Python3 RPC框架。基于微服务架构，封装了rpc/http/orm/log等常用组件，提供了简洁的API，开发者可以很快上手，快速进行业务逻辑开发。
 
 ## 安装
 ```
@@ -12,9 +10,9 @@ pip install agileutil
 
 ## RPC
 
-基于TCP协议和Pickle序列化方式实现的远程调用。下面是一个基于TCP协议的服务端例子。
-- 创建一个TcpRpcServer对象, 指定监听端口和地址
-- 调用regist()方法，将提供服务的方法注册到服务端
+这是Agileutil最核心的功能。基于TCP协议和Pickle序列化方式实现的远程过程调用。下面是一个基于TCP协议的服务端例子。可参考下面的步骤进行开发：
+- 创建一个TcpRpcServer对象, 指定服务端监听地址和端口
+- 调用regist()方法，将提供服务的方法注册到服务端（只有调用regist()方法注册过的服务，才可以被客户端访问）
 - 调用serve()方法，开始处理客户端请求
 
 ### TCP RPC 服务端
@@ -31,7 +29,8 @@ nationServer.serve()
 ### TCP RPC 客户端
 客户端例子：
 - 创建TcpRpcClient对象，指定RPC服务端地址
-- 通过call()方法，指定服务端方法名称和参数
+- 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用regist()方法注册，那么call（）方法将抛出异常）
+- call() 方法的返回值和在本地调用一样，原来是什么返回类型，就还是什么（例如返回字典、列表、对象甚至内置类型，经过序列化后，不会发生改变）
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -41,7 +40,11 @@ print('resp', resp)
 ```
 
 ### Tornado RPC 服务端
-TornadoTcpRpcServer同样是基于TCP协议的RPC服务端，只是底层是基于Tornado高性能网络库实现。你同样可以使用上面例子中的TcpRpcServer(一个基于多线程的并发服务器)
+TornadoTcpRpcServer同样是基于TCP协议的RPC服务端，只是底层是基于Tornado高性能网络库实现。你同样可以使用TornadoTcpRpcServer创建一个TCP服务，参考TcpRpcServer的创建步骤：
+- 创建一个TornadoTcpRpcServer对象，指定监听的地址和端口
+- 调用regist()注册需要提供给客户端的方法
+- 调用server()方法开始处理客户端请求
+
 ```python
 from agileutil.rpc.server import TornadoTcpRpcServer
 
@@ -54,7 +57,7 @@ s.serve()
 ```
 
 ### Tornado RPC 客户端
-客户端仍然使用TcpRpcClient对象。
+客户端使用TcpRpcClient对象即可。
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -93,16 +96,18 @@ for i in range(5000):
 ```
 
 ## 服务发现
-Agileutil既支持客户端与服务端直连，也支持服务注册发现。
-目前仅支持基于Consul的服务发现。未来计划支持etcd。
+Agileutil既支持客户端与服务端直连，也支持服务注册发现
+（客户端与服务端直连的例子，请参考上面的TcpRpcServer部分）。
+目前仅支持基于Consul的服务发现，未来计划支持etcd。
 
 
-### 监控检查
-基于Consul的Check机制。服务注册后，自动添加一个定期的健康检查（默认为TCP端口检查，未来计划支持HTTP健康检查）。一旦服务进程挂掉，那么客户端将请求到其他健康的服务节点上。同时客户端也存在重试机制（由于健康检查存在时间间隔，可能服务端进程挂掉后，仍需等待一段时间才被Consul发现，这时客户端如果请求到挂掉的服务节点上失败后，客户端会尝试请求其他服务节点进行重试）。
+### 健康检查
+基于Consul的Check机制。服务注册后，自动添加一个定期的健康检查（默认为TCP端口检查，未来有计划支持HTTP健康检查）。一旦服务进程挂掉，那么客户端将请求到其他健康的服务节点上。同时客户端也存在重试机制，由于健康检查存在时间间隔，可能服务端进程挂掉后，仍需等待一段时间才被Consul发现，这时客户端如果请求到挂掉的服务节点上失败后，客户端会尝试请求其他服务节点进行重试。
 
 ### 快速开始
-第一步，你需要定义一个DiscoverConfig对象。
-指定用于服务注册发现的Consul的地址和端口。同时通过serviceName参数指定一个全局唯一的服务名称（用于标记服务端服务）。并同时指定服务端监听的地址和端口。
+服务注册发现的使用也很简单，请耐心看完。
+- 第一步，你需要定义一个DiscoverConfig对象。
+指定用于服务注册发现的Consul的地址和端口。同时通过serviceName参数指定一个全局唯一的服务名称（用于标记服务端服务）。同时指定服务端监听的地址和端口。
 
 ```python
 from agileutil.rpc.discovery import DiscoveryConfig
@@ -115,13 +120,13 @@ disconf = DiscoveryConfig(
     servicePort = 9988
 )
 ```
-说明:
- - consulHost 和 consulPort 参数指定Consul的地址和端口
- - ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一
- - serviceHost和servicePort参数指定服务端监听的端口和地址
+> 说明:
+1.consulHost 和 consulPort 参数指定Consul的地址和端口
+2.ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一
+3.serviceHost和servicePort参数指定服务端监听的端口和地址
 
-
-第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入，之后调用serve()方法，开始处理请求
+- 第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入
+- 第三步，之后调用serve()方法，开始处理请求
 ```python
 s = TcpRpcServer('0.0.0.0', 9988)
 s.regist(sayHello)
@@ -158,7 +163,9 @@ s.serve()
 ```
 
 ### 完整的客户端示例 
-Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object
+- 创建DiscoveryConfig对象，指定Consul的地址端口.
+  > serviceName参数和服务端的保持一致，且全局唯一
+- 调用call()方法指定服务端的方法名和参数
 ```python
 from agileutil.rpc.client import DiscoveryTcpRpcClient
 from agileutil.rpc.discovery import DiscoveryConfig
