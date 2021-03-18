@@ -1,3 +1,7 @@
+from recommonmark.parser import CommonMarkParser
+source_parsers = {
+    '.md': CommonMarkParser,
+}
 
 project = 'agileutil'
 copyright = '2021, tank'
@@ -6,10 +10,6 @@ author = 'tank'
 # The full version, including alpha/beta/rc tags
 release = 'v0.0.1'
 
-from recommonmark.parser import CommonMarkParser
-source_parsers = {
-    '.md': CommonMarkParser,
-}
 source_suffix = ['.md']
 
 import sphinx_rtd_theme
