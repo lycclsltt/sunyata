@@ -1,7 +1,5 @@
 # Agileutil
 
-[英文文档](docs/docs/en.md)
-
 Agileutil是一个Python3 RPC框架。基于微服务架构，封装了rpc/http/orm/log等常用组件，提供了简洁的API，开发者可以很快上手，快速进行业务开发。
 
 ## 安装
