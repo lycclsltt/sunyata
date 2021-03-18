@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Agileutil - My Docs</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Agileutil";
+    var mkdocs_page_input_path = "en.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> My Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Agileutil</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Agileutil</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#agileutil">Agileutil</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#install">Install</a></li>
+        
+            <li><a class="toctree-l3" href="#rpc">RPC</a></li>
+        
+            <li><a class="toctree-l3" href="#service-discovery">Service discovery</a></li>
+        
+            <li><a class="toctree-l3" href="#orm">ORM</a></li>
+        
+            <li><a class="toctree-l3" href="#pooldb">PoolDB</a></li>
+        
+            <li><a class="toctree-l3" href="#db">DB</a></li>
+        
+            <li><a class="toctree-l3" href="#log">Log</a></li>
+        
+            <li><a class="toctree-l3" href="#thanks">Thanks</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">My Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Agileutil</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="agileutil">Agileutil</h1>
+<p>Agileutil is a Python 3 rpc framework that’s written to develop fast. It allows the usage of the rpc/http/orm package, which makes your code speedy and includes many commonly used functions. Agileutil aspires to be simple.</p>
+<h2 id="install">Install</h2>
+<pre><code>pip install agileutil
+</code></pre>
+
+<h2 id="rpc">RPC</h2>
+<p>Agileutil provides a simple RPC call.Its underlying infrastructure is based on TCP and the pickle serialization facility.</p>
+<h3 id="tcp-rpc-server">TCP RPC server</h3>
+<pre><code class="python">from agileutil.rpc.server import TcpRpcServer
+
+def sayHello(name):
+    return 'hello ' + name
+
+nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
+nationServer.regist(sayHello)
+nationServer.serve()
+</code></pre>
+
+<h3 id="tcp-rpc-client">TCP RPC client</h3>
+<pre><code class="python">from agileutil.rpc.client import TcpRpcClient
+
+c = TcpRpcClient('127.0.0.1', 9988)
+resp = c.call(func = 'sayHello', args = ('zhangsan'))
+print('resp', resp)
+</code></pre>
+
+<h3 id="tornado-rpc-server">Tornado RPC server</h3>
+<p>TCP server have two choice, These are TcpRpcServer and TornadoTcpRpcServer.
+The TronadoTcpServer class was based on Tornado, a python high-performance net libiary.</p>
+<pre><code class="python">from agileutil.rpc.server import TornadoTcpRpcServer
+
+def rows(): 
+    return {'name' : 123}
+
+s = TornadoTcpRpcServer('127.0.0.1', 9988)
+s.regist(rows)
+s.serve()
+</code></pre>
+
+<h3 id="tornado-rpc-client">Tornado RPC client</h3>
+<p>As same as TcpRpcServer, use TcpRpcClient object.</p>
+<pre><code class="python">from agileutil.rpc.client import TcpRpcClient
+
+c = TcpRpcClient('127.0.0.1', 9988)
+resp = c.call(func = 'rows'))
+print('resp', resp)
+</code></pre>
+
+<h3 id="http-rpc-server">HTTP RPC Server</h3>
+<p>Agileutil also provides Remote Procedure Call (RPC) based on HTTP protocol, with the underlying implementation based on HTTP protocol and high performance Sanic web framework.It is very simple to use and is very similar to TcpRpcServer.</p>
+<pre><code class="python">from agileutil.rpc.server import HttpRpcServer
+
+def sayHello(name):
+    return 'hello ' + name
+
+s = HttpRpcServer('0.0.0.0', 9988, workers=1)
+s.regist(sayHello)
+s.serve()
+</code></pre>
+
+<h3 id="http-rpc-client">HTTP RPC Client</h3>
+<p>Again, the client needs to use the corresponding HttpRcpClient.</p>
+<pre><code class="python">from agileutil.rpc.client import HttpRpcClient
+
+cli = HttpRpcClient('127.0.0.1', 9988)
+for i in range(10):
+    resp = cli.call(func = 'sayHello', args=('zhangsan'))
+    print('resp', resp)
+</code></pre>
+
+<h3 id="udp-rpc-server">UDP RPC server</h3>
+<p>If you want to use UDP, just change TcpRpcServer to UdpRpcServer.</p>
+<pre><code class="python">from agileutil.rpc.server import UdpRpcServer
+
+def sayHello(name): 
+    return 'hello ' + name
+
+s = UdpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+s.serve()
+</code></pre>
+
+<h3 id="udp-rpc-client">UDP RPC client</h3>
+<pre><code class="python">from agileutil.rpc.client import UdpRpcClient
+cli = UdpRpcClient('127.0.0.1', 9988)
+for i in range(5000):
+    resp = cli.call(func = 'sayHello', args =('xiaoming') )
+    print(resp)
+</code></pre>
+
+<h2 id="service-discovery">Service discovery</h2>
+<p>Currently only Consul based service registration and discovery is supported.Future plans support ETCD.</p>
+<h3 id="health-check">Health check</h3>
+<p>If the server process is Down, The client will make requests to other healthy server instances(This health Check is based on Consul's Check mechanism implementation).</p>
+<h3 id="quick-start">Quick start</h3>
+<p>The first step, you need a DiscoveryConfig object to specify Consul's address port and your service name, which needs to be globally unique.</p>
+<pre><code class="python">from agileutil.rpc.discovery import DiscoveryConfig
+
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+</code></pre>
+
+<p>Note:
+ - The parameters consulHost and consulPort specify the address and port of consul.</p>
+<ul>
+<li>The parameter ServiceName is used to mark the service, which should be globally unique. Service registration discovery is implemented by the service name</li>
+<li>The serviceHost and servicePort parameters specify the address and port for the current server to listen on.You need to ensure that the address and port can be connected by the client.</li>
+</ul>
+<p>The second step，the setDiscoverConfig() method needs to be called before the serve() method, as follows:</p>
+<pre><code class="python">s = TcpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+s.setDiscoverConfig(disconf)
+s.serve()
+</code></pre>
+
+<h3 id="complete-server-side-example">Complete server-side example</h3>
+<pre><code class="python">from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc.discovery import DiscoveryConfig
+from agileutil.util import local_ip
+
+def sayHello(): 
+    return 'hello '
+
+s = TcpRpcServer('0.0.0.0', 9988)
+s.regist(sayHello)
+disconf = DiscoveryConfig(
+    consulHost = '192.168.19.103',
+    consulPort = 8500,
+    serviceName = 'test-rpc-server',
+    serviceHost = local_ip(),
+    servicePort = 9988
+)
+s.setDiscoverConfig(disconf)
+s.serve()
+</code></pre>
+
+<h3 id="complete-client-side-example">Complete client-side example</h3>
+<p>Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object</p>
+<pre><code class="python">from agileutil.rpc.client import DiscoveryTcpRpcClient
+from agileutil.rpc.discovery import DiscoveryConfig
+
+cli = DiscoveryTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
+for i in range(10):
+    resp = cli.call(func = 'sayHello')
+    print(resp)
+</code></pre>
+
+<h2 id="orm">ORM</h2>
+<p>Define a table named Nation with two filed: id(int, promary key) and name(varchar).</p>
+<pre><code class="python">CREATE TABLE `nation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
+</code></pre>
+
+<p>First call Model.init() method and set min_conn_num param's value for database connection pool,
+then define a class which was extend Model class.</p>
+<pre><code class="python">from agileutil.orm import Model, IntField, CharField
+
+Model.init('127.0.0.1', 3306, 'root', '', 'test2', min_conn_num=10)
+
+class Nation(Model):
+    tableName = 'nation' #required
+    primaryKey = 'id'    #required
+    id = IntField()      #field type int
+    name = CharField()   #field type char
+</code></pre>
+
+<h3 id="create">Create</h3>
+<pre><code class="python">Nation(name='test').create()
+</code></pre>
+
+<h3 id="read-one">Read one</h3>
+<pre><code class="python">obj = Nation.filter('name', '=', 'test').first()
+print(obj.name, obj.id)
+</code></pre>
+
+<h3 id="read-list">Read list</h3>
+<pre><code class="python">objs = Nation.filter('name', '=', 'test')
+for obj in objs: print(obj.name, obj.id)
+</code></pre>
+
+<h3 id="update">Update</h3>
+<pre><code class="python">obj = Nation.filter('name', '=', 'test').first()
+obj.name = 'test update'
+obj.update()
+</code></pre>
+
+<h3 id="delete">Delete</h3>
+<pre><code class="python">Nation.filter('name', '=', 'test').delete()
+</code></pre>
+
+<p>Delete by object</p>
+<pre><code class="python">obj = Nation.filter('name', '=', 'test').first()
+obj.delete()
+</code></pre>
+
+<h2 id="pooldb">PoolDB</h2>
+<p>PoolDB is a database connection pool class.It is easy to use.ORM function was developed base on PoolDB.
+If you want to do CRUD on database without orm, you can use this class.</p>
+<h3 id="define-pooldb-object">Define PoolDB object.</h3>
+<pre><code class="python">from agileutil.db4 import PoolDB
+db = PoolDB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2', min_conn_num=10)
+db.connect()
+</code></pre>
+
+<h3 id="search">Search</h3>
+<pre><code class="python">sql = 'select * from nation'
+rows = db.query(sql)
+print(rows)
+</code></pre>
+
+<h3 id="update-include-delete-update-create">Update (include delete, update, create)</h3>
+<pre><code class="python">sql = &quot;insert into nation(name) values('test')&quot;
+effect, lastid = db.update(sql)
+print(effect,lastid)
+
+sql = &quot;delete from nation where name='test'&quot;
+effect, _ = db.update(sql)
+print(effect,lastid)
+</code></pre>
+
+<h2 id="db">DB</h2>
+<p>DB is a database class without connection pool.Its use is similar to that of PoolDB.</p>
+<h3 id="define-db-object">Define DB object.</h3>
+<pre><code class="python">from agileutil.db import DB
+db = DB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2')
+</code></pre>
+
+<h3 id="search_1">Search</h3>
+<pre><code class="python">sql = 'select * from nation'
+rows = db.query(sql)
+print(rows)
+</code></pre>
+
+<h3 id="update-include-delete-update-create_1">Update (include delete, update, create)</h3>
+<pre><code class="python">sql = &quot;insert into nation(name) values('test')&quot;
+effetc = db.update(sql)
+print(effetc, db.lastrowid())
+</code></pre>
+
+<h2 id="log">Log</h2>
+<p>Agileutil provides a thread-safe logging tool.It's very simple to use.</p>
+<pre><code class="python">from agileutil.log import Log
+
+logger = Log('./debug.log')
+logger.info(123, '456')
+logger.warning('warning')
+logger.error('error')
+</code></pre>
+
+<h3 id="log-rotate">Log rotate</h3>
+<p>The log will be stored for 7 days as follows.One log file is generated per day.</p>
+<pre><code>logger = Log('./debug.log', logSaveDays=7)
+logger.info('info')
+</code></pre>
+
+<p>Of course, you can also force logs not to be rotated.</p>
+<pre><code>logger = Log('./debug.log', isRotate=False)
+logger.info('info')
+</code></pre>
+
+<h3 id="error-log">Error log</h3>
+<p>By default, ERROR level logs are highlighted in red.
+Runtime information is appended to the original log.</p>
+<pre><code>logger.error('runtimee exception raise')
+</code></pre>
+
+<h2 id="thanks">Thanks</h2>
+<p><a href="https://github.com/lycclsltt/agileutil/stargazers"><img alt="Stargazers repo roster for @lycclsltt/agileutil" src="https://reporoster.com/stars/lycclsltt/agileutil" /></a></p>
+<p><a href="https://github.com/lycclsltt/agileutil/network/members"><img alt="Forkers repo roster for @lycclsltt/agileutil" src="https://reporoster.com/forks/lycclsltt/agileutil" /></a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href=".." class="btn btn-neutral" title="Agileutil"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>
