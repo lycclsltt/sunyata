@@ -67,6 +67,30 @@ resp = c.call(func = 'rows'))
 print('resp', resp)
 ```
 
+### HTTP RPC 服务端
+Agileutil也提供了基于HTTP协议的远程过程调用。底层是基于高性能的Sanic异步web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
+```python
+from agileutil.rpc.server import HttpRpcServer
+
+def sayHello(name):
+    return 'hello ' + name
+
+s = HttpRpcServer('0.0.0.0', 9988, workers=1)
+s.regist(sayHello)
+s.serve()
+```
+
+### HTTP RPC Client
+同样的，客户端使用对应的HttpRpcClient对象:
+```python
+from agileutil.rpc.client import HttpRpcClient
+
+cli = HttpRpcClient('127.0.0.1', 9988)
+for i in range(10):
+    resp = cli.call(func = 'sayHello', args=('zhangsan'))
+    print('resp', resp)
+```
+
 ### UDP RPC 服务端
 如果想要使用UDP协议，将TcpRpcServer替换为UdpRpcServer即可。一个UDP RPC服务端的例子如下，与TCP类似：
 - 创建UdpRpcServer对象，指定监听的地址和端口
