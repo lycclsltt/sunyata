@@ -100,7 +100,7 @@ for i in range(5000):
 ```
 
 ## Service discovery
-Currently only Consul based service registration and discovery is supported.Future plans support ETCD.
+Currently only Consul based service registration and discovery is supported.Future plans support ETCD.Both the server and the client libraries of the TCP/HTTP/UDP protocol support service registration and discovery. The following example takes TCP as an example.
 
 ### Health check
 If the server process is Down, The client will make requests to other healthy server instances(This health Check is based on Consul's Check mechanism implementation).
@@ -143,34 +143,37 @@ s.serve()
 ```python
 from agileutil.rpc.server import TcpRpcServer
 from agileutil.rpc.discovery import DiscoveryConfig
-from agileutil.util import local_ip
 
-def sayHello(): 
-    return 'hello '
+def sayHello(name): 
+    return 'hello ' + name
 
-s = TcpRpcServer('0.0.0.0', 9988)
-s.regist(sayHello)
 disconf = DiscoveryConfig(
     consulHost = '192.168.19.103',
     consulPort = 8500,
     serviceName = 'test-rpc-server',
     serviceHost = local_ip(),
-    servicePort = 9988
+    servicePort = 10001
 )
-s.setDiscoverConfig(disconf)
-s.serve()
+server = TcpRpcServer('0.0.0.0', 10001)
+server.setDiscoverConfig(disconf)
+server.regist(sayHello)
+server.serve()
 ```
 
 ### Complete client-side example 
 Initialize a DiscoveryTcpRpcClient object from the DiscoveryConfig object
 ```python
-from agileutil.rpc.client import DiscoveryTcpRpcClient
+from agileutil.rpc.client import TcpRpcClient
 from agileutil.rpc.discovery import DiscoveryConfig
-
-cli = DiscoveryTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
-for i in range(10):
-    resp = cli.call(func = 'sayHello')
-    print(resp)
+cli = TcpRpcClient()
+disconf = DiscoveryConfig(
+    consulHost= '192.168.19.103',
+    consulPort= 8500,
+    serviceName='test-rpc-server'
+)
+cli.setDiscoveryConfig(disconf)
+for i in range(3):
+    resp = cli.call(func = 'sayHello', args=('mary'))
 ```
 
 ## ORM
