@@ -37,6 +37,7 @@ app.route('/',  TestController)
 app.run()
 '''
 
+import uuid
 import multiprocessing
 from sanic import Sanic
 from sanic.response import text, raw
@@ -187,7 +188,7 @@ class SanicApp(object):
 
     def initApp(self):
         if self.app == None:
-            self.app = Sanic(name='agileutil')
+            self.app = Sanic(name='agileutil' + str(uuid.uuid1()) )
 
     def initLog(self):
         if self.logger == None and self.log != '':

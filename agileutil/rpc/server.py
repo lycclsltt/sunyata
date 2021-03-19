@@ -130,6 +130,28 @@ class HttpRpcServer(RpcServer, SanicController):
         self.protocal.transport.app.run()
 
 
+class HttpRpcServer(RpcServer, SanicController):
+    
+    def __init__(self, host, port, workers = multiprocessing.cpu_count()):
+        RpcServer.__init__(self)
+        self.host = host
+        self.port = port
+        self.worker = workers
+        self.protocal = HttpProtocal(host, port, workers)
+        HttpRpcServerController.setCallback(self.handle)
+        self.protocal.transport.app.route('/', HttpRpcServerController)
+        
+    def handle(self, msg):
+        request = self.protocal.unserialize(msg)
+        func, args = self.protocal.parseRequest(request)
+        resp = self.run(func, args)
+        resp = self.protocal.serialize(resp)
+        return resp
+
+    def serve(self):
+        self.protocal.transport.app.run()
+
+
 class AsyncTcpRpcServer(TcpRpcServer):
 
     def __init__(self, host, port):
