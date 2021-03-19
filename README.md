@@ -167,6 +167,10 @@ s.serve()
 ```python
 from agileutil.rpc.server import TcpRpcServer
 from agileutil.rpc.discovery import DiscoveryConfig
+
+def sayHello(name): 
+    return 'hello ' + name
+
 disconf = DiscoveryConfig(
     consulHost = '192.168.19.103',
     consulPort = 8500,
