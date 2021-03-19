@@ -1,10 +1,10 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
 from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.discovery import ConsulRpcDiscovery
-from agileutil.wrap import retry, retryTimes
+from agileutil.wrap import retryTimes
 
 class RpcClient(object): 
 
@@ -15,6 +15,7 @@ class RpcClient(object):
         self.protocalMap = {}
         self.isSync = False
         self.syncInterval = 30
+        self.protocal = RpcProtocal()
 
     def getInstance(self):
         instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
@@ -25,13 +26,6 @@ class RpcClient(object):
         self.instanceIndex = self.instanceIndex + 1
         return instanceList[index]
 
-    def getProtocalInstance(self, instance):
-        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
-        if key in self.protocalMap:
-            return self.protocalMap.get(key)
-        self.protocalMap[key] =  TcpProtocal(instance.address, instance.port)
-        return self.protocalMap[key]
-
     def refreshProtocal(self):
         instance = self.getInstance()
         self.protocal = self.getProtocalInstance(instance)
@@ -39,11 +33,14 @@ class RpcClient(object):
     def setDiscoveryConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
         self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort)
+
+    def close(self):
+        self.protocal.transport.close()
         
 
 class TcpRpcClient(RpcClient):
 
-    def __init__(self, host, port, keepconnect = True):
+    def __init__(self, host = '', port = 0, keepconnect = True):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
@@ -52,6 +49,8 @@ class TcpRpcClient(RpcClient):
 
     @retryTimes(retryTimes=3)
     def call(self, func, args = ()):
+        if self.discovery:
+            self.refreshProtocal()
         if args == None: args = ()
         try:
             self.protocal.transport.connect()
@@ -72,31 +71,26 @@ class TcpRpcClient(RpcClient):
         if not self.keepconnect: self.protocal.transport.close()
         return resp
 
-    def close(self):
-        self.protocal.transport.close()
-
-class DiscoveryTcpRpcClient(TcpRpcClient):
-
-    def __init__(self, discoveryConfig:DiscoveryConfig):
-        TcpRpcClient.__init__(self, host='', port=0)
-        self.setDiscoveryConfig(discoveryConfig)
-
-    @retryTimes(retryTimes=3)
-    def call(self, func, args = ()):
-        self.refreshProtocal()
-        return super().call(func, args)
-        
+    def getProtocalInstance(self, instance):
+        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
+        if key in self.protocalMap:
+            return self.protocalMap.get(key)
+        self.protocalMap[key] =  TcpProtocal(instance.address, instance.port)
+        return self.protocalMap[key]
 
 
 class UdpRpcClient(RpcClient):
 
-    def __init__(self, host, port):
+    def __init__(self, host = '', port = 0):
+        RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.protocal = UdpProtocal(host, port)
 
     @retryTimes(retryTimes=3)
     def call(self, func, args):
+        if self.discovery:
+            self.refreshProtocal()
         package = {
             'func' : func,
             'args' : args,
@@ -109,17 +103,26 @@ class UdpRpcClient(RpcClient):
             raise resp
         return resp
 
+    def getProtocalInstance(self, instance):
+        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
+        if key in self.protocalMap:
+            return self.protocalMap.get(key)
+        self.protocalMap[key] =  UdpProtocal(instance.address, instance.port)
+        return self.protocalMap[key]
+
 
 class HttpRpcClient(RpcClient):
 
-    def __init__(self, host, port):
+    def __init__(self, host = '', port = 0):
+        RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.protocal = HttpProtocal(host, port)
 
-
     @retryTimes(retryTimes=3)
     def call(self, func, args):
+        if self.discovery:
+            self.refreshProtocal()
         package = {
             'func' : func,
             'args' : args,
@@ -130,3 +133,10 @@ class HttpRpcClient(RpcClient):
         if isinstance(resp, FuncNotFoundException):
             raise resp
         return resp
+
+    def getProtocalInstance(self, instance):
+        key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
+        if key in self.protocalMap:
+            return self.protocalMap.get(key)
+        self.protocalMap[key] =  HttpProtocal(instance.address, instance.port)
+        return self.protocalMap[key]

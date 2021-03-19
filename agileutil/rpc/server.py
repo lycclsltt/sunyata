@@ -149,6 +149,8 @@ class HttpRpcServer(RpcServer, SanicController):
         return resp
 
     def serve(self):
+        if self.discovery and self.discoveryConfig:
+            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.protocal.transport.app.run()
 
 
@@ -290,6 +292,8 @@ class UdpRpcServer(RpcServer):
     def serve(self):
         self.startWorkers()
         self.protocal.transport.bind()
+        if self.discovery and self.discoveryConfig:
+            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
             msg, cliAddr = self.protocal.transport.recv()
             self.queue.put({'msg' : msg, 'addr' : cliAddr})
