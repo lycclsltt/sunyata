@@ -142,7 +142,7 @@ class HttpTransport(RpcTransport):
         self.port = port
         self.worker = worker
         self.timeout = timeout
-        self.app = SanicApp(host=host, port=port, worker_num=worker)
+        self.app = SanicApp(host=host, port=port, worker_num=worker, debug=False)
         self.poolConnection = poolConnection
         self.poolMaxSize = poolMaxSize
         self.maxRetries = maxRetries

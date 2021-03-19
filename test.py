@@ -24,7 +24,7 @@ class TestRpcServerClient(unittest.TestCase):
             client = TcpRpcClient('127.0.0.1', 9988)
             for i in range(3):
                 resp = client.call(func='sayHello', args=('zhangsan'))
-                print('tcp resp', resp)
+                self.assertEqual(resp, 'hello zhangsan')
 
         tServer = threading.Thread(target=create_server, args=())
         tServer.start()
@@ -45,7 +45,7 @@ class TestRpcServerClient(unittest.TestCase):
             client = UdpRpcClient('127.0.0.1', 9999)
             for i in range(3):
                 resp = client.call(func='sayHello', args=('lisi'))
-                print('udp resp', resp)
+                self.assertEqual(resp, 'hello lisi')
         
         tServer = threading.Thread(target=create_server, args=())
         tServer.start()
@@ -54,7 +54,6 @@ class TestRpcServerClient(unittest.TestCase):
         tClient.start()
          
 def create_http_server():
-    print('call create http server')
     from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10000)
     server.regist(sayHello)
@@ -65,18 +64,17 @@ def create_http_client():
     client = HttpRpcClient('127.0.0.1', 10000)
     for i in range(3):
         resp = client.call(func = 'sayHello', args = ('xiaoming'))
-        print('http resp', resp) 
+        assert (resp == 'hello xiaoming')
 
 if __name__ == '__main__':
     #测试HTTP
     tServer = Process(target=create_http_server, args=())
     tServer.start()
-    time.sleep(1)
-    print('finish')
+    time.sleep(3)
     tClient = threading.Thread(target=create_http_client, args=())
     tClient.start()
+    time.sleep(3)
     tServer.terminate()
     tServer.join()
     #测试其他
     unittest.main()
-    

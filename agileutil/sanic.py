@@ -203,7 +203,8 @@ class SanicApp(object):
         self.app.run(host=self.host,
                      port=self.port,
                      debug=self.debug,
-                     workers=self.workerNum)
+                     workers=self.workerNum,
+                     access_log=False)
 
     def route(self, path, className):
         className.setLogger(self.getLogger())
