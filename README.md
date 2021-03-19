@@ -121,7 +121,7 @@ for i in range(5000):
 ## 服务发现
 Agileutil既支持客户端与服务端直连，也支持服务注册发现
 （客户端与服务端直连的例子，请参考上面的TcpRpcServer部分）。
-目前仅支持基于Consul的服务发现，未来计划支持etcd。
+目前仅支持基于Consul的服务发现，未来计划支持etcd。TCP/UDP/HTTP这些协议的服务端、客户端类库均支持服务注册发现，下面的例子以TCP为例。
 
 
 ### 健康检查
@@ -163,40 +163,38 @@ disconf = DiscoveryConfig(
 s.setDiscoverConfig(disconf)
 s.serve()
 ```
-### 完整的服务端示例
+### 完整的服务端示例 (UDP/HTTP调用方式相同)
 ```python
 from agileutil.rpc.server import TcpRpcServer
 from agileutil.rpc.discovery import DiscoveryConfig
-from agileutil.util import local_ip
-
-def sayHello(): 
-    return 'hello '
-
-s = TcpRpcServer('0.0.0.0', 9988)
-s.regist(sayHello)
 disconf = DiscoveryConfig(
     consulHost = '192.168.19.103',
     consulPort = 8500,
     serviceName = 'test-rpc-server',
     serviceHost = local_ip(),
-    servicePort = 9988
+    servicePort = 10001
 )
-s.setDiscoverConfig(disconf)
-s.serve()
+server = TcpRpcServer('0.0.0.0', 10001)
+server.setDiscoverConfig(disconf)
+server.regist(sayHello)
+server.serve()
 ```
 
-### 完整的客户端示例 
-- 创建DiscoveryConfig对象，指定Consul的地址端口.
-  > serviceName参数和服务端的保持一致，且全局唯一
-- 调用call()方法指定服务端的方法名和参数
+### 完整的客户端示例（UDP/HTTP调用方式相同）
+- 创建DiscoveryConfig对象，指定Consul的地址端口（serviceName参数和服务端的保持一致，且全局唯一）
+- 调用setDiscoveryConfig()方法传入服务发现配置
 ```python
-from agileutil.rpc.client import DiscoveryTcpRpcClient
+from agileutil.rpc.client import TcpRpcClient
 from agileutil.rpc.discovery import DiscoveryConfig
-
-cli = DiscoveryTcpRpcClient(DiscoveryConfig(consulHost='192.168.19.103', consulPort=8500, serviceName='test-rpc-server'))
-for i in range(10):
-    resp = cli.call(func = 'sayHello')
-    print(resp)
+cli = TcpRpcClient()
+disconf = DiscoveryConfig(
+    consulHost= '192.168.19.103',
+    consulPort= 8500,
+    serviceName='test-rpc-server'
+)
+cli.setDiscoveryConfig(disconf)
+for i in range(3):
+    resp = cli.call(func = 'sayHello', args=('mary'))
 ```
 
 ## ORM
