@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.transport import ZMQTransport, TcpTransport, UdpTransport, HttpTransport
+from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport
 from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
 import json
 from abc import ABCMeta, abstractmethod

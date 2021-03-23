@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '0.0.2'
+DEFINE_VERSION = '0.0.3'
 from setuptools import setup
 import platform
 system = platform.system()
@@ -20,8 +20,10 @@ webpy = 'web.py'
 if platform.python_version()[0:1] == '3':
     webpy = 'web.py==0.40.dev1'
 requireList = [
-    'pexpect', 'ujson', 'requests', 'python-decouple', 'PyMySQL==0.10.1',
-    'DBUtils==1.3', 'IPy', 'sanic==20.12.2'
+    'requests',
+    'PyMySQL==0.10.1',
+    'DBUtils==1.3', 
+    'sanic==20.12.2'
 ]
 #if requireList == 'Linux':
 #    requireList.append('japronto')
@@ -35,8 +37,6 @@ setup(name='agileutil',
       platforms="any",
       install_requires=requireList,
       classifiers=[
-          'Programming Language :: Python :: 2.6',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
