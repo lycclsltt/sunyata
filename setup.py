@@ -20,10 +20,11 @@ webpy = 'web.py'
 if platform.python_version()[0:1] == '3':
     webpy = 'web.py==0.40.dev1'
 requireList = [
-    'requests',
+    'requests==2.25.1',
     'PyMySQL==0.10.1',
     'DBUtils==1.3', 
-    'sanic==20.12.2'
+    'sanic==20.12.2',
+    'tornado==6.1'
 ]
 #if requireList == 'Linux':
 #    requireList.append('japronto')
