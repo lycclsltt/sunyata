@@ -109,7 +109,7 @@ class UdpTransport(RpcTransport):
 
 class HttpTransport(RpcTransport):
 
-    def __init__(self, host, port, worker=cpu_count(), timeout = 10, poolConnection=5, poolMaxSize=20, maxRetries=3):
+    def __init__(self, host, port, worker=cpu_count(), timeout = 10, poolConnection=20, poolMaxSize=20, maxRetries=2):
         self.host = host
         self.port = port
         self.worker = worker
@@ -128,8 +128,9 @@ class HttpTransport(RpcTransport):
     def send(self, msg):
         url = self.makeUrl()
         headers = {
-            'Content-type' : 'application/octet-strea'
+            'Content-type' : 'application/octet-stream'
         }
         r = self.requestSession.post(url, headers = headers, data=msg, timeout = self.timeout)
+        #r = requests.post(url, headers = headers, data=msg, timeout = self.timeout)
         resp = r.content
         return resp
