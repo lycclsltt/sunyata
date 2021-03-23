@@ -12,6 +12,12 @@ CONSUL_PORT = 8500
 
 def sayHello(name): return 'hello ' + name
 
+class A(object):
+    def __init__(self, val):
+        self.val = val
+    def dump(self):
+        print('self.val', self.val)
+
 
 class TestRpcServerClient(unittest.TestCase):
 
@@ -130,6 +136,31 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(3)
         tClient = threading.Thread(target=create_client)
         tClient.start()  
+
+    def test_serialize_obj(self):
+        #测试TCP
+        def create_server():
+            from agileutil.rpc.server import TcpRpcServer
+            def retObj():
+                return A(10)
+            server = TcpRpcServer('127.0.0.1', 10004)
+            server.regist(retObj)
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import TcpRpcClient
+            client = TcpRpcClient('127.0.0.1', 10004)
+            for i in range(3):
+                resp = client.call(func='retObj')
+                #print("resp.val", resp.val)
+                #resp.dump()
+                self.assertEqual(resp.val, 10)
+
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
 
 def create_http_server():
     from agileutil.rpc.server import HttpRpcServer
