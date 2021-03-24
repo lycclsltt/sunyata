@@ -43,7 +43,7 @@ print('resp', resp)
 ```
 
 ### 指定多个服务端地址
-- 通过servers参数，你也可以创建一个指定多个服务端地址的client对象，默认采用轮询的负载均衡策略，将请求转发到多个server上，如果请求其中一个server出现了失败，那么会自动重试。参考下面的例子:
+- 通过servers参数，你也可以创建一个指定多个服务端地址的client对象，默认采用轮询的负载均衡策略，将请求转发到多个server上，如果请求其中一个server出现了失败，那么会自动重试。框架中所有TCP/UDP/HTTP的client都支持servers参数，都可以指定多个服务端地址，参考下面的例子:
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -51,6 +51,8 @@ c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
 resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
+> 注意：
+> 如果通过servers参数指定了多个服务端地址，又同时指定了服务发现的consul地址，那么实际请求的服务端节点是由server参数决定的，所以使用时请注意不要和服务发现同时使用。
 
 
 ### Tornado RPC 服务端
