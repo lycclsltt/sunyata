@@ -5,6 +5,14 @@ from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.discovery import ConsulRpcDiscovery
 from agileutil.wrap import retryTimes
+from agileutil.rpc.discovery import Instance
+
+class Address(object):
+
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+
 
 class RpcClient(object): 
 
@@ -16,6 +24,11 @@ class RpcClient(object):
         self.isSync = False
         self.syncInterval = 30
         self.protocal = RpcProtocal()
+        self.servers = []
+        self.serversCount = len(self.servers)
+        self.serversProtocalMap = {}
+        self.serverIndex = 0
+        self.lastServer = ''
 
     def getInstance(self):
         instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
@@ -27,8 +40,20 @@ class RpcClient(object):
         return instanceList[index]
 
     def refreshProtocal(self):
-        instance = self.getInstance()
-        self.protocal = self.getProtocalInstance(instance)
+        if self.discovery:
+            instance = self.getInstance()
+            self.protocal = self.getProtocalInstance(instance)
+        if self.servers:
+            self.serversCount = len(self.servers)
+            index = self.serverIndex % self.serversCount
+            self.serverIndex = self.serverIndex + 1
+            server = self.servers[ index ]
+            self.lastServer = server
+            self.protocal = self.serversProtocalMap[ server ]
+
+    def getProtocalInstance(self, instance):
+        #overide
+        pass
 
     def setDiscoveryConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
@@ -39,27 +64,37 @@ class RpcClient(object):
 
     def __del__(self):
         self.close()
-        
+
+    def beforeCall(self):
+        self.refreshProtocal()
+
+    def debugGetLastServer(self):
+        return self.lastServer
+
 
 class TcpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0, keepconnect = True):
+    def __init__(self, host = '', port = 0, servers=[],keepconnect = True):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.keepconnect = keepconnect
         self.protocal = TcpProtocal(host, port)
+        self.servers = servers
+        if len(self.servers) == 0 and self.host != '' and self.port != 0:
+            self.servers = [ host+':'+str(port) ]
+        for server in self.servers:
+            host, port = server.split(':')
+            self.serversProtocalMap[ server ] = TcpProtocal(host, int(port))
 
     @retryTimes(retryTimes=3)
     def call(self, func, args = ()):
-        if self.discovery:
-            self.refreshProtocal()
+        self.beforeCall()
         if args == None: args = ()
         try:
             self.protocal.transport.connect()
         except Exception as ex:
             pass
-
         package = {
             'func' : func,
             'args' : args,
@@ -84,16 +119,21 @@ class TcpRpcClient(RpcClient):
 
 class UdpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0):
+    def __init__(self, host = '', port = 0, servers=[]):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.protocal = UdpProtocal(host, port)
+        self.servers = servers
+        if len(self.servers) == 0 and self.host != '' and self.port != 0:
+            self.servers = [ host+':'+str(port) ]
+        for server in self.servers:
+            host, port = server.split(':')
+            self.serversProtocalMap[ server ] = UdpProtocal(host, int(port))
 
     @retryTimes(retryTimes=3)
     def call(self, func, args):
-        if self.discovery:
-            self.refreshProtocal()
+        self.beforeCall()
         package = {
             'func' : func,
             'args' : args,
@@ -116,16 +156,21 @@ class UdpRpcClient(RpcClient):
 
 class HttpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0):
+    def __init__(self, host = '', port = 0, servers = []):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.protocal = HttpProtocal(host, port)
+        self.servers = servers
+        if len(self.servers) == 0 and self.host != '' and self.port != 0:
+            self.servers = [ host+':'+str(port) ]
+        for server in self.servers:
+            host, port = server.split(':')
+            self.serversProtocalMap[ server ] = HttpProtocal(host, int(port))
 
     @retryTimes(retryTimes=3)
     def call(self, func, args):
-        if self.discovery:
-            self.refreshProtocal()
+        self.beforeCall()
         package = {
             'func' : func,
             'args' : args,
