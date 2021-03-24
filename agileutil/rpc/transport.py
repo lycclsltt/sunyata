@@ -120,17 +120,16 @@ class HttpTransport(RpcTransport):
         self.maxRetries = maxRetries
         self.requestSession = requests.Session()
         self.requestSession.mount('http://', requests.adapters.HTTPAdapter(pool_connections=self.poolConnection, pool_maxsize=self.poolMaxSize, max_retries=self.maxRetries))
+        self.url = self.makeUrl()
+        self.headers = {
+            'Content-type' : 'application/octet-stream'
+        }
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     def makeUrl(self):
         return "http://%s:%s/" % (self.host, self.port)
 
     def send(self, msg):
-        url = self.makeUrl()
-        headers = {
-            'Content-type' : 'application/octet-stream'
-        }
-        r = self.requestSession.post(url, headers = headers, data=msg, timeout = self.timeout)
-        #r = requests.post(url, headers = headers, data=msg, timeout = self.timeout)
+        r = self.requestSession.post(self.url, headers = self.headers, data=msg, timeout = self.timeout)
         resp = r.content
         return resp

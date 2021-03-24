@@ -13,3 +13,5 @@ restart.sh
 *.ini
 test_server.py
 test_client.py
+test_perf.py
+todo.txt
