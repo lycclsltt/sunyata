@@ -42,6 +42,17 @@ resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
 
+### 指定多个服务端地址
+- 通过servers参数，你也可以创建一个指定多个服务端地址的client对象，默认采用轮询的负载均衡策略，将请求转发到多个server上，如果请求其中一个server出现了失败，那么会自动重试。参考下面的例子:
+```python
+from agileutil.rpc.client import TcpRpcClient
+
+c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
+resp = c.call(func = 'sayHello', args = ('zhangsan'))
+print('resp', resp)
+```
+
+
 ### Tornado RPC 服务端
 TornadoTcpRpcServer同样是基于TCP协议的RPC服务端，只是底层是基于Tornado高性能网络库实现。你同样可以使用TornadoTcpRpcServer创建一个TCP服务，参考TcpRpcServer的创建步骤：
 - 创建一个TornadoTcpRpcServer对象，指定监听的地址和端口
