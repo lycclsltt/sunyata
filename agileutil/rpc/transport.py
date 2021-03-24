@@ -8,7 +8,10 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
-class RpcTransport(object): pass
+class RpcTransport(object): 
+
+    def close(self):
+        pass
 
 
 class TcpTransport(RpcTransport):
@@ -58,6 +61,8 @@ class TcpTransport(RpcTransport):
             if bufsize <= 0:
                 break
             bytearr = conn.recv(bufsize)
+            if len(bytearr) == 0:
+                raise Exception('peer closed')
             lengthbyte = lengthbyte + bytearr
             readn = readn + len(bytearr)
         toread = struct.unpack("i", lengthbyte)[0]
@@ -68,6 +73,8 @@ class TcpTransport(RpcTransport):
             if bufsize <= 0:
                 break
             bytearr = conn.recv(bufsize)
+            if len(bytearr) == 0:
+                raise Exception('peer closed')
             msg = msg + bytearr
             readn = readn + len(bytearr)
         return msg

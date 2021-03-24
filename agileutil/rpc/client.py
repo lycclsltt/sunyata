@@ -36,6 +36,9 @@ class RpcClient(object):
 
     def close(self):
         self.protocal.transport.close()
+
+    def __del__(self):
+        self.close()
         
 
 class TcpRpcClient(RpcClient):
