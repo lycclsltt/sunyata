@@ -32,7 +32,7 @@ requireList = [
 
 setup(name='agileutil',
       version=DEFINE_VERSION,
-      description='Python3 RPC Framework',
+      description='Light, concurrent RPC framework for Python',
       author='tank',
       license='MIT',
       platforms="any",
