@@ -68,9 +68,6 @@ class TcpRpcServer(SimpleTcpRpcServer):
     def __init__(self, host, port, workers = multiprocessing.cpu_count()):
         SimpleTcpRpcServer.__init__(self, host, port)
         self.worker = workers
-        self.queueMaxSize = 100000
-        self.queue = queue.Queue(self.queueMaxSize)
-        
 
     def handle(self, conn):
         while 1:
