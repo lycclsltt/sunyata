@@ -25,7 +25,7 @@ nationServer.serve()
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
-c = TcpRpcClient('127.0.0.1', 9988)
+c = TcpRpcClient('127.0.0.1', 9988, timeout=5)
 resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
