@@ -1,3 +1,9 @@
+#coding=utf-8
+
+"""
+PYPI 发布脚本
+"""
+
 import sys
 import subprocess
 import platform

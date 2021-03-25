@@ -1,5 +1,11 @@
 #coding=utf-8
 
+"""
+单元测试脚本:
+
+python3 -W ignore test.py
+"""
+
 import threading
 import time
 import unittest
