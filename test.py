@@ -5,12 +5,19 @@ import time
 import unittest
 from multiprocessing import Process
 from agileutil.util import local_ip
+import socket
+import requests
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
+SLEEP = 1
 
 
 def sayHello(name): return 'hello ' + name
+
+def testTimeout():
+    time.sleep(3)
+    return 'finish'
 
 class A(object):
     def __init__(self, val):
@@ -27,6 +34,7 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 9988)
             server.regist(sayHello)
+            print('test_tcp_server_client ready serve')
             server.serve()
 
         def create_client():
@@ -38,7 +46,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         tServer = threading.Thread(target=create_server)
         tServer.start()
-        time.sleep(1)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
@@ -48,6 +56,7 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 9999)
             server.regist(sayHello)
+            print('test_udp_server_client ready serve')
             server.serve()
 
         def create_client():
@@ -59,7 +68,7 @@ class TestRpcServerClient(unittest.TestCase):
         
         tServer = threading.Thread(target=create_server)
         tServer.start()
-        time.sleep(1)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
@@ -78,6 +87,7 @@ class TestRpcServerClient(unittest.TestCase):
             server = TcpRpcServer('0.0.0.0', 10001)
             server.setDiscoverConfig(disconf)
             server.regist(sayHello)
+            print('test_tcp_server_discovery ready serve')
             server.serve()
 
         def create_client():
@@ -96,7 +106,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         tServer = threading.Thread(target=create_server)
         tServer.start()
-        time.sleep(1)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()      
     
@@ -115,6 +125,7 @@ class TestRpcServerClient(unittest.TestCase):
             server = UdpRpcServer('0.0.0.0', 10002)
             server.setDiscoverConfig(disconf)
             server.regist(sayHello)
+            print('test_udp_server_discovery ready serve')
             server.serve()
 
         def create_client():
@@ -133,7 +144,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         tServer = threading.Thread(target=create_server)
         tServer.start()
-        time.sleep(3)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()  
 
@@ -145,6 +156,7 @@ class TestRpcServerClient(unittest.TestCase):
                 return A(10)
             server = TcpRpcServer('127.0.0.1', 10004)
             server.regist(retObj)
+            print('test_serialize_obj ready serve')
             server.serve()
 
         def create_client():
@@ -158,7 +170,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         tServer = threading.Thread(target=create_server)
         tServer.start()
-        time.sleep(1)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
@@ -167,16 +179,19 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10005)
             server.regist(sayHello)
+            print('test_multi_server ready serve')
             server.serve()
         def create_server_10006():
             from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10006)
             server.regist(sayHello)
+            print('create_server_10006 ready serve')
             server.serve()
         def create_server_10007():
             from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10007)
             server.regist(sayHello)
+            print('create_server_10007 ready serve')
             server.serve()
         def create_client():
             from agileutil.rpc.client import TcpRpcClient
@@ -184,7 +199,6 @@ class TestRpcServerClient(unittest.TestCase):
                 '127.0.0.1:10005',
                 '127.0.0.1:10006',
                 '127.0.0.1:10007',
-                '127.0.0.1:10008',
             ])
             for i in range(10):
                 resp = client.call(func='sayHello', args=('zhangsan'))
@@ -196,7 +210,7 @@ class TestRpcServerClient(unittest.TestCase):
         tServer_10005.start()
         tServer_10006.start()
         tServer_10007.start()
-        time.sleep(3)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
@@ -206,16 +220,19 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10008)
             server.regist(sayHello)
+            print('create_server_10008 ready serve')
             server.serve()
         def create_server_10009():
             from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10009)
             server.regist(sayHello)
+            print('create_server_10009 ready serve')
             server.serve()
         def create_server_10010():
             from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10010)
             server.regist(sayHello)
+            print('create_server_10010 ready serve')
             server.serve()
         def create_client():
             from agileutil.rpc.client import UdpRpcClient
@@ -234,14 +251,74 @@ class TestRpcServerClient(unittest.TestCase):
         tServer_10008.start()
         tServer_10009.start()
         tServer_10010.start()
-        time.sleep(3)
+        time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
+
+    def test_tcp_server_client_timeout(self):
+        #测试TCP
+        def create_server():
+            from agileutil.rpc.server import TcpRpcServer
+            server = TcpRpcServer('127.0.0.1', 10014)
+            server.regist(testTimeout)
+            server.regist(sayHello)
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import TcpRpcClient
+            client = TcpRpcClient('127.0.0.1', 10014, timeout = 2)
+            tag = ''
+            try:
+                resp = client.call('testTimeout')
+                self.assertEqual(resp, 'finish')
+            except socket.timeout as ex:
+                tag = 'test timeout ok!'
+            self.assertEqual(tag, 'test timeout ok!')
+            resp = client.call('sayHello', 'xiaoming')
+            self.assertEqual(resp, 'hello xiaoming')
+        
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+    
+    def test_udp_server_client_timeout(self):
+        #测试UDP
+        def create_server():
+            from agileutil.rpc.server import UdpRpcServer
+            server = UdpRpcServer('127.0.0.1', 10015)
+            server.regist(sayHello)
+            server.regist(testTimeout)
+            print('test_udp_server_client_timeout ready serve')
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import UdpRpcClient
+            client = UdpRpcClient('127.0.0.1', 10015, timeout=2)
+            print('client.protocal.transport.socket', client.protocal.transport.socket)
+            tag = ''
+            try:
+                resp = client.call(func='testTimeout')
+            except socket.timeout as ex:
+                tag = 'udp timeout'
+            self.assertEqual(tag, 'udp timeout')
+            resp = client.call('sayHello', ('xiaoming'))
+            time.sleep(5)
+            self.assertEqual(resp, 'hello xiaoming')
+
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(SLEEP)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+
 
 def create_http_server():
     from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10000)
     server.regist(sayHello)
+    print('create_http_server ready serve')
     server.serve()
 
 def create_http_client():
@@ -264,6 +341,7 @@ def create_http_server_discovery():
     )
     server.setDiscoverConfig(disconf)
     server.regist(sayHello)
+    print('create_http_server_discovery ready serve')
     server.serve()
 
 def create_http_client_discovery():
@@ -284,18 +362,21 @@ def create_http_server_10011():
     from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10011)
     server.regist(sayHello)
+    print('create_http_server_10011 ready serve')
     server.serve()
 
 def create_http_server_10012():
     from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10012)
     server.regist(sayHello)
+    print('create_http_server_10012 ready serve')
     server.serve()
 
 def create_http_server_10013():
     from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10013)
     server.regist(sayHello)
+    print('create_http_server_10013 ready serve')
     server.serve()
 
 def create_http_client_multi():
@@ -310,20 +391,41 @@ def create_http_client_multi():
         print('http server', client.debugGetLastServer())
         assert (resp == 'hello xiaoming')
 
+def create_http_server_timeout():
+    from agileutil.rpc.server import HttpRpcServer
+    server = HttpRpcServer('127.0.0.1', 10016)
+    server.regist(testTimeout)
+    server.regist(sayHello)
+    print('create_http_server_timeout ready serve')
+    server.serve()
+
+def create_http_client_timeout():
+    from agileutil.rpc.client import HttpRpcClient
+    client = HttpRpcClient('127.0.0.1', 10016, timeout=2)
+    tag = ''
+    try:
+        resp = client.call(func = 'testTimeout')
+    except requests.exceptions.ReadTimeout as ex:
+        tag = 'http timeout'
+    assert(  tag == 'http timeout')
+    resp = client.call(func = 'sayHello', args=('xiaoming'))
+    assert( resp == 'hello xiaoming' )
+        
+
 if __name__ == '__main__':
     #测试HTTP
     tServer = Process(target=create_http_server)
     tServer.start()
-    time.sleep(3)
+    time.sleep(SLEEP)
     tClient = threading.Thread(target=create_http_client)
     tClient.start()
-    time.sleep(1)
+    time.sleep(SLEEP)
     tServer.terminate()
     tServer.join()
     #测试HTTP服务发现
     httpServer = Process(target=create_http_server_discovery)
     httpServer.start()
-    time.sleep(3)
+    time.sleep(SLEEP)
     httpClient = threading.Thread(target=create_http_client_discovery)
     httpClient.start()
     #测试HTTP多个服务端地址
@@ -333,8 +435,14 @@ if __name__ == '__main__':
     httpServer_10011.start()
     httpServer_10012.start()
     httpServer_10013.start()
-    time.sleep(3)
+    time.sleep(SLEEP)
     httpClient_multi = threading.Thread(target=create_http_client_multi)
     httpClient_multi.start()
+    #测试http超时
+    httpServer = Process(target=create_http_server_timeout)
+    httpServer.start()
+    time.sleep(SLEEP)
+    httpClient = threading.Thread(target=create_http_client_timeout)
+    httpClient.start()
     #测试其他
     unittest.main()

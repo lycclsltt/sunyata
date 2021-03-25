@@ -1,11 +1,12 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
 from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.discovery import ConsulRpcDiscovery
 from agileutil.wrap import retryTimes
 from agileutil.rpc.discovery import Instance
+import socket
 
 class Address(object):
 
@@ -29,6 +30,7 @@ class RpcClient(object):
         self.serversProtocalMap = {}
         self.serverIndex = 0
         self.lastServer = ''
+        self.timeout = 10
 
     def getInstance(self):
         instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
@@ -74,40 +76,42 @@ class RpcClient(object):
 
 class TcpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0, servers=[],keepconnect = True):
+    def __init__(self, host = '', port = 0, servers=[], timeout=10, keepconnect = True):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
         self.keepconnect = keepconnect
-        self.protocal = TcpProtocal(host, port)
+        self.protocal = TcpProtocal(host, port, timeout=timeout)
         self.servers = servers
+        self.timeout = timeout
         if len(self.servers) == 0 and self.host != '' and self.port != 0:
             self.servers = [ host+':'+str(port) ]
         for server in self.servers:
             host, port = server.split(':')
-            self.serversProtocalMap[ server ] = TcpProtocal(host, int(port))
+            self.serversProtocalMap[ server ] = TcpProtocal(host, int(port), timeout = timeout)
 
     @retryTimes(retryTimes=3)
     def call(self, func, args = ()):
-        self.beforeCall()
-        if args == None: args = ()
         try:
+            self.beforeCall()
+            if args == None: args = ()
             self.protocal.transport.connect()
-        except Exception as ex:
-            pass
-        package = {
-            'func' : func,
-            'args' : args,
-        }
-        msg = self.protocal.serialize(package)
-        self.protocal.transport.send(msg)
-        respmsg = self.protocal.transport.recv()
-        resp = self.protocal.unserialize(respmsg)
-        if isinstance(resp, Exception):
+            package = {
+                'func' : func,
+                'args' : args,
+            }
+            msg = self.protocal.serialize(package)
+            self.protocal.transport.send(msg)
+            respmsg = self.protocal.transport.recv()
+            resp = self.protocal.unserialize(respmsg)
+            if isinstance(resp, Exception):
+                if not self.keepconnect: self.protocal.transport.close()
+                raise resp
             if not self.keepconnect: self.protocal.transport.close()
-            raise resp
-        if not self.keepconnect: self.protocal.transport.close()
-        return resp
+            return resp
+        except socket.timeout as ex:
+            self.protocal.transport.close()
+            raise ex
 
     def getProtocalInstance(self, instance):
         key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
@@ -119,32 +123,37 @@ class TcpRpcClient(RpcClient):
 
 class UdpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0, servers=[]):
+    def __init__(self, host = '', port = 0, servers=[], timeout = 10):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
-        self.protocal = UdpProtocal(host, port)
+        self.protocal = ClientUdpProtocal(host, port, timeout=timeout)
         self.servers = servers
+        self.timeout = timeout
         if len(self.servers) == 0 and self.host != '' and self.port != 0:
             self.servers = [ host+':'+str(port) ]
         for server in self.servers:
             host, port = server.split(':')
-            self.serversProtocalMap[ server ] = UdpProtocal(host, int(port))
+            self.serversProtocalMap[ server ] = ClientUdpProtocal(host, int(port), timeout=timeout)
 
     @retryTimes(retryTimes=3)
-    def call(self, func, args):
-        self.beforeCall()
-        package = {
-            'func' : func,
-            'args' : args,
-        }
-        msg = self.protocal.serialize(package)
-        self.protocal.transport.send(msg)
-        respmsg, _ = self.protocal.transport.recv()
-        resp = self.protocal.unserialize(respmsg)
-        if isinstance(resp, FuncNotFoundException):
-            raise resp
-        return resp
+    def call(self, func, args = ()):
+        try:
+            self.beforeCall()
+            package = {
+                'func' : func,
+                'args' : args,
+            }
+            msg = self.protocal.serialize(package)
+            self.protocal.transport.send(msg)
+            respmsg, _ = self.protocal.transport.recv()
+            resp = self.protocal.unserialize(respmsg)
+            if isinstance(resp, Exception):
+                raise resp
+            return resp
+        except socket.timeout as ex:
+            self.protocal.newTransport()
+            raise ex
 
     def getProtocalInstance(self, instance):
         key = "%s:%s:%s" % (instance.service, instance.address, instance.port)
@@ -156,20 +165,21 @@ class UdpRpcClient(RpcClient):
 
 class HttpRpcClient(RpcClient):
 
-    def __init__(self, host = '', port = 0, servers = []):
+    def __init__(self, host = '', port = 0, servers = [], timeout = 10):
         RpcClient.__init__(self)
         self.host = host
         self.port = port
-        self.protocal = HttpProtocal(host, port)
+        self.protocal = HttpProtocal(host, port, timeout=timeout)
         self.servers = servers
+        self.timeout = timeout
         if len(self.servers) == 0 and self.host != '' and self.port != 0:
             self.servers = [ host+':'+str(port) ]
         for server in self.servers:
             host, port = server.split(':')
-            self.serversProtocalMap[ server ] = HttpProtocal(host, int(port))
+            self.serversProtocalMap[ server ] = HttpProtocal(host, int(port), timeout=timeout)
 
     @retryTimes(retryTimes=3)
-    def call(self, func, args):
+    def call(self, func, args = ()):
         self.beforeCall()
         package = {
             'func' : func,

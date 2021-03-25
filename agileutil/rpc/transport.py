@@ -16,9 +16,10 @@ class RpcTransport(object):
 
 class TcpTransport(RpcTransport):
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, timeout):
         self.host = host
         self.port = port
+        self.timeout = timeout
         self.socket = None
 
     def bind(self):
@@ -30,8 +31,9 @@ class TcpTransport(RpcTransport):
     def connect(self):
         if self.socket == None:
             self.socket = socket(AF_INET, SOCK_STREAM)
+            self.socket.settimeout(self.timeout)
             self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self.socket.connect( (self.host, self.port) )
+            self.socket.connect( (self.host, self.port) )
 
     def accept(self):
         cli, addr = self.socket.accept()
@@ -112,6 +114,14 @@ class UdpTransport(RpcTransport):
     def close(self):
         self.socket.close()
         self.socket = None
+
+
+class ClientUdpTransport(UdpTransport):
+
+    def __init__(self, host, port, timeout = 10):
+        UdpTransport.__init__(self, host, port)
+        self.timeout = timeout
+        self.socket.settimeout(self.timeout)
 
 
 class HttpTransport(RpcTransport):

@@ -6,6 +6,7 @@ from multiprocessing import Process
 import functools
 import time
 import agileutil.date as dt
+import socket
 
 
 def stdout_log(func):
@@ -53,6 +54,9 @@ def retryTimes(retryTimes=2):
     如果装饰的方法抛出异常，那么进行重试n次，默认重试1次
     如果重试n次后仍然异常，那么抛出最后一个异常
     '''
+    if retryTimes <= 0:
+        retryTimes = 1
+    
     def function(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -62,6 +66,8 @@ def retryTimes(retryTimes=2):
                 try:
                     ret = func(*args, **kwargs)
                     return ret
+                except socket.timeout as ex:
+                    raise ex
                 except Exception as ex:
                     lastEx = ex
                     #print(
@@ -88,6 +94,8 @@ def retry(func):
             try:
                 ret = func(*args, **kwargs)
                 return ret
+            except socket.timeout as ex:
+                raise ex
             except Exception as ex:
                 lastEx = ex
                 #print(

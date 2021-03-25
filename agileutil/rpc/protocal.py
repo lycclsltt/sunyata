@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport
+from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport
 from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
 import json
 from abc import ABCMeta, abstractmethod
@@ -54,20 +54,38 @@ class HttpProtocal(RpcProtocal):
         self.port = port
         self.worker = worker
         self.serializeType = serializeType
+        self.timeout = timeout
         self.transport = HttpTransport(host, port, worker, timeout, poolConnection, poolMaxSize, maxRetries)
 
 
 class TcpProtocal(RpcProtocal):
     
-    def __init__(self, host, port, serializeType = 'bin'):
+    def __init__(self, host, port, serializeType = 'bin', timeout = 10):
         RpcProtocal.__init__(self)
         self.serializeType = serializeType
-        self.transport = TcpTransport(host, port)
+        self.timeout = timeout
+        self.transport = TcpTransport(host, port, timeout)
 
 
 class UdpProtocal(RpcProtocal):
 
-    def __init__(self, host, port, serializeType = 'bin'):
+    def __init__(self, host, port, serializeType = 'bin', timeout = 10):
         RpcProtocal.__init__(self)
         self.serializeType = serializeType
+        self.timeout = timeout
         self.transport = UdpTransport(host, port)
+
+
+class ClientUdpProtocal(UdpProtocal):
+
+    def __init__(self, host, port, serializeType = 'bin', timeout = 10):
+        UdpProtocal.__init__(self, host, port, serializeType=serializeType, timeout=timeout)
+        self.serializeType = serializeType
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+        self.transport = ClientUdpTransport(host, port, timeout)
+    
+    def newTransport(self):
+        self.transport.close()
+        self.transport = ClientUdpTransport(self.host, self.port, self.timeout)
