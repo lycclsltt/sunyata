@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport
+from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
 from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
 import json
 from abc import ABCMeta, abstractmethod
@@ -12,7 +12,7 @@ import requests
 class RpcProtocal(object):
 
     def __init__(self):
-        pass
+        self.transport = RpcTransport()
 
     def serialize(self, obj):
         serializer = None

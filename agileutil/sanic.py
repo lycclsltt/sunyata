@@ -48,6 +48,8 @@ try:
     from decouple import config
 except:
     pass
+import logging
+from sanic.log import logger
 
 class SanicController(HTTPMethodView):
     def __init__(self):
@@ -186,9 +188,12 @@ class SanicApp(object):
         self.initApp()
         self.initLog()
 
+    def disableLog(self):
+        logger.setLevel(logging.WARNING)
+
     def initApp(self):
         if self.app == None:
-            self.app = Sanic(name='agileutil' + str(uuid.uuid1()) )
+            self.app = Sanic(name='agileutil' + str(uuid.uuid1()))
 
     def initLog(self):
         if self.logger == None and self.log != '':

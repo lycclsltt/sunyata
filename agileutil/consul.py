@@ -66,7 +66,7 @@ class ConsulApi(object):
             'DeregisterCriticalServiceAfter' : degisterAfter,
             'TTL' : '%ss' % ttl,
         }
-        print('params', json.dumps(params))
+        #print('params', json.dumps(params))
         url = self.baseUrl + '/v1/agent/service/register'
         r = requests.put(url, data=json.dumps(params), timeout = self.timeout)
         print(r.text, r.status_code)

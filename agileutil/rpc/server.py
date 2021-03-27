@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal
+from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
 import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
 import queue
@@ -22,6 +22,7 @@ class RpcServer(object):
         self.funcList = []
         self.discoveryConfig = None
         self.discovery = None
+        self.protocal = RpcProtocal()
 
     def regist(self, func):
         self.funcMap[ func.__name__ ] = func
@@ -44,6 +45,9 @@ class RpcServer(object):
         self.discoveryConfig = config
         self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort)
 
+    def setKeepaliveTimeout(self, keepaliveTimeout: int):
+        self.protocal.transport.setKeepaliveTimeout(keepaliveTimeout)
+
 
 class SimpleTcpRpcServer(RpcServer):
     
@@ -54,7 +58,7 @@ class SimpleTcpRpcServer(RpcServer):
         self.protocal = TcpProtocal(host, port)
     
     def serve(self):
-        self.protocal.transport.bind()
+        self.protocal.transport.bind(self.keepaliveTimeout)
         while 1:
             msg = self.protocal.transport.recv()
             request = self.protocal.unserialize(msg)
@@ -72,11 +76,11 @@ class TcpRpcServer(SimpleTcpRpcServer):
     def handle(self, conn):
         while 1:
             try:
-                msg = self.protocal.transport.recv(conn)
+                msg = self.protocal.transport.recvPeer(conn)
                 request = self.protocal.unserialize(msg)
                 func, args = self.protocal.parseRequest(request)
                 resp = self.run(func, args)                    
-                self.protocal.transport.send(self.protocal.serialize(resp), conn)
+                self.protocal.transport.sendPeer(self.protocal.serialize(resp), conn)
             except Exception as ex:
                 conn.close()
                 return
@@ -127,6 +131,9 @@ class HttpRpcServer(RpcServer, SanicController):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.protocal.transport.app.run()
+
+    def disableLog(self):
+        self.protocal.transport.app.disableLog()
 
 
 """
@@ -220,7 +227,6 @@ class TornadoTcpRpcServer(TcpRpcServer):
                 connection.close()
                 break
 
-
     def connectionReady(self, sock, fd, events):
         while True:
             try:
@@ -231,7 +237,6 @@ class TornadoTcpRpcServer(TcpRpcServer):
             except BlockingIOError:
                 return
             
-
     def serve(self):
         self.protocal.transport.bind()
         self.protocal.transport.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -258,13 +263,16 @@ class UdpRpcServer(RpcServer):
 
     def handle(self):
         while 1:
-            body = self.queue.get()
-            addr = body.get('addr')
-            msg = body.get('msg')
-            request = self.protocal.unserialize(msg)
-            func, args = self.protocal.parseRequest(request)
-            resp = self.run(func, args)
-            self.protocal.transport.send(self.protocal.serialize(resp), addr = addr)
+            try:
+                body = self.queue.get()
+                addr = body.get('addr')
+                msg = body.get('msg')
+                request = self.protocal.unserialize(msg)
+                func, args = self.protocal.parseRequest(request)
+                resp = self.run(func, args)
+                self.protocal.transport.sendPeer(self.protocal.serialize(resp), addr = addr)
+            except Exception as ex:
+                print('udp handler exception:', ex)
     
     def serve(self):
         self.startWorkers()
@@ -272,7 +280,8 @@ class UdpRpcServer(RpcServer):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
-            msg, cliAddr = self.protocal.transport.recv()
-            self.queue.put({'msg' : msg, 'addr' : cliAddr})
-
-            
+            try:
+                msg, cliAddr = self.protocal.transport.recv()
+                self.queue.put({'msg' : msg, 'addr' : cliAddr})
+            except socket.timeout:
+                pass
