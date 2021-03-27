@@ -33,10 +33,11 @@ class RpcServer(object):
             if func not in self.funcList:
                 return FuncNotFoundException('func not found')
             funcobj = self.funcMap[func]
+            args = tuple(args)
             if len(args) == 0:
                 resp = funcobj()
             else:
-                resp = funcobj(args)
+                resp = funcobj(*args)
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))

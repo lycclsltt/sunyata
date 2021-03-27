@@ -52,7 +52,7 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 9988)
             for i in range(3):
-                resp = client.call(func='sayHello', args=('zhangsan'))
+                resp = client.call(func='sayHello', args=('zhangsan', ))
                 self.assertEqual(resp, 'hello zhangsan')
 
         tServer = threading.Thread(target=create_server)
@@ -73,7 +73,7 @@ class TestRpcServerClient(unittest.TestCase):
             from agileutil.rpc.client import UdpRpcClient
             client = UdpRpcClient('127.0.0.1', 9999)
             for i in range(3):
-                resp = client.call(func='sayHello', args=('lisi'))
+                resp = client.call(func='sayHello', args='lisi' )
                 self.assertEqual(resp, 'hello lisi')
         
         tServer = threading.Thread(target=create_server)
@@ -147,7 +147,7 @@ class TestRpcServerClient(unittest.TestCase):
             )
             client.setDiscoveryConfig(disconf)
             for i in range(3):
-                resp = client.call(func = 'sayHello', args=('mary'))
+                resp = client.call(func = 'sayHello', args='mary')
                 self.assertEqual(resp, 'hello mary')
 
         tServer = threading.Thread(target=create_server)
@@ -203,7 +203,7 @@ class TestRpcServerClient(unittest.TestCase):
                 '127.0.0.1:10007',
             ])
             for i in range(10):
-                resp = client.call(func='sayHello', args=('zhangsan'))
+                resp = client.call(func='sayHello', args=('zhangsan',))
                 self.assertEqual(resp, 'hello zhangsan')
         tServer_10005 = threading.Thread(target=create_server_10005)
         tServer_10006 = threading.Thread(target=create_server_10006)

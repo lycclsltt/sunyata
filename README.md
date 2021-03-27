@@ -41,7 +41,7 @@ nationServer.serve()
 from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient('127.0.0.1', 9988, timeout=5)
-resp = c.call(func = 'sayHello', args = ('zhangsan'))
+resp = c.call(func = 'sayHello', args = 'zhangsan') #或resp = c.call(func = 'sayHello', args = ('zhangsan', ） )
 print('resp', resp)
 ```
 
@@ -105,7 +105,7 @@ from agileutil.rpc.client import HttpRpcClient
 
 cli = HttpRpcClient('127.0.0.1', 9988)
 for i in range(10):
-    resp = cli.call(func = 'sayHello', args=('zhangsan'))
+    resp = cli.call(func = 'sayHello', args=('zhangsan', ))
     print('resp', resp)
 ```
 
@@ -134,7 +134,7 @@ s.serve()
 from agileutil.rpc.client import UdpRpcClient
 cli = UdpRpcClient('127.0.0.1', 9988)
 for i in range(5000):
-    resp = cli.call(func = 'sayHello', args =('xiaoming') )
+    resp = cli.call(func = 'sayHello', args = 'xiaoming' )
     print(resp)
 ```
 
@@ -221,7 +221,7 @@ disconf = DiscoveryConfig(
 )
 cli.setDiscoveryConfig(disconf)
 for i in range(3):
-    resp = cli.call(func = 'sayHello', args=('mary'))
+    resp = cli.call(func = 'sayHello', args=('mary', ))
 ```
 
 ## ORM
@@ -351,6 +351,7 @@ logger.info('info')
 ```
 logger.error('runtimee exception raise')
 ```
+
 
 ## 致谢
 [![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)

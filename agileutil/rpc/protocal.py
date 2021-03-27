@@ -39,6 +39,16 @@ class RpcProtocal(object):
         args = package['args']
         return func, args
 
+    def tranArgs(self, args):
+        nargs = tuple()
+        if args == None:
+            return nargs
+        if type(args) != tuple and type(args) != list:
+            nargs = (args, )
+        else:
+            nargs = tuple(args)
+        return nargs
+
 
 class UdpProtocal(RpcProtocal):
 
