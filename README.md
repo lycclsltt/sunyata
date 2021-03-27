@@ -51,7 +51,7 @@ print('resp', resp)
 from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
-resp = c.call(func = 'sayHello', args = ('zhangsan'))
+resp = c.call(func = 'sayHello', args = 'zhangsan')
 print('resp', resp)
 ```
 > 注意：
