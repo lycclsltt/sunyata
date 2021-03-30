@@ -331,6 +331,29 @@ class TestRpcServerClient(unittest.TestCase):
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
+    def test_tcp_decorator(self):
+        #测试TCP
+        def create_server():
+            from agileutil.rpc.server import TcpRpcServer
+            from agileutil.rpc import rpc
+            @rpc
+            def add(n1, n2):
+                return n1 +n2
+            server = TcpRpcServer('127.0.0.1', 10018)
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import TcpRpcClient
+            client = TcpRpcClient('127.0.0.1', 10018, timeout = 2)
+            resp = client.call('add', (1, 1))
+            self.assertEqual(resp, 2)
+        
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+
 
 def create_http_server():
     from agileutil.rpc.server import HttpRpcServer

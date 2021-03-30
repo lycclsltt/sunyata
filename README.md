@@ -18,11 +18,23 @@ pip install agileutil
 
 这是Agileutil最核心的功能。基于TCP协议和Pickle序列化方式实现的远程过程调用。下面是一个基于TCP协议的服务端例子。可参考下面的步骤进行开发：
 - 创建一个TcpRpcServer对象, 指定服务端监听地址和端口
-- 调用regist()方法，将提供服务的方法注册到服务端（只有调用regist()方法注册过的服务，才可以被客户端访问）
+- 通过@rpc装饰器注册需要被客户端请求的方法
 - 调用serve()方法，开始处理客户端请求
 
 ### TCP RPC 服务端
 ```python
+from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc import rpc
+
+@rpc
+def sayHello(name):
+    return 'hello ' + name
+
+nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
+nationServer.serve()
+```
+> 除了使用@rpc注册方法，还可以使用regist()方法，参考下面的例子
+``` python
 from agileutil.rpc.server import TcpRpcServer
 
 def sayHello(name):
@@ -32,6 +44,7 @@ nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
 nationServer.regist(sayHello)
 nationServer.serve()
 ```
+
 ### TCP RPC 客户端
 客户端例子：
 - 创建TcpRpcClient对象，指定RPC服务端地址

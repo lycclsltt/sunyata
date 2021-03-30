@@ -16,17 +16,21 @@ from agileutil.sanic import SanicController
 
 
 class RpcServer(object):
+
+    funcMap = {}
+    funcList = []
     
     def __init__(self):
-        self.funcMap = {}
-        self.funcList = []
+        #self.funcMap = {}
+        #self.funcList = []
         self.discoveryConfig = None
         self.discovery = None
         self.protocal = RpcProtocal()
 
-    def regist(self, func):
-        self.funcMap[ func.__name__ ] = func
-        self.funcList = self.funcMap.keys()
+    @classmethod
+    def regist(cls, func):
+        cls.funcMap[ func.__name__ ] = func
+        cls.funcList = cls.funcMap.keys()
 
     def run(self, func, args):
         try:
@@ -48,6 +52,10 @@ class RpcServer(object):
 
     def setKeepaliveTimeout(self, keepaliveTimeout: int):
         self.protocal.transport.setKeepaliveTimeout(keepaliveTimeout)
+
+    @classmethod
+    def rpc(cls, func):
+        cls.regist(func)
 
 
 class SimpleTcpRpcServer(RpcServer):
