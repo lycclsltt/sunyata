@@ -334,8 +334,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_decorator(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
-            from agileutil.rpc import rpc
+            from agileutil.rpc.server import TcpRpcServer, rpc
             @rpc
             def add(n1, n2):
                 return n1 +n2

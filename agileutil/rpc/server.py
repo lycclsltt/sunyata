@@ -294,3 +294,6 @@ class UdpRpcServer(RpcServer):
                 self.queue.put({'msg' : msg, 'addr' : cliAddr})
             except socket.timeout:
                 pass
+
+
+rpc = RpcServer.rpc
