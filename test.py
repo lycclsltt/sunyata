@@ -16,14 +16,12 @@ import requests
 import agileutil.rpc.const
 from sanic.log import logger
 import logging
+import random
+from agileutil.rpc.compress import RpcCompress
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
 SLEEP = 1
-
-agileutil.rpc.const.SERVER_TIMEOUT = 5
-
-
 
 def sayHello(name): return 'hello ' + name
 
@@ -353,6 +351,53 @@ class TestRpcServerClient(unittest.TestCase):
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
+    def test_tcp_compress(self):
+        #测试TCP
+        def create_server():
+            from agileutil.rpc.server import TcpRpcServer
+            from agileutil.rpc.compress import RpcCompress
+            RpcCompress.DEBUG = True
+            RpcCompress.enableCompressLen = 200
+            server = TcpRpcServer('127.0.0.1', 10019)
+            server.regist(sayHello)
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import TcpRpcClient
+            client = TcpRpcClient('127.0.0.1', 10019, timeout = 2)
+            name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
+            resp = client.call('sayHello', args=name)
+            self.assertEqual(resp, 'hello ' + name)
+        
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+    
+    def test_udp_compress(self):
+        #测试UDP
+        def create_server():
+            from agileutil.rpc.compress import RpcCompress
+            from agileutil.rpc.server import UdpRpcServer
+            RpcCompress.DEBUG = True
+            RpcCompress.enableCompressLen = 200
+            server = UdpRpcServer('127.0.0.1', 10020)
+            server.regist(sayHello)
+            server.serve()
+
+        def create_client():
+            from agileutil.rpc.client import UdpRpcClient
+            client = UdpRpcClient('127.0.0.1', 10020, timeout=2)
+            name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
+            resp = client.call('sayHello', args=name )
+            self.assertEqual(resp, 'hello ' + name)
+
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(SLEEP)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
 
 def create_http_server():
     from agileutil.rpc.server import HttpRpcServer
@@ -449,7 +494,24 @@ def create_http_client_timeout():
     assert(  tag == 'http timeout')
     resp = client.call(func = 'sayHello', args=('xiaoming'))
     assert( resp == 'hello xiaoming' )
-        
+
+def create_http_server_compress():
+    from agileutil.rpc.server import HttpRpcServer
+    from agileutil.rpc.compress import RpcCompress
+    RpcCompress.DEBUG = True
+    RpcCompress.enableCompressLen = 200
+    server = HttpRpcServer('127.0.0.1', 10021)
+    server.disableLog()
+    server.regist(sayHello)
+    server.serve()
+
+def create_http_client_compress():
+    RpcCompress.DEBUG = True
+    from agileutil.rpc.client import HttpRpcClient
+    client = HttpRpcClient('127.0.0.1', 10021, timeout=2)
+    name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
+    resp = client.call(func = 'sayHello', args=(name, ))
+    assert( resp == 'hello ' + name )
 
 if __name__ == '__main__':
     #测试HTTP
@@ -482,6 +544,12 @@ if __name__ == '__main__':
     httpServer.start()
     time.sleep(SLEEP)
     httpClient = threading.Thread(target=create_http_client_timeout)
+    httpClient.start()
+    #测试http压缩
+    httpServer = Process(target=create_http_server_compress)
+    httpServer.start()
+    time.sleep(SLEEP)
+    httpClient = threading.Thread(target=create_http_client_compress)
     httpClient.start()
     #测试其他
     unittest.main()

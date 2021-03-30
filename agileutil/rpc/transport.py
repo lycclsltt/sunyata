@@ -7,6 +7,7 @@ from multiprocessing import cpu_count
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from agileutil.rpc.const import SERVER_TIMEOUT
+from agileutil.rpc.compress import RpcCompress
 
 
 class RpcTransport(object): 
@@ -47,18 +48,29 @@ class TcpTransport(RpcTransport):
         return cli, addr
 
     def send(self, msg: bytes):
+        isEnableCompress = b'0'
+        if len(msg) >= RpcCompress.enableCompressLen:
+            isEnableCompress = b'1'
+            msg = RpcCompress.compress(msg)
         newbyte = struct.pack("i", len(msg))
         try:
             self.socket.sendall(newbyte)
+            self.socket.sendall(isEnableCompress)
             self.socket.sendall(msg)
         except BrokenPipeError:
             self.reconnect()
             self.socket.sendall(newbyte)
+            self.socket.sendall(isEnableCompress)
             self.socket.sendall(msg)
 
     def sendPeer(self, msg: bytes, conn):
+        isEnableCompress = b'0'
+        if len(msg) >= RpcCompress.enableCompressLen:
+            isEnableCompress = b'1'
+            msg = RpcCompress.compress(msg)
         newbyte = struct.pack("i", len(msg))
         conn.sendall(newbyte)
+        conn.sendall(isEnableCompress)
         conn.sendall(msg)
 
     def getSendByte(self, msg: bytes, conn = None):
@@ -81,6 +93,22 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             lengthbyte = lengthbyte + bytearr
             readn = readn + len(bytearr)
+        #读取是否压缩字段
+        toread = 1
+        readn = 0
+        msg = b''
+        while 1:
+            bufsize = toread - readn
+            if bufsize <= 0:
+                break
+            bytearr = conn.recv(bufsize)
+            if len(bytearr) == 0:
+                raise Exception('peer closed')
+            msg = msg + bytearr
+            readn = readn + len(bytearr)
+        isEnableCompress = 0
+        if msg == b'1':
+            isEnableCompress = 1
         toread = struct.unpack("i", lengthbyte)[0]
         readn = 0
         msg = b''
@@ -93,6 +121,8 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             msg = msg + bytearr
             readn = readn + len(bytearr)
+        if isEnableCompress:
+            msg = RpcCompress.decompress(msg)
         return msg
 
     def recvPeer(self, conn):
@@ -109,6 +139,22 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             lengthbyte = lengthbyte + bytearr
             readn = readn + len(bytearr)
+        #读取是否压缩字段
+        toread = 1
+        readn = 0
+        msg = b''
+        while 1:
+            bufsize = toread - readn
+            if bufsize <= 0:
+                break
+            bytearr = conn.recv(bufsize)
+            if len(bytearr) == 0:
+                raise Exception('peer closed')
+            msg = msg + bytearr
+            readn = readn + len(bytearr)
+        isEnableCompress = 0
+        if msg == b'1':
+            isEnableCompress = 1
         toread = struct.unpack("i", lengthbyte)[0]
         readn = 0
         msg = b''
@@ -121,6 +167,8 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             msg = msg + bytearr
             readn = readn + len(bytearr)
+        if isEnableCompress:
+            msg = RpcCompress.decompress(msg)
         return msg
 
     def close(self):
@@ -149,16 +197,30 @@ class UdpTransport(RpcTransport):
         self.socket.bind( (self.host, self.port) )
 
     def sendPeer(self, msg: bytes, addr):
-        self.socket.sendto(msg, addr)
+        isEnableCompress = b'0'
+        if len(msg) >= RpcCompress.enableCompressLen:
+            isEnableCompress = b'1'
+            msg = RpcCompress.compress(msg)
+        package = isEnableCompress + msg
+        self.socket.sendto(package, addr)
 
     def send(self, msg: bytes):
+        isEnableCompress = b'0'
+        if len(msg) >= RpcCompress.enableCompressLen:
+            isEnableCompress = b'1'
+            msg = RpcCompress.compress(msg)
         addr = (self.host, self.port)
-        self.socket.sendto(msg, addr)
+        package = isEnableCompress + msg
+        self.socket.sendto(package, addr)
 
     def recv(self, conn = None):
         if conn == None:
             conn = self.socket
-        msg, addr = conn.recvfrom(100000)
+        package, addr = conn.recvfrom(100000)
+        isEnableCompress = package[:1]
+        msg = package[1:]
+        if isEnableCompress == b'1':
+            msg = RpcCompress.decompress(msg)
         return msg, addr
 
     def close(self):
@@ -198,6 +260,11 @@ class HttpTransport(RpcTransport):
         return "http://%s:%s/" % (self.host, self.port)
 
     def send(self, msg):
+        isEnableCompress = b'0'
+        if len(msg) >= RpcCompress.enableCompressLen:
+            isEnableCompress = b'1'
+            msg = RpcCompress.compress(msg)
+        msg = isEnableCompress + msg
         r = self.requestSession.post(self.url, headers = self.headers, data=msg, timeout = self.timeout)
         resp = r.content
         return resp

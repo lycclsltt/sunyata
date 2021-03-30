@@ -13,6 +13,7 @@ from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
 import functools
 from agileutil.sanic import SanicController
+from agileutil.rpc.compress import RpcCompress
 
 
 class RpcServer(object):
@@ -129,7 +130,11 @@ class HttpRpcServer(RpcServer, SanicController):
         HttpRpcServerController.setCallback(self.handle)
         self.protocal.transport.app.route('/', HttpRpcServerController)
         
-    def handle(self, msg):
+    def handle(self, package):
+        isEnableCompress = package[:1]
+        msg = package[1:]
+        if isEnableCompress == b'1':
+            msg = RpcCompress.decompress(msg)
         request = self.protocal.unserialize(msg)
         func, args = self.protocal.parseRequest(request)
         resp = self.run(func, args)

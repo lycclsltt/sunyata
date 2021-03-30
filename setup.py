@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '0.0.9'
+DEFINE_VERSION = '0.0.10'
 from setuptools import setup
 import platform
 system = platform.system()
@@ -20,6 +20,7 @@ webpy = 'web.py'
 if platform.python_version()[0:1] == '3':
     webpy = 'web.py==0.40.dev1'
 requireList = [
+    'lz4==3.1.3',
     'requests==2.25.1',
     'PyMySQL==0.10.1',
     'DBUtils==1.3', 
