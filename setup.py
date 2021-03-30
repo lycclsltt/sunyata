@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '0.0.10'
+DEFINE_VERSION = '0.0.11'
 from setuptools import setup
 import platform
 system = platform.system()
