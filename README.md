@@ -70,34 +70,6 @@ print('resp', resp)
 > 注意：
 > 如果通过servers参数指定了多个服务端地址，又同时指定了服务发现的consul地址，那么实际请求的服务端节点是由server参数决定的，所以使用时请注意不要和服务发现同时使用。
 
-
-### Tornado RPC 服务端
-TornadoTcpRpcServer同样是基于TCP协议的RPC服务端，只是底层是基于Tornado高性能网络库实现。你同样可以使用TornadoTcpRpcServer创建一个TCP服务，参考TcpRpcServer的创建步骤：
-- 创建一个TornadoTcpRpcServer对象，指定监听的地址和端口
-- 调用regist()注册需要提供给客户端的方法
-- 调用server()方法开始处理客户端请求
-
-```python
-from agileutil.rpc.server import TornadoTcpRpcServer
-
-def rows(): 
-    return {'name' : 123}
-
-s = TornadoTcpRpcServer('127.0.0.1', 9988)
-s.regist(rows)
-s.serve()
-```
-
-### Tornado RPC 客户端
-客户端使用TcpRpcClient对象即可。
-```python
-from agileutil.rpc.client import TcpRpcClient
-
-c = TcpRpcClient('127.0.0.1', 9988)
-resp = c.call(func = 'rows'))
-print('resp', resp)
-```
-
 ### HTTP RPC 服务端
 Agileutil也提供了基于HTTP协议的远程过程调用。底层是基于高性能的Sanic异步web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
 ```python

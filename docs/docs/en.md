@@ -30,30 +30,6 @@ resp = c.call(func = 'sayHello', args = ('zhangsan'))
 print('resp', resp)
 ```
 
-### Tornado RPC server
-TCP server have two choice, These are TcpRpcServer and TornadoTcpRpcServer.
-The TronadoTcpServer class was based on Tornado, a python high-performance net libiary.
-```python
-from agileutil.rpc.server import TornadoTcpRpcServer
-
-def rows(): 
-    return {'name' : 123}
-
-s = TornadoTcpRpcServer('127.0.0.1', 9988)
-s.regist(rows)
-s.serve()
-```
-
-### Tornado RPC client
-As same as TcpRpcServer, use TcpRpcClient object.
-```python
-from agileutil.rpc.client import TcpRpcClient
-
-c = TcpRpcClient('127.0.0.1', 9988)
-resp = c.call(func = 'rows'))
-print('resp', resp)
-```
-
 ### HTTP RPC Server
 Agileutil also provides Remote Procedure Call (RPC) based on HTTP protocol, with the underlying implementation based on HTTP protocol and high performance Sanic web framework.It is very simple to use and is very similar to TcpRpcServer.
 ```python
