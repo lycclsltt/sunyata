@@ -30,8 +30,8 @@ from agileutil.rpc import rpc
 def sayHello(name):
     return 'hello ' + name
 
-nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
-nationServer.serve()
+server = TcpRpcServer('0.0.0.0', 9988, workers=4)
+server.serve()
 ```
 > 除了使用@rpc注册方法，还可以使用regist()方法，参考下面的例子
 ``` python
@@ -40,9 +40,9 @@ from agileutil.rpc.server import TcpRpcServer
 def sayHello(name):
     return 'hello ' + name
 
-nationServer = TcpRpcServer('0.0.0.0', 9988, workers=4)
-nationServer.regist(sayHello)
-nationServer.serve()
+server = TcpRpcServer('0.0.0.0', 9988, workers=4)
+server.regist(sayHello)
+server.serve()
 ```
 
 ### TCP RPC 客户端
@@ -55,7 +55,7 @@ from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient('127.0.0.1', 9988, timeout=5)
 resp = c.call(func = 'sayHello', args = 'zhangsan') #或resp = c.call(func = 'sayHello', args = ('zhangsan', ） )
-print('resp', resp)
+print(resp)
 ```
 
 ### 指定多个服务端地址
@@ -65,7 +65,7 @@ from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
 resp = c.call(func = 'sayHello', args = 'zhangsan')
-print('resp', resp)
+print(resp)
 ```
 > 注意：
 > 如果通过servers参数指定了多个服务端地址，又同时指定了服务发现的consul地址，那么实际请求的服务端节点是由server参数决定的，所以使用时请注意不要和服务发现同时使用。
@@ -88,10 +88,10 @@ s.serve()
 ```python
 from agileutil.rpc.client import HttpRpcClient
 
-cli = HttpRpcClient('127.0.0.1', 9988)
+c = HttpRpcClient('127.0.0.1', 9988)
 for i in range(10):
-    resp = cli.call(func = 'sayHello', args=('zhangsan', ))
-    print('resp', resp)
+    resp = c.call(func = 'sayHello', args=('zhangsan', ))
+    print(resp)
 ```
 
 ### UDP RPC 服务端
@@ -106,9 +106,9 @@ from agileutil.rpc.server import UdpRpcServer
 def sayHello(name): 
     return 'hello ' + name
 
-s = UdpRpcServer('0.0.0.0', 9988)
-s.regist(sayHello)
-s.serve()
+server = UdpRpcServer('0.0.0.0', 9988)
+server.regist(sayHello)
+server.serve()
 ```
 ### UDP RPC 客户端
 一个UDP客户端的例子：
