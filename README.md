@@ -161,9 +161,9 @@ disconf = DiscoveryConfig(
 )
 ```
 > 说明:
-1.consulHost 和 consulPort 参数指定Consul的地址和端口 
-2.ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一 
-3.serviceHost和servicePort参数指定服务端监听的端口和地址
+> 1.consulHost 和 consulPort 参数指定Consul的地址和端口 
+> 2.ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一 
+> 3.serviceHost和servicePort参数指定服务端监听的端口和地址
 
 - 第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入
 - 第三步，之后调用serve()方法，开始处理请求
