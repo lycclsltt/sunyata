@@ -16,7 +16,7 @@ pip install agileutil
 
 ## RPC
 
-这是Agileutil最核心的功能。基于TCP协议和Pickle序列化方式实现的远程过程调用。下面是一个基于TCP协议的服务端例子。可参考下面的步骤进行开发：
+这是Agileutil最核心的功能。下面是一个基于TCP协议的服务端例子。可参考下面的步骤进行开发：
 - 创建一个TcpRpcServer对象, 指定服务端监听地址和端口
 - 通过@rpc装饰器注册需要被客户端请求的方法
 - 调用serve()方法，开始处理客户端请求
