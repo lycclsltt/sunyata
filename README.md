@@ -270,13 +270,16 @@ obj.delete()
 ## PoolDB
 PooolDB实现了数据库连接池，并且ORM功能是基于PoolDB实现的。对于常用的数据库操作，如果不使用ORM，直接使用PoolDB也是可以的。
 
+### 裸SQL
+PoolDB通过裸SQL操作数据库。
+
 ### 定义 PoolDB 对象.
 ```python
 from agileutil.db4 import PoolDB
 db = PoolDB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2', min_conn_num=10)
 db.connect()
 ```
-### 查询记录
+### 查询
 ```python
 sql = 'select * from nation'
 rows = db.query(sql)
@@ -295,6 +298,8 @@ print(effect,lastid)
 
 ## DB
 DB 是一个操作数据库的类，和PoolDB的区别是，它不支持数据库连接池，因此更建议使用PoolDB.它的用法和PoolDB是相似的。
+同样通过裸SQL操作数据库。
+
 ### 定义DB对象
 ```python
 from agileutil.db import DB
