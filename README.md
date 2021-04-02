@@ -48,7 +48,7 @@ server.serve()
 ### TCP RPC 客户端
 客户端例子：
 - 创建TcpRpcClient对象，指定RPC服务端地址
-- 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用regist()方法注册，那么call（）方法将抛出异常）
+- 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用regist()方法注册，那么call()方法将抛出异常）
 - call() 方法的返回值和在本地调用一样，原来是什么返回类型，就还是什么（例如返回字典、列表、对象甚至内置类型，经过序列化后，不会发生改变）
 ```python
 from agileutil.rpc.client import TcpRpcClient
