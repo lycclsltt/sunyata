@@ -166,7 +166,7 @@ disconf = DiscoveryConfig(
 > 3.serviceHost和servicePort参数指定服务端监听的端口和地址
 
 - 第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入
-- 第三步，之后调用serve()方法，开始处理请求
+- 第三步，调用serve()方法，开始处理请求
 ```python
 s = TcpRpcServer('0.0.0.0', 9988)
 s.regist(sayHello)
@@ -214,11 +214,15 @@ disconf = DiscoveryConfig(
     serviceName='test-rpc-server'
 )
 cli.setDiscoveryConfig(disconf)
-for i in range(3):
-    resp = cli.call(func = 'sayHello', args=('mary', ))
+resp = cli.call(func = 'sayHello', args=('mary', ))
+print(resp)
 ```
 
 ## ORM
+提供了一个支持数据库连接池的ORM。
+
+### 快速开始
+
 定义一个nation表，包含两个字段：id字段和name字段
 ```python
 CREATE TABLE `nation` (
