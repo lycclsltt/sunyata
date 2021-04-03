@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '0.0.11'
+DEFINE_VERSION = '0.0.12'
 from setuptools import setup
 import platform
 system = platform.system()
@@ -25,7 +25,6 @@ requireList = [
     'PyMySQL==0.10.1',
     'DBUtils==1.3', 
     'sanic==20.12.2',
-    'tornado==6.1'
 ]
 #if requireList == 'Linux':
 #    requireList.append('japronto')
@@ -33,7 +32,7 @@ requireList = [
 
 setup(name='agileutil',
       version=DEFINE_VERSION,
-      description='Light, concurrent RPC framework for Python',
+      description='Light, simple RPC framework for Python',
       author='tank',
       license='MIT',
       platforms="any",
