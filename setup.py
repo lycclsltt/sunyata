@@ -12,7 +12,7 @@ twine upload -u [username] -p [password] dist/*
 python setup.py install
 '''
 
-DEFINE_VERSION = '0.0.11'
+DEFINE_VERSION = '0.0.12'
 from setuptools import setup
 import platform
 system = platform.system()
@@ -24,7 +24,7 @@ requireList = [
     'requests==2.25.1',
     'PyMySQL==0.10.1',
     'DBUtils==1.3', 
-    'sanic==20.12.2',
+    'sanic==20.12.3',
     'tornado==6.1'
 ]
 #if requireList == 'Linux':
