@@ -30,21 +30,23 @@ requireList = [
 #    requireList.append('japronto')
 #    requireList.append('sanic')
 
-setup(name='agileutil',
-      version=DEFINE_VERSION,
-      description='Light, simple RPC framework for Python',
-      author='tank',
-      license='MIT',
-      platforms="any",
-      install_requires=requireList,
-      classifiers=[
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
-          'Programming Language :: Python :: 3.8',
-      ],
-      keywords='agileutil',
-      packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm'],
-      include_package_data=True)
+setup(
+    name='agileutil',
+    version=DEFINE_VERSION,
+    description='Light, simple RPC framework for Python',
+    author='tank',
+    license='MIT',
+    platforms="any",
+    install_requires=requireList,
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
+    keywords='agileutil',
+    packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm'],
+    include_package_data=True
+)
