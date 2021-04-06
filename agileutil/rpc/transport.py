@@ -54,14 +54,10 @@ class TcpTransport(RpcTransport):
             msg = RpcCompress.compress(msg)
         newbyte = struct.pack("i", len(msg))
         try:
-            self.socket.sendall(newbyte)
-            self.socket.sendall(isEnableCompress)
-            self.socket.sendall(msg)
+            self.socket.sendall(newbyte + isEnableCompress + msg)
         except BrokenPipeError:
             self.reconnect()
-            self.socket.sendall(newbyte)
-            self.socket.sendall(isEnableCompress)
-            self.socket.sendall(msg)
+            self.socket.sendall(newbyte + isEnableCompress + msg)
 
     def sendPeer(self, msg: bytes, conn):
         isEnableCompress = b'0'
@@ -69,9 +65,7 @@ class TcpTransport(RpcTransport):
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
         newbyte = struct.pack("i", len(msg))
-        conn.sendall(newbyte)
-        conn.sendall(isEnableCompress)
-        conn.sendall(msg)
+        conn.sendall(newbyte + isEnableCompress + msg)
 
     def getSendByte(self, msg: bytes, conn = None):
         newbyte = struct.pack("i", len(msg))
@@ -81,7 +75,7 @@ class TcpTransport(RpcTransport):
     def recv(self):
         #每次读一个完整的字节，再接收前4个字节，再取body
         conn = self.socket
-        toread = 4
+        toread = 5
         readn = 0
         lengthbyte = b''
         while 1:
@@ -93,23 +87,12 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             lengthbyte = lengthbyte + bytearr
             readn = readn + len(bytearr)
-        #读取是否压缩字段
-        toread = 1
-        readn = 0
-        msg = b''
-        while 1:
-            bufsize = toread - readn
-            if bufsize <= 0:
-                break
-            bytearr = conn.recv(bufsize)
-            if len(bytearr) == 0:
-                raise Exception('peer closed')
-            msg = msg + bytearr
-            readn = readn + len(bytearr)
+        lengthField = lengthbyte[:4]
+        compressField = lengthbyte[4:5]
         isEnableCompress = 0
-        if msg == b'1':
+        if compressField == b'1':
             isEnableCompress = 1
-        toread = struct.unpack("i", lengthbyte)[0]
+        toread = struct.unpack("i", lengthField)[0]
         readn = 0
         msg = b''
         while 1:
@@ -127,7 +110,7 @@ class TcpTransport(RpcTransport):
 
     def recvPeer(self, conn):
         #每次读一个完整的字节，再接收前4个字节，再取body
-        toread = 4
+        toread = 5
         readn = 0
         lengthbyte = b''
         while 1:
@@ -139,23 +122,12 @@ class TcpTransport(RpcTransport):
                 raise Exception('peer closed')
             lengthbyte = lengthbyte + bytearr
             readn = readn + len(bytearr)
-        #读取是否压缩字段
-        toread = 1
-        readn = 0
-        msg = b''
-        while 1:
-            bufsize = toread - readn
-            if bufsize <= 0:
-                break
-            bytearr = conn.recv(bufsize)
-            if len(bytearr) == 0:
-                raise Exception('peer closed')
-            msg = msg + bytearr
-            readn = readn + len(bytearr)
+        lengthField = lengthbyte[:4]
+        compressField = lengthbyte[4:5]
         isEnableCompress = 0
-        if msg == b'1':
+        if compressField == b'1':
             isEnableCompress = 1
-        toread = struct.unpack("i", lengthbyte)[0]
+        toread = struct.unpack("i", lengthField)[0]
         readn = 0
         msg = b''
         while 1:

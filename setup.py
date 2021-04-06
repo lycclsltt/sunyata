@@ -23,9 +23,8 @@ requireList = [
     'lz4==3.1.3',
     'requests==2.25.1',
     'PyMySQL==0.10.1',
-    'DBUtils==1.3', 
+    'DBUtils==1.3',
     'sanic==20.12.3',
-    'tornado==6.1'
 ]
 #if requireList == 'Linux':
 #    requireList.append('japronto')
@@ -33,7 +32,7 @@ requireList = [
 
 setup(name='agileutil',
       version=DEFINE_VERSION,
-      description='Light, concurrent RPC framework for Python',
+      description='Light, simple RPC framework for Python',
       author='tank',
       license='MIT',
       platforms="any",

@@ -320,6 +320,7 @@ class DebugUtil(object):
         self.curTime = time.time()
 
     def tag(self, tagName):
+        tagName = str(tagName)
         if len(self.tagList) == 0:
             self.tagList.append(tagName)
             self.curTime = time.time()
@@ -335,4 +336,4 @@ class DebugUtil(object):
             print(i)
             if type(i) == int or type(i) == float:
                 cost = cost + i
-        print('total cost:' + str(cost) + ' seconds')
+        print('total cost:', cost ,' seconds')
