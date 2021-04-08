@@ -1,7 +1,5 @@
-#coding=utf-8
-
 """
-PYPI 发布脚本
+PYPI publish
 """
 
 import sys

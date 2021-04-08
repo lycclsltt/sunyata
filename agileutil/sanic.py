@@ -1,8 +1,4 @@
-#coding=utf-8
 '''
-
-基于高性能sanic框架封装
-
 Usage:
 
 from agileutil.sanic import SanicApp, SanicController

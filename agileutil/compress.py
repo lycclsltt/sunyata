@@ -1,5 +1,3 @@
-#coding=utf-8
-
 import lz4.block as lb
 
 class Compress(object):

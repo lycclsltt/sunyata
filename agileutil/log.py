@@ -1,5 +1,3 @@
-#coding=utf-8
-
 import sys
 try:
     from imp import reload

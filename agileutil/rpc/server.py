@@ -1,5 +1,3 @@
-#coding=utf-8
-
 from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
 import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException

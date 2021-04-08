@@ -1,5 +1,3 @@
-#coding=utf-8
-
 from agileutil.consul import ConsulApi, Instance
 import time
 import threading

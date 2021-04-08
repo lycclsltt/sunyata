@@ -1,5 +1,3 @@
-#coding=utf-8
-
 class Encrypt(object):
 
     PRIVATE_KEY = b'agileutil'

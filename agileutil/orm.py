@@ -1,5 +1,3 @@
-#coding=utf-8
-
 '''
 from agileutil.orm import Model, IntField, CharField
 

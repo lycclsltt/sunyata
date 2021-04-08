@@ -1,5 +1,3 @@
-#coding=utf-8
-
 import pickle
 import json
 from abc import ABCMeta, abstractmethod

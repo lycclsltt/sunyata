@@ -1,5 +1,3 @@
-#coding=utf-8
-
 from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
 from agileutil.rpc.exception import FuncNotFoundException
 from agileutil.rpc.discovery import DiscoveryConfig

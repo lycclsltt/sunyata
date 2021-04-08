@@ -1,8 +1,5 @@
-#coding=utf-8
 '''
-生成表格
-
-用法：
+usage:
 
 header = ['name', 'age']
 rows = [ ['wangermazi', 25], ['zhangsan', 11], ['lisi', 30] ]

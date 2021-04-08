@@ -1,7 +1,5 @@
-# coding=utf-8
 '''
-pip install pymysql
-支持数据库连接池的全新版本
+mysql conneciton pool
 '''
 
 import pymysql
@@ -413,4 +411,3 @@ class DBProxy(object):
 
     def update(self, sql):
         return self._masterDb.update(sql)
-

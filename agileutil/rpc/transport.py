@@ -1,5 +1,3 @@
-#coding=utf-8
-
 from socket import *
 import struct
 from agileutil.sanic import SanicApp

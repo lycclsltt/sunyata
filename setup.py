@@ -1,5 +1,3 @@
-#coding=utf-8
-
 DEFINE_VERSION = '0.0.12'
 from setuptools import setup
 
