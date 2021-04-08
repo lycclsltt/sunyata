@@ -16,6 +16,15 @@ from sanic.log import logger
 import logging
 import random
 from agileutil.rpc.compress import RpcCompress
+from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc.client import TcpRpcClient
+from agileutil.rpc.server import UdpRpcServer
+from agileutil.rpc.client import UdpRpcClient
+from agileutil.rpc.discovery import DiscoveryConfig
+from agileutil.rpc.compress import RpcCompress
+from agileutil.rpc.server import HttpRpcServer
+from agileutil.rpc.client import HttpRpcClient
+from agileutil.rpc import rpc
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
@@ -39,13 +48,11 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_client(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 9988)
             server.regist(sayHello)
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 9988)
             for i in range(3):
                 resp = client.call(func='sayHello', args=('zhangsan', ))
@@ -60,13 +67,11 @@ class TestRpcServerClient(unittest.TestCase):
     def test_udp_server_client(self):
         #测试UDP
         def create_server():
-            from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 9999)
             server.regist(sayHello)
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import UdpRpcClient
             client = UdpRpcClient('127.0.0.1', 9999)
             for i in range(3):
                 resp = client.call(func='sayHello', args='lisi' )
@@ -82,8 +87,6 @@ class TestRpcServerClient(unittest.TestCase):
         if socket.gethostname() == 'ubuntu': return
         #测试TCP服务发现
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
-            from agileutil.rpc.discovery import DiscoveryConfig
             disconf = DiscoveryConfig(
                 consulHost = CONSUL_HOST,
                 consulPort = CONSUL_PORT,
@@ -97,8 +100,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
-            from agileutil.rpc.discovery import DiscoveryConfig
             cli = TcpRpcClient()
             disconf = DiscoveryConfig(
                 consulHost= CONSUL_HOST,
@@ -120,8 +121,6 @@ class TestRpcServerClient(unittest.TestCase):
         if socket.gethostname() == 'ubuntu': return 
         #测试UDP服务发现
         def create_server():
-            from agileutil.rpc.server import UdpRpcServer
-            from agileutil.rpc.discovery import DiscoveryConfig
             disconf = DiscoveryConfig(
                 consulHost = CONSUL_HOST,
                 consulPort = CONSUL_PORT,
@@ -135,8 +134,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import UdpRpcClient
-            from agileutil.rpc.discovery import DiscoveryConfig
             client = UdpRpcClient()
             disconf = DiscoveryConfig(
                 consulHost= CONSUL_HOST,
@@ -157,7 +154,6 @@ class TestRpcServerClient(unittest.TestCase):
     def test_serialize_obj(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
             def retObj():
                 return A(10)
             server = TcpRpcServer('127.0.0.1', 10004)
@@ -165,7 +161,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 10004)
             for i in range(3):
                 resp = client.call(func='retObj')
@@ -179,22 +174,18 @@ class TestRpcServerClient(unittest.TestCase):
 
     def test_multi_server(self):
         def create_server_10005():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10005)
             server.regist(sayHello)
             server.serve()
         def create_server_10006():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10006)
             server.regist(sayHello)
             server.serve()
         def create_server_10007():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10007)
             server.regist(sayHello)
             server.serve()
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient(servers=[  
                 '127.0.0.1:10005',
                 '127.0.0.1:10006',
@@ -216,22 +207,18 @@ class TestRpcServerClient(unittest.TestCase):
     def test_multi_udp_server_client(self):
         #测试UDP
         def create_server_10008():
-            from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10008)
             server.regist(sayHello)
             server.serve()
         def create_server_10009():
-            from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10009)
             server.regist(sayHello)
             server.serve()
         def create_server_10010():
-            from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10010)
             server.regist(sayHello)
             server.serve()
         def create_client():
-            from agileutil.rpc.client import UdpRpcClient
             client = UdpRpcClient(servers = [
                 '127.0.0.1:10008',
                 '127.0.0.1:10009',
@@ -253,14 +240,12 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_client_timeout(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10014)
             server.regist(testTimeout)
             server.regist(sayHello)
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 10014, timeout = 2)
             tag = ''
             try:
@@ -281,14 +266,12 @@ class TestRpcServerClient(unittest.TestCase):
     def test_udp_server_client_timeout(self):
         #测试UDP
         def create_server():
-            from agileutil.rpc.server import UdpRpcServer
             server = UdpRpcServer('127.0.0.1', 10015)
             server.regist(sayHello)
             server.regist(testTimeout)
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import UdpRpcClient
             client = UdpRpcClient('127.0.0.1', 10015, timeout=2)
             tag = ''
             try:
@@ -309,13 +292,11 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_server_timeout(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
             server = TcpRpcServer('127.0.0.1', 10017)
             server.regist(sayHello)
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 10017, timeout = 2)
             resp = client.call('sayHello', ('xiaoming'))
             self.assertEqual(resp, 'hello xiaoming')
@@ -332,7 +313,6 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_decorator(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer, rpc
             @rpc
             def add(n1, n2):
                 return n1 +n2
@@ -340,7 +320,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 10018, timeout = 2)
             resp = client.call('add', (1, 1))
             self.assertEqual(resp, 2)
@@ -354,8 +333,6 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_compress(self):
         #测试TCP
         def create_server():
-            from agileutil.rpc.server import TcpRpcServer
-            from agileutil.rpc.compress import RpcCompress
             RpcCompress.DEBUG = True
             RpcCompress.enableCompressLen = 200
             server = TcpRpcServer('127.0.0.1', 10019)
@@ -363,7 +340,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import TcpRpcClient
             client = TcpRpcClient('127.0.0.1', 10019, timeout = 2)
             name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
             resp = client.call('sayHello', args=name)
@@ -378,8 +354,6 @@ class TestRpcServerClient(unittest.TestCase):
     def test_udp_compress(self):
         #测试UDP
         def create_server():
-            from agileutil.rpc.compress import RpcCompress
-            from agileutil.rpc.server import UdpRpcServer
             RpcCompress.DEBUG = True
             RpcCompress.enableCompressLen = 200
             server = UdpRpcServer('127.0.0.1', 10020)
@@ -387,7 +361,6 @@ class TestRpcServerClient(unittest.TestCase):
             server.serve()
 
         def create_client():
-            from agileutil.rpc.client import UdpRpcClient
             client = UdpRpcClient('127.0.0.1', 10020, timeout=2)
             name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
             resp = client.call('sayHello', args=name )
@@ -400,14 +373,12 @@ class TestRpcServerClient(unittest.TestCase):
         tClient.start()
 
 def create_http_server():
-    from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10000)
     server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_client():
-    from agileutil.rpc.client import HttpRpcClient
     client = HttpRpcClient('127.0.0.1', 10000)
     for i in range(3):
         resp = client.call(func = 'sayHello', args = ('xiaoming'))
@@ -415,8 +386,6 @@ def create_http_client():
 
 def create_http_server_discovery():
     if socket.gethostname() == 'ubuntu': return
-    from agileutil.rpc.server import HttpRpcServer
-    from agileutil.rpc.discovery import DiscoveryConfig
     server = HttpRpcServer('127.0.0.1', 10003)
     server.disableLog()
     disconf = DiscoveryConfig(
@@ -432,8 +401,6 @@ def create_http_server_discovery():
 
 def create_http_client_discovery():
     if socket.gethostname() == 'ubuntu': return
-    from agileutil.rpc.client import HttpRpcClient
-    from agileutil.rpc.discovery import DiscoveryConfig
     client = HttpRpcClient()
     disconf = DiscoveryConfig(
         consulHost = CONSUL_HOST,
@@ -446,28 +413,24 @@ def create_http_client_discovery():
         assert (resp == 'hello xiaoming')
 
 def create_http_server_10011():
-    from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10011)
     server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10012():
-    from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10012)
     server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10013():
-    from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10013)
     server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_client_multi():
-    from agileutil.rpc.client import HttpRpcClient
     client = HttpRpcClient(servers = [
         '127.0.0.1:10011',
         '127.0.0.1:10012',
@@ -478,7 +441,6 @@ def create_http_client_multi():
         assert (resp == 'hello xiaoming')
 
 def create_http_server_timeout():
-    from agileutil.rpc.server import HttpRpcServer
     server = HttpRpcServer('127.0.0.1', 10016)
     server.disableLog()
     server.regist(testTimeout)
@@ -486,7 +448,6 @@ def create_http_server_timeout():
     server.serve()
 
 def create_http_client_timeout():
-    from agileutil.rpc.client import HttpRpcClient
     client = HttpRpcClient('127.0.0.1', 10016, timeout=2)
     tag = ''
     try:
@@ -498,8 +459,6 @@ def create_http_client_timeout():
     assert( resp == 'hello xiaoming' )
 
 def create_http_server_compress():
-    from agileutil.rpc.server import HttpRpcServer
-    from agileutil.rpc.compress import RpcCompress
     RpcCompress.DEBUG = True
     RpcCompress.enableCompressLen = 200
     server = HttpRpcServer('127.0.0.1', 10021)
@@ -509,7 +468,6 @@ def create_http_server_compress():
 
 def create_http_client_compress():
     RpcCompress.DEBUG = True
-    from agileutil.rpc.client import HttpRpcClient
     client = HttpRpcClient('127.0.0.1', 10021, timeout=2)
     name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
     resp = client.call(func = 'sayHello', args=(name, ))
