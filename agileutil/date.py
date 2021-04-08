@@ -44,3 +44,9 @@ def datestr_to_zh_time(date_str):
         diff = lastdaystamp - stamp
         days = diff / (3600 * 24) + 1
         return str(days) + ' 天前'
+
+
+def hm_2_cur_day_seconds(self, hm):
+    tm = time.strptime(hm, '%H:%M')
+    seconds = tm.tm_hour * 3600 + tm.tm_min * 60
+    return seconds
