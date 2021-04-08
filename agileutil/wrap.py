@@ -1,7 +1,5 @@
 #coding=utf-8
-'''
-常用的装饰器
-'''
+
 from multiprocessing import Process
 import functools
 import time
