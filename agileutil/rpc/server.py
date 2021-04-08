@@ -7,8 +7,6 @@ import queue
 import threading
 import select
 import socket
-import tornado.ioloop
-from tornado.iostream import IOStream
 from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
 import functools
@@ -202,63 +200,6 @@ class AsyncTcpRpcServer(TcpRpcServer):
                         self.epoll.modify(fd, select.EPOLLIN)
                         socket.close()
 """
-
-
-class TornadoTcpRpcServer(TcpRpcServer):
-
-    def __init__(self, host, port):
-        TcpRpcServer.__init__(self, host, port)
-
-    async def handleConnection(self, connection, address):
-        stream = IOStream(connection)
-        while 1:
-            try:
-                toread = 4
-                readn = 0
-                lengthbyte = b''
-                while 1:
-                    bufsize = toread - readn
-                    if bufsize <= 0:
-                        break
-                    bytearr = await stream.read_bytes(bufsize, partial=True)
-                    lengthbyte = lengthbyte + bytearr
-                    readn = readn + len(bytearr)
-                toread = struct.unpack("i", lengthbyte)[0]
-                readn = 0
-                msg = b''
-                while 1:
-                    bufsize = toread - readn
-                    if bufsize <= 0:
-                        break
-                    bytearr = await stream.read_bytes(bufsize, partial=True)
-                    msg = msg + bytearr
-                    readn = readn + len(bytearr)
-                request = self.protocal.unserialize(msg)
-                func, args = self.protocal.parseRequest(request)
-                resp = self.run(func, args)
-                await stream.write( self.protocal.transport.getSendByte( self.protocal.serialize(resp) ) )
-            except Exception as ex:
-                connection.close()
-                break
-
-    def connectionReady(self, sock, fd, events):
-        while True:
-            try:
-                connection, address = sock.accept()
-                connection.setblocking(0)
-                io_loop = tornado.ioloop.IOLoop.current()
-                io_loop.spawn_callback(self.handleConnection, connection, address)
-            except BlockingIOError:
-                return
-            
-    def serve(self):
-        self.protocal.transport.bind()
-        self.protocal.transport.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.protocal.transport.socket.setblocking(0)
-        self.ioLoop = tornado.ioloop.IOLoop.current()
-        callback = functools.partial(self.connectionReady, self.protocal.transport.socket)
-        self.ioLoop.add_handler(self.protocal.transport.socket.fileno(), callback, self.ioLoop.READ)
-        self.ioLoop.start()
 
 
 class UdpRpcServer(RpcServer):
