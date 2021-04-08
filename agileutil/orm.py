@@ -36,8 +36,8 @@ obj = Nation.filter('id', '=', 30).first()
 print(obj)
 '''
 
-from agileutil.db4 import PoolDB
-from agileutil.db4 import Orm
+from agileutil.db import PoolDB
+from agileutil.db import Orm
 
 class OrmObject(object):
 

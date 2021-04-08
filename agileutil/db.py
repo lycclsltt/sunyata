@@ -1,199 +1,77 @@
-#coding=utf-8
+# coding=utf-8
 '''
 pip install pymysql
-一些旧系统使用，为了兼容保留此文件
+支持数据库连接池的全新版本
 '''
 
 import pymysql
-from .threadlock import ThreadLock
+from DBUtils.PooledDB import PooledDB
+
+import sys
+if sys.version[0:1] == '3': unicode = str
 
 
-class DB(object):
-
-    __slots__ = [
-        '__host', '__port', '__user', '__passwd', '__dbName', '__conn',
-        '__cur', '__ispersist', '__log', '__is_mutex', '__connect_timeout',
-        '__read_timeout'
-    ]
-
+class PoolDB(object):
     def __init__(self,
                  host,
                  port,
                  user,
                  passwd,
                  dbName,
-                 ispersist=False,
                  log=None,
-                 is_mutex=False,
                  connect_timeout=10,
-                 read_timeout=None):
-        self.__host = host
-        self.__port = port
-        self.__user = user
-        self.__passwd = passwd
-        self.__dbName = dbName
-        self.__conn = None
-        self.__cur = None
-        self.__ispersist = ispersist
-        self.__log = log
-        self.__is_mutex = is_mutex
-        self.__connect_timeout = connect_timeout
-        self.__read_timeout = read_timeout
-
-        if (self.__ispersist):
-            DB.connect(self)
-
-    def log_error(self, err_info):
-        if (self.__log):
-            self.__log.error(err_info)
+                 read_timeout=None,
+                 min_conn_num=10,
+                 auto_commit = True):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.passwd = passwd
+        self.dbName = dbName
+        self.log = log
+        self.connectTimeout = connect_timeout
+        self.readTimeout = read_timeout
+        self.minConnNum = min_conn_num
+        self.charset = 'utf8'
+        self.pool = None
 
     def connect(self):
-        try:
-            self.__conn = pymysql.Connect(
-                host=self.__host,
-                port=self.__port,
-                user=self.__user,
-                passwd=self.__passwd,
-                db=self.__dbName,
-                charset='utf8',
-                cursorclass=pymysql.cursors.DictCursor,
-                connect_timeout=self.__connect_timeout,
-                read_timeout=self.__read_timeout)
-            self.__cur = self.__conn.cursor()
-        except Exception as ex:
-            self.log_error('db connect exception: ' + str(ex))
-            raise ex
+        if self.pool == None:
+            self.pool = PooledDB(pymysql,
+                                 self.minConnNum,
+                                 host=self.host,
+                                 port=self.port,
+                                 user=self.user,
+                                 passwd=self.passwd,
+                                 db=self.dbName,
+                                 charset=self.charset,
+                                 connect_timeout=self.connectTimeout,
+                                 read_timeout=self.readTimeout)
+            print('PoolDB init finish')
 
     def close(self):
-        try:
-            self.__cur.close()
-            self.__conn.close()
-        except Exception as ex:
-            self.log_error('db close exception: ' + str(ex))
-            #raise ex
-
-    def lastrowid(self):
-        return self.__cur.lastrowid
-
-    def lock(self):
-        if self.__is_mutex:
-            ThreadLock.lock()
-
-    def unlock(self):
-        if self.__is_mutex:
-            ThreadLock.unlock()
-
-    def update(self, sql):
-        self.lock()
-
-        if (not self.__ispersist):
-            try:
-                self.connect()
-            except Exception as ex:
-                self.unlock()
-                raise ex
-        else:
-            try:
-                self.__conn.ping(True)
-            except Exception as ex:
-                self.log_error(str(ex))
-                try:
-                    self.connect()
-                except Exception as ex:
-                    self.unlock()
-                    raise ex
-
-        effect_rows = 0
-        try:
-            effect_rows = self.__cur.execute(sql)
-            self.__conn.commit()
-        except Exception as ex:
-            self.unlock()
-            self.log_error('db update exception: ' + str(ex))
-            raise ex
-
-        if (not self.__ispersist):
-            try:
-                self.close()
-            except Exception as ex:
-                self.unlock()
-                #raise ex
-
-        self.unlock()
-        return effect_rows
+        if self.pool != None:
+            self.pool.close()
+            self.pool = None
 
     def query(self, sql):
-        self.lock()
+        conn = self.pool.connection()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur.execute(sql)
+        res = cur.fetchall()
+        cur.close()
+        conn.close()
+        return res
 
-        if (not self.__ispersist):
-            try:
-                self.connect()
-            except Exception as ex:
-                self.unlock()
-                raise ex
-        else:
-            try:
-                self.__conn.ping(True)
-            except Exception as ex:
-                self.log_error(str(ex))
-                try:
-                    self.connect()
-                except Exception as ex:
-                    self.unlock()
-                    raise ex
-
-        result = None
-        try:
-            self.__cur.execute(sql)
-            result = self.__cur.fetchall()
-            #self.__conn.commit()
-        except Exception as ex:
-            self.unlock()
-            self.log_error('db query exception: ' + str(ex))
-            raise ex
-            #retry
-            #return self.query(sql)
-
-        if (not self.__ispersist):
-            try:
-                self.close()
-            except Exception as ex:
-                self.unlock()
-
-        self.unlock()
-        return result
-
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-
-'''
-rows = Orm(db).table("service").where("allow_stamp_range", 300).where("is_chec_timestamp", 0).where("id", 1).get()
-
-Orm(db).table("service").data([
-    {
-        "service_name": "orm7",
-        'is_check_ip':0,
-    },
-    {
-        "service_name": "orm8",
-        'is_check_ip':0,
-    },
-]).insert()
-'''
-'''
-Orm(db).table("service").data({
-    "service_name": "orm10",
-    'is_check_ip':0,
-}).insert()
-'''
-'''
-Orm(db).table('service').where("id", 37).delete()
-'''
+    def update(self, sql):
+        conn = self.pool.connection()
+        cur = conn.cursor()
+        effect_rows = cur.execute(sql)
+        conn.commit()
+        lastrowId = cur.lastrowid
+        cur.close()
+        conn.close()
+        return effect_rows, lastrowId
 
 
 class Orm:
@@ -206,9 +84,22 @@ class Orm:
         self.tableName = ''
         self.whereCon = ''
         self.updateData = None
+        self.fields = []
+        self.raw = ''
 
     def table(self, tableName):
         self.tableName = tableName
+        return self
+
+    def field(self, field_name):
+        tmpFields = list(set( [ item.strip() for item in field_name.split(',') ] ))
+        for tf in tmpFields:
+            self.fields.append(tf)
+        self.fields = list(set(self.fields))
+        return self
+
+    def sql(self, raw):
+        self.raw = raw
         return self
 
     def where(self, *args):
@@ -219,11 +110,26 @@ class Orm:
         if len(args) == 0:
             return self
         elif len(args) == 1:
-            raise Exception('where param length must be >= 2')
+            if self.whereCon != '':
+                self.whereCon = self.whereCon + ' and %s ' % (args[0])
+            else:
+                self.whereCon = ' where %s ' %  (args[0])
+            return self
         elif len(args) == 2:
             compareTag = '='
             colName = args[0]
             data = args[1]
+            if '__in' in colName:
+                compareTag = 'in'
+                colName = colName.replace('__in', '')
+                if type(data) == list:
+                    itemList = [ "'" + str(item) + "'" for item in data ]
+                    data = '(' + ','.join(itemList) + ')'
+                elif type(data) == str:
+                    splitList = data.split(',')
+                    itemList = [ "'" + str(item).strip() + "'" for item in splitList ]
+                    data = '(' + ','.join(itemList) + ')'
+
         elif len(args) == 3:
             colName = args[0]
             compareTag = args[1]
@@ -237,33 +143,90 @@ class Orm:
         else:
             self.whereCon = ' where `%s` %s' % (colName, compareTag)
 
-        if type(data) == int or float:
+        if (type(data) == int) or (type(data) == float):
             self.whereCon = self.whereCon + " %s " % data
         else:
-            data = pymysql.escape_string(data)
-            self.whereCon = self.whereCon + " '%s' " % data
+            if compareTag == 'in':
+                self.whereCon = self.whereCon + " %s " % data
+            else:
+                data = pymysql.escape_string(data)
+                self.whereCon = self.whereCon + " '%s' " % data
 
         return self
 
-    """
-    def where(self, colName, data):
+    def orWhere(self, *args):
+        colName = ''
+        data = ''
+        compareTag = ''
+
+        if len(args) == 0:
+            return self
+        elif len(args) == 1:
+            if self.whereCon != '':
+                self.whereCon = self.whereCon + ' or %s ' % (args[0])
+            else:
+                self.whereCon = ' where %s ' %  (args[0])
+            return self
+        elif len(args) == 2:
+            compareTag = '='
+            colName = args[0]
+            data = args[1]
+            if '__in' in colName:
+                compareTag = 'in'
+                colName = colName.replace('__in', '')
+                if type(data) == list:
+                    itemList = [ "'" + str(item) + "'" for item in data ]
+                    data = '(' + ','.join(itemList) + ')'
+                elif type(data) == str:
+                    splitList = data.split(',')
+                    itemList = [ "'" + str(item).strip() + "'" for item in splitList ]
+                    data = '(' + ','.join(itemList) + ')'
+
+        elif len(args) == 3:
+            colName = args[0]
+            compareTag = args[1]
+            data = args[2]
+        else:
+            raise Exception('where param length not support')
+
         if self.whereCon != '':
-            self.whereCon = self.whereCon + ' and `%s` =' % colName
+            self.whereCon = self.whereCon + ' or `%s` %s' % (colName,
+                                                              compareTag)
         else:
-            self.whereCon = ' where `%s` =' % colName
-        if type(data) == int:
-            self.whereCon = self.whereCon + " %s "  % data
+            self.whereCon = ' where `%s` %s' % (colName, compareTag)
+
+        if (type(data) == int) or (type(data) == float):
+            self.whereCon = self.whereCon + " %s " % data
         else:
-            data = pymysql.escape_string(data) 
-            self.whereCon = self.whereCon + " '%s' " % data
+            if compareTag == 'in':
+                self.whereCon = self.whereCon + " %s " % data
+            else:
+                data = pymysql.escape_string(data)
+                self.whereCon = self.whereCon + " '%s' " % data
+
         return self
-    """
+
+
+    def andWhere(self, *args):
+        return self.where(*args)
 
     def getSql(self, cmd):
         #cmd 'insert, delete, update, select'
+        if self.raw != '':
+            return self.raw
+        
         sql = ''
         if cmd == 'select':
-            sql = 'select * from %s %s' % (self.tableName, self.whereCon)
+            field_str = '*'
+            if len(self.fields) == 0:
+                field_str = '*'
+            else:
+                if len(self.fields) == 1:
+                    if self.fields[0] == '' or self.fields[0] == '*':
+                        field_str = '*'
+                    else:
+                        field_str = ','.join([ '`' + colname + '`' for colname in self.fields ])
+            sql = 'select %s from %s %s' % (field_str, self.tableName, self.whereCon)
         if cmd == 'insert':
             sql_list = []
             if type(self.updateData) == list:
@@ -280,9 +243,9 @@ class Orm:
                 for row in self.updateData:
                     tup = []
                     for k, v in row.items():
-                        if type(v) == int:
+                        if type(v) == int or type(v) == float:
                             tup.append(str(v))
-                        elif type(v) == str:
+                        elif type(v) == str or type(v) == unicode:
                             tup.append("'" + v + "'")
                     tupStr = '(' + ','.join(tup) + ')'
                     values.append(tupStr)
@@ -297,9 +260,9 @@ class Orm:
                 sql = 'insert into %s' % (self.tableName) + '(' + ','.join(
                     cols) + ') values('
                 for k, v in self.updateData.items():
-                    if type(v) == int:
+                    if type(v) == int or type(v) == float:
                         sql = sql + str(v) + ','
-                    if type(v) == str:
+                    if type(v) == str or type(v) == unicode:
                         sql = sql + "'" + v + "',"
                 sql = sql[0:-1]
                 sql = sql + ')'
@@ -342,6 +305,14 @@ class Orm:
         sql = self.getSql('select')
         return self.db.query(sql)
 
+    def values(self, field_name):
+        rows = self.get()
+        ret = []
+        if rows != None:
+            for row in rows:
+                ret.append(row.get(field_name))
+        return ret
+
     def first(self):
         rows = self.get()
         if len(rows) > 0:
@@ -364,11 +335,14 @@ class Orm:
     def count(self):
         sql = self.getSql('count')
         rows = self.db.query(sql)
-        row = rows[0]
-        num = int(row['cnt'])
+        try:
+            row = rows[0]
+            num = int(row['cnt'])
+        except:
+            num = len(rows)
         return num
 
-    def limit(self, limitNum):
+    def limit(self, limitNum, endpos = None):
         if not str(limitNum).isdigit():
             raise Exception('param limit is not a number')
         if '.' in str(limitNum):
@@ -376,6 +350,14 @@ class Orm:
         limitNum = int(limitNum)
         if limitNum < 0: raise Exception('param limit < 0')
         self.whereCon = self.whereCon + " limit %s" % limitNum
+
+        if type(endpos) == int or type(endpos) == str:
+            if not str(endpos).isdigit():
+                raise Exception('param limit is not a number')
+            if int(endpos) < 0 or '.' in str(endpos):
+                raise Exception('param limit is invalid')
+            self.whereCon = self.whereCon + ", " + str(endpos)
+
         return self
 
     def orderBy(self, colName, order=ORDER_ASC):
@@ -432,78 +414,3 @@ class DBProxy(object):
     def update(self, sql):
         return self._masterDb.update(sql)
 
-
-'''
-from pymongo import MongoClient
-
-class MongoCollection:
-
-    def __init__(self, coll_name, db):
-        self._coll_name = coll_name
-        self._db = db
-        self._coll = self._db[coll_name]
-
-    def add(self, obj):
-        effect_num = 0
-        obj_type = type(obj)
-        if obj_type != list and obj_type != dict: return 0
-        to_add_list = []
-        if obj_type == list: to_add_list = obj
-        else: to_add_list.append(obj)
-        for item in to_add_list:
-            self._coll.insert(item)
-            effect_num = effect_num + 1
-        return effect_num
-
-    def delete(self, condition):
-        ret = self._coll.remove(condition)
-        effect_num = ret['n']
-        return effect_num
-
-    def update(self, condition, to_update, multi = True):
-        to_update = {"$set" : to_update}
-        ret = self._coll.update(condition, to_update, multi= multi)
-        effect_num = ret['nModified']
-        return effect_num
-
-    def find_one(self, condition):
-        return self._coll.find_one(condition)
-
-    def find(self, condition, limit_cnt = -1, skip_cnt = -1):
-        rows = []
-        if limit_cnt > 0 and skip_cnt > 0:
-            rows = [row for row in self._coll.find(condition).limit(limit_cnt).skip(skip_cnt)]
-        elif limit_cnt > 0:
-            rows = [row for row in self._coll.find(condition).limit(limit_cnt)]
-        elif skip_cnt > 0:
-            rows = [row for row in self._coll.find(condition).skip(skip_cnt)]
-        else:
-            rows = [row for row in self._coll.find(condition)]
-        return rows
-
-class MongoDB:
-
-    def __init__(self, db_name, conn):
-        self._db_name = db_name
-        self._conn = conn
-        self._db = self._conn[db_name]
-
-    def select_coll(self, collection_name):
-        coll = MongoCollection(collection_name, self._db)
-        return coll
-
-    def delete_coll(self, coll_name):
-        ret = self._db.drop_collection(coll_name)
-        return self
-
-class Mongo:
-
-    def __init__(self, host, port = 27017):
-        self._host = host
-        self._port = port
-        self._conn = MongoClient(self._host, self._port)
-
-    def select_db(self, db_name):
-        db = MongoDB(db_name, self._conn)
-        return db
-'''

@@ -210,7 +210,7 @@ If you want to do CRUD on database without orm, you can use this class.
 
 ### Define PoolDB object.
 ```python
-from agileutil.db4 import PoolDB
+from agileutil.db import PoolDB
 db = PoolDB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2', min_conn_num=10)
 db.connect()
 ```
@@ -229,26 +229,6 @@ print(effect,lastid)
 sql = "delete from nation where name='test'"
 effect, _ = db.update(sql)
 print(effect,lastid)
-```
-
-## DB
-DB is a database class without connection pool.Its use is similar to that of PoolDB.
-### Define DB object.
-```python
-from agileutil.db import DB
-db = DB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2')
-```
-### Search
-```python
-sql = 'select * from nation'
-rows = db.query(sql)
-print(rows)
-```
-### Update (include delete, update, create)
-```python
-sql = "insert into nation(name) values('test')"
-effetc = db.update(sql)
-print(effetc, db.lastrowid())
 ```
 
 ## Log

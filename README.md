@@ -283,7 +283,7 @@ PoolDB通过裸SQL操作数据库。
 
 ### 定义 PoolDB 对象.
 ```python
-from agileutil.db4 import PoolDB
+from agileutil.db import PoolDB
 db = PoolDB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2', min_conn_num=10)
 db.connect()
 ```
@@ -304,30 +304,8 @@ effect, _ = db.update(sql)
 print(effect,lastid)
 ```
 
-## DB
-DB 是一个操作数据库的类，和PoolDB的区别是，它不支持数据库连接池，因此更建议使用PoolDB.它的用法和PoolDB是相似的。
-同样通过裸SQL操作数据库。
-
-### 定义DB对象
-```python
-from agileutil.db import DB
-db = DB(host='127.0.0.1', port=3306, user='root', passwd='', dbName='test2')
-```
-### 查询记录
-```python
-sql = 'select * from nation'
-rows = db.query(sql)
-print(rows)
-```
-### 修改、删除、插入记录
-```python
-sql = "insert into nation(name) values('test')"
-effetc = db.update(sql)
-print(effetc, db.lastrowid())
-```
-
 ## 日志
-Agileutil提供了一个线程安全的Log对象，使用起来非常简单。
+提供了一个线程安全的Log
 ```python
 from agileutil.log import Log
 
