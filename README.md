@@ -78,20 +78,20 @@ print(resp)
 from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
-resp = c.call(func = 'sayHello', args = 'zhangsan')
+resp = c.call(func = 'hello', args = 'zhangsan')
 print(resp)
 ```
 
 ### HTTP RPC 服务端
 底层是基于高性能的Sanic异步web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
 ```python
-from agileutil.rpc.server import HttpRpcServer
+from agileutil.rpc.server import HttpRpcServer, rpc
 
+@rpc
 def sayHello(name):
     return 'hello ' + name
 
 s = HttpRpcServer('0.0.0.0', 9988, workers=1)
-s.regist(sayHello)
 s.serve()
 ```
 
@@ -113,13 +113,13 @@ for i in range(10):
 - 调用serve()方法开始处理客户端请求
 - 返回的内容和调用本地方法没有差别，框架内部通过序列化和反序列化，将数据转化为程序内的对象（字典、列表、内置类型、各种类对象等等）
 ```python
-from agileutil.rpc.server import UdpRpcServer
+from agileutil.rpc.server import UdpRpcServer, rpc
 
+@rpc
 def sayHello(name): 
     return 'hello ' + name
 
 server = UdpRpcServer('0.0.0.0', 9988)
-server.regist(sayHello)
 server.serve()
 ```
 ### UDP RPC 客户端
@@ -224,5 +224,3 @@ print(resp)
 [![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
 
 [![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)
-
-
