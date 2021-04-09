@@ -179,9 +179,10 @@ s.serve()
 ```
 ### 完整的服务端示例 (UDP/HTTP调用方式相同)
 ```python
-from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc.server import TcpRpcServer, rpc
 from agileutil.rpc.discovery import DiscoveryConfig
 
+@rpc
 def sayHello(name): 
     return 'hello ' + name
 
@@ -194,7 +195,6 @@ disconf = DiscoveryConfig(
 )
 server = TcpRpcServer('0.0.0.0', 10001)
 server.setDiscoverConfig(disconf)
-server.regist(sayHello)
 server.serve()
 ```
 
