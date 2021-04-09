@@ -18,7 +18,7 @@
   - [完整的客户端示例（UDP/HTTP调用方式相同）](#完整的客户端示例udphttp调用方式相同)
 - [数据压缩](#数据压缩)
 ## 简介
-Agileutil是一个Python3 RPC框架
+Agileutil是一个Python3 RPC框架，client和Server可以通过直连的方式访问，也可以通过Consul做服务注册发现。
 
 ### 特性
 - 像本地函数一样调用
