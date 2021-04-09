@@ -30,6 +30,13 @@ CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
 SLEEP = 1
 
+
+@rpc
+class TestService(object):
+    def add(self, n1, n2):
+        return n1 + n2
+
+
 def sayHello(name): return 'hello ' + name
 
 def testTimeout():
@@ -369,6 +376,23 @@ class TestRpcServerClient(unittest.TestCase):
         tServer = threading.Thread(target=create_server)
         tServer.start()
         time.sleep(SLEEP)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+
+    def test_regist_class(self):
+        def create_server():
+            server = TcpRpcServer('127.0.0.1', 10022)
+            server.regist(TestService)
+            server.serve()
+
+        def create_client():
+            client = TcpRpcClient('127.0.0.1', 10022, timeout = 2)
+            resp = client.call('TestService.add', args=(1,2))
+            self.assertEqual(resp, 3)
+        
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
