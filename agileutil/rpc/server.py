@@ -10,12 +10,15 @@ import struct
 import functools
 from agileutil.sanic import SanicController
 from agileutil.rpc.compress import RpcCompress
+from types import MethodType,FunctionType
+from agileutil.rpc.method import RpcMethod
 
 
 class RpcServer(object):
 
     funcMap = {}
     funcList = []
+
     
     def __init__(self):
         #self.funcMap = {}
@@ -26,19 +29,28 @@ class RpcServer(object):
 
     @classmethod
     def regist(cls, func):
-        cls.funcMap[ func.__name__ ] = func
-        cls.funcList = cls.funcMap.keys()
+        if isinstance(func, FunctionType):
+            cls.funcMap[ func.__name__ ] = RpcMethod(RpcMethod.TYPE_WITHOUT_CLASS, func)
+            cls.funcList = cls.funcMap.keys()
+        else:
+            classDefine = func
+            serMethods = list( filter(lambda m: not m.startswith('_'), dir(classDefine)) )
+            for methodName in serMethods:
+                funcName = "{}.{}".format(classDefine.__name__, methodName)
+                funcObj = getattr(classDefine, methodName)
+                cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine)
+                cls.funcList = cls.funcMap.keys()
 
     def run(self, func, args):
         try:
             if func not in self.funcList:
                 return FuncNotFoundException('func not found')
-            funcobj = self.funcMap[func]
+            methodObj = self.funcMap[func]
             args = tuple(args)
             if len(args) == 0:
-                resp = funcobj()
+                resp = methodObj.call()
             else:
-                resp = funcobj(*args)
+                resp = methodObj.call(*args)
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))

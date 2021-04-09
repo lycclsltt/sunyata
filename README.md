@@ -48,15 +48,39 @@ server = TcpRpcServer('0.0.0.0', 9988, workers=4)
 server.serve()
 ```
 > 除了使用@rpc注册方法，还可以使用regist()方法，参考下面的例子
+
+server:
 ``` python
-from agileutil.rpc.server import TcpRpcServer
+from agileutil.rpc.server import TcpRpcServer, rpc
 
-def sayHello(name):
-    return 'hello ' + name
+@rpc
+class TestService:
 
-server = TcpRpcServer('0.0.0.0', 9988, workers=4)
-server.regist(sayHello)
+    def hello(self, name):
+        return "Hello, {}!".format(name)
+
+    def add(self, a, b, c):
+        return a + b + c
+
+@rpc
+def hello(name):
+    return "Hello, {}!".format(name)
+
+server = TcpRpcServer('0.0.0.0', 9988)
 server.serve()
+```
+
+client:
+```python
+from agileutil.rpc.client import TcpRpcClient
+
+cli = TcpRpcClient('127.0.0.1', 9988, timeout = 2)
+resp = cli.call('TestService.hello', args=('xiaoming',))
+print(resp)
+resp = cli.call('TestService.add', args=(1, 2, 3))
+print(resp)
+resp = cli.call('hello', args=('xiaoming',))
+print(resp)
 ```
 
 ### TCP RPC 客户端
