@@ -68,14 +68,14 @@ class RpcServer(object):
 
     def printLogo(self):
         logo = """
-   Light, simple RPC framework for Python, enjoy it!
-   
      _         _ _      _   _ _   _ _ 
     / \   __ _(_) | ___| | | | |_(_) |
    / _ \ / _` | | |/ _ \ | | | __| | |
   / ___ \ (_| | | |  __/ |_| | |_| | |
  /_/   \_\__, |_|_|\___|\___/ \__|_|_|
          |___/      
+ 
+ RPC server is ready!
          """
         print(logo)
 
