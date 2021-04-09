@@ -2,23 +2,22 @@
 
 Agileutil是一个Python3 RPC框架。基于微服务架构，封装了rpc/http/orm/log等常用组件，提供了简洁的API，开发者可以很快上手，快速进行业务开发。
 
+## 快速开始
 
-## Python版本要求
+### Python 版本要求
 Python >= 3.6
 
 
-## 安装
+### 安装
 ```
 pip install agileutil
 ```
 
-## 快速开始
+### TCP RPC 服务端
 下面是一个TCP协议的服务端例子。
 - 创建一个TcpRpcServer对象, 指定服务端监听地址和端口
 - 通过@rpc装饰器注册需要被客户端请求的方法
 - 调用serve()方法，开始处理客户端请求
-
-### TCP RPC 服务端
 ```python
 from agileutil.rpc.server import TcpRpcServer
 from agileutil.rpc import rpc
