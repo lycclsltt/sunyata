@@ -1,8 +1,5 @@
-#### 目录
-- [简介](#简介)
-  - [特性](#特性)
+### 目录
 - [快速开始](#快速开始)
-  - [Python 版本要求](#python-版本要求)
   - [安装](#安装)
   - [TCP RPC 服务端](#tcp-rpc-服务端)
   - [TCP RPC 客户端](#tcp-rpc-客户端)
@@ -17,7 +14,7 @@
   - [完整的服务端示例 (UDP/HTTP调用方式相同)](#完整的服务端示例-udphttp调用方式相同)
   - [完整的客户端示例（UDP/HTTP调用方式相同）](#完整的客户端示例udphttp调用方式相同)
 - [数据压缩](#数据压缩)
-## 简介
+### 简介
 Agileutil是一个Python3 RPC框架，client和server可以通过直连的方式访问，也可以通过Consul做服务注册发现。
 
 ### 特性
@@ -26,9 +23,7 @@ Agileutil是一个Python3 RPC框架，client和server可以通过直连的方式
 - HTTP/UDP/TCP 全协议支持
 
 ## 快速开始
-
-### Python 版本要求
-Python >= 3.6
+Python 版本 >= 3.6
 
 
 ### 安装
