@@ -37,20 +37,6 @@ pip install agileutil
 - 通过@rpc装饰器注册需要被客户端请求的方法
 - 调用serve()方法，开始处理客户端请求
 ```python
-from agileutil.rpc.server import TcpRpcServer
-from agileutil.rpc import rpc
-
-@rpc
-def sayHello(name):
-    return 'hello ' + name
-
-server = TcpRpcServer('0.0.0.0', 9988, workers=4)
-server.serve()
-```
-> 除了使用@rpc注册方法，还可以使用regist()方法，参考下面的例子
-
-server:
-``` python
 from agileutil.rpc.server import TcpRpcServer, rpc
 
 @rpc
@@ -70,7 +56,10 @@ server = TcpRpcServer('0.0.0.0', 9988)
 server.serve()
 ```
 
-client:
+### TCP RPC 客户端
+- 创建TcpRpcClient对象，指定RPC服务端地址
+- 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用@rpc装饰器注册，那么call()方法将抛出异常）
+- call() 方法的返回值和在本地调用一样，原来是什么返回类型，就还是什么（例如返回字典、列表、对象甚至内置类型，经过序列化后，不会发生改变）
 ```python
 from agileutil.rpc.client import TcpRpcClient
 
@@ -80,18 +69,6 @@ print(resp)
 resp = cli.call('TestService.add', args=(1, 2, 3))
 print(resp)
 resp = cli.call('hello', args=('xiaoming',))
-print(resp)
-```
-
-### TCP RPC 客户端
-- 创建TcpRpcClient对象，指定RPC服务端地址
-- 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用regist()方法注册，那么call()方法将抛出异常）
-- call() 方法的返回值和在本地调用一样，原来是什么返回类型，就还是什么（例如返回字典、列表、对象甚至内置类型，经过序列化后，不会发生改变）
-```python
-from agileutil.rpc.client import TcpRpcClient
-
-c = TcpRpcClient('127.0.0.1', 9988, timeout=5)
-resp = c.call(func = 'sayHello', args = 'zhangsan') #或resp = c.call(func = 'sayHello', args = ('zhangsan', ） )
 print(resp)
 ```
 
