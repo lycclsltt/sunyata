@@ -24,11 +24,14 @@ from agileutil.rpc.discovery import DiscoveryConfig
 from agileutil.rpc.compress import RpcCompress
 from agileutil.rpc.server import HttpRpcServer
 from agileutil.rpc.client import HttpRpcClient
+from agileutil.rpc.server import RpcServer
 from agileutil.rpc import rpc
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
 SLEEP = 1
+
+RpcServer.isPrintLogo = False
 
 
 @rpc

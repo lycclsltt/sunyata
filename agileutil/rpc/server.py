@@ -10,16 +10,17 @@ import struct
 import functools
 from agileutil.sanic import SanicController
 from agileutil.rpc.compress import RpcCompress
-from types import MethodType,FunctionType
+from types import MethodType,FunctionType,CoroutineType
 from agileutil.rpc.method import RpcMethod
+import asyncio
 
 
 class RpcServer(object):
 
     funcMap = {}
     funcList = []
+    isPrintLogo = True
 
-    
     def __init__(self):
         #self.funcMap = {}
         #self.funcList = []
@@ -67,6 +68,8 @@ class RpcServer(object):
         cls.regist(func)
 
     def printLogo(self):
+        if self.isPrintLogo == False:
+            return
         logo = """
      _         _ _      _   _ _   _ _ 
     / \   __ _(_) | ___| | | | |_(_) |
@@ -75,7 +78,7 @@ class RpcServer(object):
  /_/   \_\__, |_|_|\___|\___/ \__|_|_|
          |___/      
  
- RPC server is ready!
+ RPC server is ready! 
          """
         print(logo)
 
@@ -99,7 +102,7 @@ class SimpleTcpRpcServer(RpcServer):
 
 
 class TcpRpcServer(SimpleTcpRpcServer):
-
+    
     def __init__(self, host, port, workers = multiprocessing.cpu_count()):
         SimpleTcpRpcServer.__init__(self, host, port)
         self.worker = workers
@@ -173,58 +176,53 @@ class HttpRpcServer(RpcServer, SanicController):
         self.protocal.transport.app.disableLog()
 
 
-"""
 class AsyncTcpRpcServer(TcpRpcServer):
 
     def __init__(self, host, port):
         TcpRpcServer.__init__(self, host, port)
         self.host = host
         self.port = port
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.addr = (self.host, self.port)
-        self.timeout = 10
-        self.epoll = select.epoll()
-        self.fdToSocket = {self.socket.fileno():self.socket}
-        self.fdResp = {}
+    
+    async def handle(self, reader, writer):
+        while 1:
+            try:
+                data = await reader.read(5)
+                lengthField = data[:4]
+                compressField = data[4:5]
+                isEnableCompress = 0
+                if compressField == b'1':
+                    isEnableCompress = 1
+                toread = struct.unpack("i", lengthField)[0]
+                msg = await reader.read(toread)
+                if isEnableCompress:
+                    msg = RpcCompress.decompress(msg)
 
-    def bind(self):
-        self.socket.bind(self.addr)
-        self.socket.listen(10)
-        self.socket.setblocking(False)
-        self.epoll.register(self.socket.fileno(), select.EPOLLIN)
+                request = self.protocal.unserialize(msg)
+                func, args = self.protocal.parseRequest(request)
+                resp = self.run(func, args) 
+                respbytes = self.protocal.serialize(resp)
+
+                isEnableCompress = b'0'
+                if len(msg) >= RpcCompress.enableCompressLen:
+                    isEnableCompress = b'1'
+                    respbytes = RpcCompress.compress(respbytes)
+                lenbytes = struct.pack("i", len(respbytes))
+                writer.write( lenbytes + isEnableCompress + respbytes)
+            except Exception as ex:
+                writer.close()
+                return
+
+    async def main(self):
+        server = await asyncio.start_server(self.handle, self.host, self.port)
+        addr = server.sockets[0].getsockname()
+        self.printLogo()
+        async with server:
+            await server.serve_forever()
 
     def serve(self):
-        self.bind()
-        while 1:
-            events = self.epoll.poll(self.timeout)
-            if not events:
-                continue
-            for fd, event in events:
-                socket = self.fdToSocket[fd]
-                if socket == self.socket:
-                    conn, addr = self.socket.accept()
-                    conn.setblocking(False)
-                    self.epoll.register(conn.fileno(), select.EPOLLIN)
-                    self.fdToSocket[conn.fileno()] = conn
-                elif event & select.EPOLLHUP:
-                    self.epoll.unregister(fd)
-                    self.fdToSocket[fd].close()
-                    del self.fdToSocket[fd]
-                elif event & select.EPOLLIN:
-                    msg = self.protocal.transport.recv(socket)
-                    request = self.protocal.unserialize(msg)
-                    func, args = self.protocal.parseRequest(request)
-                    resp = self.run(func, args)
-                    self.fdResp[fd] = resp
-                    self.epoll.modify(fd, select.EPOLLOUT)
-                elif event & select.EPOLLOUT:
-                    if fd in self.fdResp:
-                        resp = self.fdResp[fd]
-                        self.protocal.transport.send(self.protocal.serialize(resp), socket)
-                        self.epoll.modify(fd, select.EPOLLIN)
-                        socket.close()
-"""
+        if self.discovery and self.discoveryConfig:
+            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
+        asyncio.run(self.main())
 
 
 class UdpRpcServer(RpcServer):
