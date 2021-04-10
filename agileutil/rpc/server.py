@@ -13,6 +13,7 @@ from agileutil.rpc.compress import RpcCompress
 from types import MethodType,FunctionType,CoroutineType
 from agileutil.rpc.method import RpcMethod
 import asyncio
+import inspect
 
 
 class RpcServer(object):
@@ -31,16 +32,24 @@ class RpcServer(object):
     @classmethod
     def regist(cls, func):
         if isinstance(func, FunctionType):
-            cls.funcMap[ func.__name__ ] = RpcMethod(RpcMethod.TYPE_WITHOUT_CLASS, func)
-            cls.funcList = cls.funcMap.keys()
+            if inspect.iscoroutinefunction(func):
+                cls.funcMap[ func.__name__ ] = RpcMethod(RpcMethod.TYPE_WITHOUT_CLASS, func, isCoroutine=True)
+                cls.funcList = cls.funcMap.keys()
+            else:
+                cls.funcMap[ func.__name__ ] = RpcMethod(RpcMethod.TYPE_WITHOUT_CLASS, func)
+                cls.funcList = cls.funcMap.keys()
         else:
             classDefine = func
             serMethods = list( filter(lambda m: not m.startswith('_'), dir(classDefine)) )
             for methodName in serMethods:
                 funcName = "{}.{}".format(classDefine.__name__, methodName)
                 funcObj = getattr(classDefine, methodName)
-                cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine)
-                cls.funcList = cls.funcMap.keys()
+                if inspect.iscoroutinefunction(funcObj):
+                    cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine, isCoroutine=True)
+                    cls.funcList = cls.funcMap.keys()
+                else:
+                    cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine)
+                    cls.funcList = cls.funcMap.keys()
 
     def run(self, func, args):
         try:
@@ -199,7 +208,7 @@ class AsyncTcpRpcServer(TcpRpcServer):
 
                 request = self.protocal.unserialize(msg)
                 func, args = self.protocal.parseRequest(request)
-                resp = self.run(func, args) 
+                resp = await self.run(func, args) 
                 respbytes = self.protocal.serialize(resp)
 
                 isEnableCompress = b'0'
@@ -218,6 +227,20 @@ class AsyncTcpRpcServer(TcpRpcServer):
         self.printLogo()
         async with server:
             await server.serve_forever()
+
+    async def run(self, func, args):
+        try:
+            if func not in self.funcList:
+                return FuncNotFoundException('func not found')
+            methodObj = self.funcMap[func]
+            args = tuple(args)
+            if len(args) == 0:
+                resp = await methodObj.asyncCall()
+            else:
+                resp = await methodObj.asyncCall(*args)
+            return resp
+        except Exception as ex:
+            return Exception('server exception, ' + str(ex))
 
     def serve(self):
         if self.discovery and self.discoveryConfig:
