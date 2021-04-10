@@ -24,7 +24,8 @@ Agileutil是一个Python3 RPC框架，client和server可以通过直连的方式
 - 像本地函数一样调用
 - 使用简单，用户只需要关注业务即可
 - HTTP/UDP/TCP 全协议支持
-
+- 支持异步 async/await
+ 
 ## 快速开始
 Python 版本 >= 3.6
 
@@ -41,6 +42,7 @@ pip install agileutil
 - 调用serve()方法，开始处理客户端请求
 ```python
 from agileutil.rpc.server import TcpRpcServer, rpc
+import asyncio
 
 @rpc
 class TestService:
@@ -48,7 +50,8 @@ class TestService:
     def hello(self, name):
         return "Hello, {}!".format(name)
 
-    def add(self, a, b, c):
+    async def add(self, a, b, c):
+        asyncio.sleep(1)
         return a + b + c
 
 @rpc
