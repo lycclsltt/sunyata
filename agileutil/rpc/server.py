@@ -110,7 +110,7 @@ class SimpleTcpRpcServer(RpcServer):
             self.protocal.transport.send(self.protocal.serialize(resp))
 
 
-class TcpRpcServer(SimpleTcpRpcServer):
+class BlockTcpRpcServer(SimpleTcpRpcServer):
     
     def __init__(self, host, port, workers = multiprocessing.cpu_count()):
         SimpleTcpRpcServer.__init__(self, host, port)
@@ -185,10 +185,10 @@ class HttpRpcServer(RpcServer, SanicController):
         self.protocal.transport.app.disableLog()
 
 
-class AsyncTcpRpcServer(TcpRpcServer):
+class TcpRpcServer(BlockTcpRpcServer):
 
     def __init__(self, host, port):
-        TcpRpcServer.__init__(self, host, port)
+        BlockTcpRpcServer.__init__(self, host, port)
         self.host = host
         self.port = port
     
