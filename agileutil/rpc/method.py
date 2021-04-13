@@ -1,5 +1,6 @@
 import operator
 import asyncio
+from agileutil.eventloop import EventLoop
 
 class RpcMethod(object):
 
@@ -18,12 +19,12 @@ class RpcMethod(object):
         if self._methodType == self.TYPE_WITH_CLASS:
             classInstance = self._classDefine()
             if self._isCoroutine:
-                resp = asyncio.run( operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance) )
+                resp = EventLoop.runUntilComplete( operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance) )
             else:
                 resp = operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance)
         else:
             if self._isCoroutine:
-                resp = asyncio.run(self._method(*args, **kwargs))
+                resp = EventLoop.runUntilComplete( self._method(*args, **kwargs) )
             else:
                 resp = self._method(*args, **kwargs)
         return resp

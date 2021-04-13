@@ -14,7 +14,7 @@ from types import MethodType,FunctionType,CoroutineType
 from agileutil.rpc.method import RpcMethod
 import asyncio
 import inspect
-
+from agileutil.eventloop import EventLoop
 
 class RpcServer(object):
 
@@ -245,7 +245,7 @@ class TcpRpcServer(BlockTcpRpcServer):
     def serve(self):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
-        asyncio.run(self.main())
+        EventLoop.runUntilComplete( self.main() )
 
 
 class UdpRpcServer(RpcServer):
