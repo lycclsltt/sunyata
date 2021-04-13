@@ -14,30 +14,30 @@ class RpcMethod(object):
         if self._methodType == self.TYPE_WITH_CLASS and self._classDefine == None:
             raise Exception('classDefine is None')
 
-    def call(self, *args):
+    def call(self, *args, **kwargs):
         if self._methodType == self.TYPE_WITH_CLASS:
             classInstance = self._classDefine()
             if self._isCoroutine:
-                resp = asyncio.run( operator.methodcaller(self._method.__name__, *args)(classInstance) )
+                resp = asyncio.run( operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance) )
             else:
-                resp = operator.methodcaller(self._method.__name__, *args)(classInstance)
+                resp = operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance)
         else:
             if self._isCoroutine:
-                resp = asyncio.run(self._method(*args))
+                resp = asyncio.run(self._method(*args, **kwargs))
             else:
-                resp = self._method(*args)
+                resp = self._method(*args, **kwargs)
         return resp
 
-    async def asyncCall(self, *args):
+    async def asyncCall(self, *args, **kwargs):
         if self._methodType == self.TYPE_WITH_CLASS:
             classInstance = self._classDefine()
             if self._isCoroutine:
-                resp = await ( operator.methodcaller(self._method.__name__, *args)(classInstance) )
+                resp = await ( operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance) )
             else:
-                resp = operator.methodcaller(self._method.__name__, *args)(classInstance)
+                resp = operator.methodcaller(self._method.__name__, *args, **kwargs)(classInstance)
         else:
             if self._isCoroutine:
-                resp = await self._method(*args)
+                resp = await self._method(*args, **kwargs)
             else:
-                resp = self._method(*args)
+                resp = self._method(*args, **kwargs)
         return resp

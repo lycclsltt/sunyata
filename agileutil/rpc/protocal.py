@@ -35,7 +35,8 @@ class RpcProtocal(object):
     def parseRequest(self, package):
         func = package['func']
         args = package['args']
-        return func, args
+        kwargs = package['kwargs']
+        return func, args, kwargs
 
     def tranArgs(self, args):
         nargs = tuple()

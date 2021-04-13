@@ -51,16 +51,16 @@ class RpcServer(object):
                     cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine)
                     cls.funcList = cls.funcMap.keys()
 
-    def run(self, func, args):
+    def run(self, func, args, kwargs):
         try:
             if func not in self.funcList:
                 return FuncNotFoundException('func not found')
             methodObj = self.funcMap[func]
             args = tuple(args)
-            if len(args) == 0:
+            if len(args) == 0 and len(kwargs) == 0:
                 resp = methodObj.call()
             else:
-                resp = methodObj.call(*args)
+                resp = methodObj.call(*args, **kwargs)
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))
@@ -105,8 +105,8 @@ class SimpleTcpRpcServer(RpcServer):
         while 1:
             msg = self.protocal.transport.recv()
             request = self.protocal.unserialize(msg)
-            func, args = self.protocal.parseRequest(request)
-            resp = self.run(func, args)
+            func, args, kwargs = self.protocal.parseRequest(request)
+            resp = self.run(func, args, kwargs)
             self.protocal.transport.send(self.protocal.serialize(resp))
 
 
@@ -121,8 +121,8 @@ class BlockTcpRpcServer(SimpleTcpRpcServer):
             try:
                 msg = self.protocal.transport.recvPeer(conn)
                 request = self.protocal.unserialize(msg)
-                func, args = self.protocal.parseRequest(request)
-                resp = self.run(func, args)                    
+                func, args, kwargs = self.protocal.parseRequest(request)
+                resp = self.run(func, args, kwargs)                    
                 self.protocal.transport.sendPeer(self.protocal.serialize(resp), conn)
             except Exception as ex:
                 conn.close()
@@ -170,8 +170,8 @@ class HttpRpcServer(RpcServer, SanicController):
         if isEnableCompress == b'1':
             msg = RpcCompress.decompress(msg)
         request = self.protocal.unserialize(msg)
-        func, args = self.protocal.parseRequest(request)
-        resp = self.run(func, args)
+        func, args, kwargs = self.protocal.parseRequest(request)
+        resp = self.run(func, args, kwargs)
         resp = self.protocal.serialize(resp)
         return resp
 
@@ -207,8 +207,8 @@ class TcpRpcServer(BlockTcpRpcServer):
                     msg = RpcCompress.decompress(msg)
 
                 request = self.protocal.unserialize(msg)
-                func, args = self.protocal.parseRequest(request)
-                resp = await self.run(func, args) 
+                func, args, kwargs = self.protocal.parseRequest(request)
+                resp = await self.run(func, args, kwargs) 
                 respbytes = self.protocal.serialize(resp)
 
                 isEnableCompress = b'0'
@@ -228,16 +228,16 @@ class TcpRpcServer(BlockTcpRpcServer):
         async with server:
             await server.serve_forever()
 
-    async def run(self, func, args):
+    async def run(self, func, args, kwargs):
         try:
             if func not in self.funcList:
                 return FuncNotFoundException('func not found')
             methodObj = self.funcMap[func]
             args = tuple(args)
-            if len(args) == 0:
+            if len(args) == 0 and len(kwargs) == 0:
                 resp = await methodObj.asyncCall()
             else:
-                resp = await methodObj.asyncCall(*args)
+                resp = await methodObj.asyncCall(*args, **kwargs)
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))
@@ -269,8 +269,8 @@ class UdpRpcServer(RpcServer):
                 addr = body.get('addr')
                 msg = body.get('msg')
                 request = self.protocal.unserialize(msg)
-                func, args = self.protocal.parseRequest(request)
-                resp = self.run(func, args)
+                func, args, kwargs = self.protocal.parseRequest(request)
+                resp = self.run(func, args, kwargs)
                 self.protocal.transport.sendPeer(self.protocal.serialize(resp), addr = addr)
             except Exception as ex:
                 print('udp handler exception:', ex)

@@ -65,7 +65,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_client():
             client = TcpRpcClient('127.0.0.1', 9988)
             for i in range(3):
-                resp = client.call(func='sayHello', args=('zhangsan', ))
+                resp = client.call('sayHello', 'zhangsan')
                 self.assertEqual(resp, 'hello zhangsan')
 
         tServer = threading.Thread(target=create_server)
@@ -84,7 +84,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_client():
             client = UdpRpcClient('127.0.0.1', 9999)
             for i in range(3):
-                resp = client.call(func='sayHello', args='lisi' )
+                resp = client.call('sayHello', 'lisi' )
                 self.assertEqual(resp, 'hello lisi')
         
         tServer = threading.Thread(target=create_server)
@@ -118,7 +118,7 @@ class TestRpcServerClient(unittest.TestCase):
             )
             cli.setDiscoveryConfig(disconf)
             for i in range(3):
-                resp = cli.call(func = 'sayHello', args=('mary'))
+                resp = cli.call('sayHello', 'mary')
                 self.assertEqual(resp, 'hello mary')
 
         tServer = threading.Thread(target=create_server)
@@ -152,7 +152,7 @@ class TestRpcServerClient(unittest.TestCase):
             )
             client.setDiscoveryConfig(disconf)
             for i in range(3):
-                resp = client.call(func = 'sayHello', args='mary')
+                resp = client.call('sayHello', 'mary')
                 self.assertEqual(resp, 'hello mary')
 
         tServer = threading.Thread(target=create_server)
@@ -173,7 +173,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_client():
             client = TcpRpcClient('127.0.0.1', 10004)
             for i in range(3):
-                resp = client.call(func='retObj')
+                resp = client.call('retObj')
                 self.assertEqual(resp.val, 10)
 
         tServer = threading.Thread(target=create_server)
@@ -202,7 +202,7 @@ class TestRpcServerClient(unittest.TestCase):
                 '127.0.0.1:10007',
             ])
             for i in range(10):
-                resp = client.call(func='sayHello', args=('zhangsan',))
+                resp = client.call('sayHello', 'zhangsan')
                 self.assertEqual(resp, 'hello zhangsan')
         tServer_10005 = threading.Thread(target=create_server_10005)
         tServer_10006 = threading.Thread(target=create_server_10006)
@@ -235,7 +235,7 @@ class TestRpcServerClient(unittest.TestCase):
                 '127.0.0.1:10010',
             ])
             for i in range(10):
-                resp = client.call(func='sayHello', args=('lisi'))
+                resp = client.call('sayHello', 'lisi')
                 self.assertEqual(resp, 'hello lisi')
         tServer_10008 = threading.Thread(target=create_server_10008)
         tServer_10009 = threading.Thread(target=create_server_10009)
@@ -285,11 +285,11 @@ class TestRpcServerClient(unittest.TestCase):
             client = UdpRpcClient('127.0.0.1', 10015, timeout=2)
             tag = ''
             try:
-                resp = client.call(func='testTimeout')
+                resp = client.call('testTimeout')
             except socket.timeout as ex:
                 tag = 'udp timeout'
             self.assertEqual(tag, 'udp timeout')
-            resp = client.call('sayHello', ('xiaoming'))
+            resp = client.call('sayHello', 'xiaoming')
             time.sleep(5)
             self.assertEqual(resp, 'hello xiaoming')
 
@@ -308,10 +308,10 @@ class TestRpcServerClient(unittest.TestCase):
 
         def create_client():
             client = TcpRpcClient('127.0.0.1', 10017, timeout = 2)
-            resp = client.call('sayHello', ('xiaoming'))
+            resp = client.call('sayHello', 'xiaoming')
             self.assertEqual(resp, 'hello xiaoming')
             time.sleep(10)
-            resp = client.call('sayHello', ('zhangsan'))
+            resp = client.call('sayHello', 'zhangsan')
             self.assertEqual(resp, 'hello zhangsan')
         
         tServer = threading.Thread(target=create_server)
@@ -331,7 +331,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         def create_client():
             client = TcpRpcClient('127.0.0.1', 10018, timeout = 2)
-            resp = client.call('add', (1, 1))
+            resp = client.call('add', n1=1, n2=1)
             self.assertEqual(resp, 2)
         
         tServer = threading.Thread(target=create_server)
@@ -352,7 +352,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_client():
             client = TcpRpcClient('127.0.0.1', 10019, timeout = 2)
             name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
-            resp = client.call('sayHello', args=name)
+            resp = client.call('sayHello', name)
             self.assertEqual(resp, 'hello ' + name)
         
         tServer = threading.Thread(target=create_server)
@@ -373,7 +373,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_client():
             client = UdpRpcClient('127.0.0.1', 10020, timeout=2)
             name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
-            resp = client.call('sayHello', args=name )
+            resp = client.call('sayHello', name )
             self.assertEqual(resp, 'hello ' + name)
 
         tServer = threading.Thread(target=create_server)
@@ -390,7 +390,7 @@ class TestRpcServerClient(unittest.TestCase):
 
         def create_client():
             client = TcpRpcClient('127.0.0.1', 10022, timeout = 2)
-            resp = client.call('TestService.add', args=(1,2))
+            resp = client.call('TestService.add', n1=1,n2=2)
             self.assertEqual(resp, 3)
         
         tServer = threading.Thread(target=create_server)
@@ -398,6 +398,7 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(1)
         tClient = threading.Thread(target=create_client)
         tClient.start()
+
 
 def create_http_server():
     server = HttpRpcServer('127.0.0.1', 10000)
@@ -408,7 +409,7 @@ def create_http_server():
 def create_http_client():
     client = HttpRpcClient('127.0.0.1', 10000)
     for i in range(3):
-        resp = client.call(func = 'sayHello', args = ('xiaoming'))
+        resp = client.call('sayHello', 'xiaoming')
         assert (resp == 'hello xiaoming')
 
 def create_http_server_discovery():
@@ -436,7 +437,7 @@ def create_http_client_discovery():
     )
     client.setDiscoveryConfig(disconf)
     for i in range(3):
-        resp = client.call('sayHello', ('xiaoming'))
+        resp = client.call('sayHello', 'xiaoming')
         assert (resp == 'hello xiaoming')
 
 def create_http_server_10011():
@@ -464,7 +465,7 @@ def create_http_client_multi():
         '127.0.0.1:10013'
     ])
     for i in range(10):
-        resp = client.call(func = 'sayHello', args = ('xiaoming'))
+        resp = client.call('sayHello', 'xiaoming')
         assert (resp == 'hello xiaoming')
 
 def create_http_server_timeout():
@@ -478,11 +479,11 @@ def create_http_client_timeout():
     client = HttpRpcClient('127.0.0.1', 10016, timeout=2)
     tag = ''
     try:
-        resp = client.call(func = 'testTimeout')
+        resp = client.call('testTimeout')
     except requests.exceptions.ReadTimeout as ex:
         tag = 'http timeout'
     assert(  tag == 'http timeout')
-    resp = client.call(func = 'sayHello', args=('xiaoming'))
+    resp = client.call('sayHello', 'xiaoming')
     assert( resp == 'hello xiaoming' )
 
 def create_http_server_compress():
@@ -497,7 +498,7 @@ def create_http_client_compress():
     RpcCompress.DEBUG = True
     client = HttpRpcClient('127.0.0.1', 10021, timeout=2)
     name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
-    resp = client.call(func = 'sayHello', args=(name, ))
+    resp = client.call('sayHello', name)
     assert( resp == 'hello ' + name )
 
 if __name__ == '__main__':

@@ -72,11 +72,13 @@ from agileutil.rpc.client import TcpRpcClient
 cli = TcpRpcClient('127.0.0.1', 9988, timeout = 2)
 
 resp = cli.call('TestService.hello', 'xiaoming')
+print(resp)
 
-resp = cli.call('TestService.add', args=(1, 2, 3))
+resp = cli.call('TestService.add', a=1, b=2, c=3)
+print(resp)
 
-resp = cli.call('hello', args=('xiaoming',))
-
+resp = cli.call('hello', name = 'xiaoming')
+print(resp)
 ```
 
 ### 指定多个服务端地址
@@ -85,7 +87,7 @@ resp = cli.call('hello', args=('xiaoming',))
 from agileutil.rpc.client import TcpRpcClient
 
 c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
-resp = c.call(func = 'hello', args = 'zhangsan')
+resp = c.call('hello', 'zhangsan')
 print(resp)
 ```
 
@@ -109,7 +111,7 @@ from agileutil.rpc.client import HttpRpcClient
 
 c = HttpRpcClient('127.0.0.1', 9988)
 for i in range(10):
-    resp = c.call(func = 'sayHello', args=('zhangsan', ))
+    resp = c.call('sayHello', 'zhangsan')
     print(resp)
 ```
 
@@ -137,7 +139,7 @@ server.serve()
 from agileutil.rpc.client import UdpRpcClient
 cli = UdpRpcClient('127.0.0.1', 9988)
 for i in range(5000):
-    resp = cli.call(func = 'sayHello', args = 'xiaoming' )
+    resp = cli.call('sayHello', name = 'xiaoming' )
     print(resp)
 ```
 
@@ -188,6 +190,7 @@ s.serve()
 ```python
 from agileutil.rpc.server import TcpRpcServer, rpc
 from agileutil.rpc.discovery import DiscoveryConfig
+from agileutil.util import local_ip
 
 @rpc
 def sayHello(name): 
@@ -218,7 +221,7 @@ disconf = DiscoveryConfig(
     serviceName='test-rpc-server'
 )
 cli.setDiscoveryConfig(disconf)
-resp = cli.call(func = 'sayHello', args=('mary', ))
+resp = cli.call('sayHello', name = 'mary')
 print(resp)
 ```
 

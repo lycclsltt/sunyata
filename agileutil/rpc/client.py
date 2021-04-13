@@ -89,7 +89,7 @@ class TcpRpcClient(RpcClient):
             self.serversProtocalMap[ server ] = TcpProtocal(host, int(port), timeout = timeout)
 
     @retryTimes(retryTimes=3)
-    def call(self, func, args = ()):
+    def call(self, func, *args, **kwargs):
         try:
             self.beforeCall()
             args = self.protocal.tranArgs(args)
@@ -97,6 +97,7 @@ class TcpRpcClient(RpcClient):
             package = {
                 'func' : func,
                 'args' : args,
+                'kwargs' : kwargs,
             }
             msg = self.protocal.serialize(package)
             self.protocal.transport.send(msg)
@@ -135,13 +136,14 @@ class UdpRpcClient(RpcClient):
             self.serversProtocalMap[ server ] = ClientUdpProtocal(host, int(port), timeout=timeout)
 
     @retryTimes(retryTimes=3)
-    def call(self, func, args = ()):
+    def call(self, func, *args, **kwargs):
         try:
             self.beforeCall()
             args = self.protocal.tranArgs(args)
             package = {
                 'func' : func,
                 'args' : args,
+                'kwargs' : kwargs
             }
             msg = self.protocal.serialize(package)
             self.protocal.transport.send(msg)
@@ -178,12 +180,13 @@ class HttpRpcClient(RpcClient):
             self.serversProtocalMap[ server ] = HttpProtocal(host, int(port), timeout=timeout)
 
     @retryTimes(retryTimes=3)
-    def call(self, func, args = ()):
+    def call(self, func, *args, **kwargs):
         self.beforeCall()
         args = self.protocal.tranArgs(args)
         package = {
             'func' : func,
             'args' : args,
+            'kwargs' : kwargs,
         }
         msg = self.protocal.serialize(package)
         respmsg = self.protocal.transport.send(msg)
