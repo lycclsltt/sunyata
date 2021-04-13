@@ -70,7 +70,7 @@ server.serve()
 from agileutil.rpc.client import TcpRpcClient
 
 cli = TcpRpcClient('127.0.0.1', 9988, timeout = 2)
-resp = cli.call('TestService.hello', args=('xiaoming',))
+resp = cli.call('TestService.hello', 'xiaoming')
 print(resp)
 resp = cli.call('TestService.add', args=(1, 2, 3))
 print(resp)
