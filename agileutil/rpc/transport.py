@@ -142,8 +142,9 @@ class TcpTransport(RpcTransport):
         return msg
 
     def close(self):
-        self.socket.close()
-        self.socket = None
+        if self.socket:
+            self.socket.close()
+            self.socket = None
 
     def reconnect(self):
         self.close()
@@ -194,8 +195,9 @@ class UdpTransport(RpcTransport):
         return msg, addr
 
     def close(self):
-        self.socket.close()
-        self.socket = None
+        if self.socket:
+            self.socket.close()
+            self.socket = None
 
 
 class ClientUdpTransport(UdpTransport):
