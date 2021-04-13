@@ -18,7 +18,7 @@
 - [数据压缩](#数据压缩)
 
 ## 简介
-Agileutil是一个Python3 RPC框架，client和server可以通过直连的方式访问，也可以通过Consul做服务注册发现。
+Agileutil是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul做服务注册发现。
 
 ## 特性
 - 像本地函数一样调用
