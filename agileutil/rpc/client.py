@@ -92,7 +92,6 @@ class TcpRpcClient(RpcClient):
     def call(self, func, *args, **kwargs):
         try:
             self.beforeCall()
-            args = self.protocal.tranArgs(args)
             self.protocal.transport.connect()
             package = {
                 'func' : func,
@@ -139,7 +138,6 @@ class UdpRpcClient(RpcClient):
     def call(self, func, *args, **kwargs):
         try:
             self.beforeCall()
-            args = self.protocal.tranArgs(args)
             package = {
                 'func' : func,
                 'args' : args,
@@ -182,7 +180,6 @@ class HttpRpcClient(RpcClient):
     @retryTimes(retryTimes=3)
     def call(self, func, *args, **kwargs):
         self.beforeCall()
-        args = self.protocal.tranArgs(args)
         package = {
             'func' : func,
             'args' : args,
