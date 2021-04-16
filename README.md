@@ -36,7 +36,7 @@ pip install agileutil
 ## 快速开始
 创建文件my_service.py
 ```python
-from agileutil.rpc.server import rpc
+from agileutil.rpc import rpc
 
 @rpc
 def hello(name):
