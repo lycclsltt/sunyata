@@ -1,4 +1,4 @@
-DEFINE_VERSION = '0.0.17'
+DEFINE_VERSION = '0.0.18'
 from setuptools import setup
 
 requireList = [
@@ -24,6 +24,11 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     keywords='agileutil',
-    packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm'],
-    include_package_data=True
+    packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm', 'agileutil/cli'],
+    include_package_data=True,
+    entry_points = {
+        'console_scripts' : [
+            'agileutil=agileutil.cli.entry:main'
+        ]
+    }
 )
