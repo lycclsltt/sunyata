@@ -179,7 +179,7 @@ class HttpRpcServer(RpcServer, SanicController):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
-        print('HTTP serve on %s:%s' % (self.host, self.port) )
+        print(' HTTP serve on %s:%s' % (self.host, self.port) )
         self.protocal.transport.app.run()
 
     def disableLog(self):
@@ -226,7 +226,7 @@ class TcpRpcServer(BlockTcpRpcServer):
         server = await asyncio.start_server(self.handle, self.host, self.port)
         addr = server.sockets[0].getsockname()
         self.printLogo()
-        print('TCP serve on %s:%s' % (self.host, self.port) )
+        print(' TCP serve on %s:%s' % (self.host, self.port) )
         async with server:
             await server.serve_forever()
 
@@ -283,7 +283,7 @@ class UdpRpcServer(RpcServer):
         self.startWorkers()
         self.protocal.transport.bind()
         self.printLogo()
-        print('UDP serve on %s:%s' % (self.host, self.port))
+        print(' UDP serve on %s:%s' % (self.host, self.port))
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
