@@ -34,7 +34,7 @@ pip install agileutil
 ```
 
 ## 快速开始
-创建文件my_service.py
+创建文件myservice.py
 ```python
 from agileutil.rpc import rpc
 
@@ -44,7 +44,7 @@ def hello(name):
 ```
 启动：
 ```shell
-agileutil --run my_service
+agileutil --run myservice
 ```
 
 ## 详细介绍
