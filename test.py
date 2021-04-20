@@ -399,6 +399,14 @@ class TestRpcServerClient(unittest.TestCase):
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
+    def test_msg_pack_serialize(self):
+        from agileutil.rpc.serialize import MsgpackSerialize
+        arr = [1,2,3,4,5]
+        bytearr = MsgpackSerialize.serialize(arr)
+        newarr = MsgpackSerialize.unserialize(bytearr)
+        self.assertEqual(arr, newarr)
+        print('arr', arr, 'newarr', newarr)
+
 
 def create_http_server():
     server = HttpRpcServer('127.0.0.1', 10000)

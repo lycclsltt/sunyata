@@ -1,14 +1,12 @@
 import pickle
 import json
+import msgpack
 from abc import ABCMeta, abstractmethod
 
 
 class RpcSerialize(object):
 
     __metaclass__ = ABCMeta
-
-    def __init__(self):
-        pass
     
     @abstractmethod
     def serialize(cls, obj) -> bytes:
@@ -21,9 +19,6 @@ class RpcSerialize(object):
 
 class BinarySerialize(RpcSerialize):
 
-    def __init__(self):
-        pass
-
     @classmethod
     def serialize(cls, obj) -> bytes:
         return pickle.dumps(obj)
@@ -35,9 +30,6 @@ class BinarySerialize(RpcSerialize):
 
 class JsonSerialize(RpcSerialize):
 
-    def __init__(self):
-        pass
-
     @classmethod
     def serialize(cls, obj) -> bytes:
         return json.dumps(obj)
@@ -45,3 +37,14 @@ class JsonSerialize(RpcSerialize):
     @classmethod
     def unserialize(cls, bytearr):
         return json.loads(bytearr)
+
+
+class MsgpackSerialize(RpcSerialize):
+
+    @classmethod
+    def serialize(cls, obj) -> bytes:
+        return msgpack.dumps(obj)
+
+    @classmethod
+    def unserialize(cls, bytearr):
+        return msgpack.loads(bytearr)

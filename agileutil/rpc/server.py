@@ -249,6 +249,11 @@ class TcpRpcServer(BlockTcpRpcServer):
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         EventLoop.runUntilComplete( self.main() )
 
+    async def asyncServe(self):
+        if self.discovery and self.discoveryConfig:
+            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
+        await self.main()
+
 
 class UdpRpcServer(RpcServer):
 
