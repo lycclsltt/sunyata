@@ -176,6 +176,10 @@ class HttpRpcServer(RpcServer, SanicController):
         return resp
 
     def serve(self):
+        asyncio.run(self.asyncServe())
+
+    async def asyncServe(self):
+        tRegist = None
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
