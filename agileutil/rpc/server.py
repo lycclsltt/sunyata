@@ -245,14 +245,16 @@ class TcpRpcServer(BlockTcpRpcServer):
             return Exception('server exception, ' + str(ex))
 
     def serve(self):
-        if self.discovery and self.discoveryConfig:
-            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
-        EventLoop.runUntilComplete( self.main() )
+        asyncio.run( self.asyncServe() )
 
     async def asyncServe(self):
+        tRegist = None
         if self.discovery and self.discoveryConfig:
-            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
-        await self.main()
+            tRegist = asyncio.create_task( self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True) )
+        tServer = asyncio.create_task( self.main() )
+        await tServer
+        if tRegist:
+            await tRegist
 
 
 class UdpRpcServer(RpcServer):

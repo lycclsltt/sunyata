@@ -1,6 +1,7 @@
 from agileutil.consul import ConsulApi, Instance
 import time
 import threading
+import asyncio
 
 
 class RpcDiscovery(object):
@@ -33,12 +34,24 @@ class ConsulRpcDiscovery(RpcDiscovery):
             except:
                 pass
             time.sleep(interval)
+    
+    async def asyncDoHeartbeat(self, service, address, port, interval):
+        while 1:
+            try:
+                self.consulApi.ttlHeartbeat(service, address, port)
+            except:
+                pass
+            await asyncio.sleep(interval)
 
     def regist(self, service, address, port, ttlHeartBeat = True):
         self.consulApi.registService(serviceName = service, address = address, port=port)
         if ttlHeartBeat:
             t = threading.Thread(target=self.doHeartbeat, args=(service, address, port, self.heartbeatInterval))
             t.start()
+
+    async def asyncRegist(self, service, address, port, ttlHeartBeat = True):
+        self.consulApi.registService(serviceName = service, address = address, port=port)
+        await self.asyncDoHeartbeat(service, address, port, self.heartbeatInterval)
 
     def getInstanceList(self, service):
         instanceList = self.consulApi.getServiceInstanceList(service)
