@@ -26,7 +26,7 @@ Agileutil是一个Python3 RPC框架，client和server既可以直连，也可以
 - 使用简单，用户只需要关注业务即可
 - HTTP/UDP/TCP 全协议支持
 - 支持异步 async/await
-- 服务注册、发现
+- 支持只服务注册、发现
 
 ## 安装
 Python 版本 >= 3.6
