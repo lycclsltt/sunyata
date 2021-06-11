@@ -26,6 +26,7 @@ from agileutil.rpc.server import HttpRpcServer
 from agileutil.rpc.client import HttpRpcClient
 from agileutil.rpc.server import RpcServer
 from agileutil.rpc import rpc
+from agileutil.http.server import HttpServer
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
@@ -406,6 +407,25 @@ class TestRpcServerClient(unittest.TestCase):
         newarr = MsgpackSerialize.unserialize(bytearr)
         self.assertEqual(arr, newarr)
         print('arr', arr, 'newarr', newarr)
+
+    def test_inner_http_server(self):
+        def inner_hello(req):
+            name = req.data.get('name', '')
+            return 'hello ' + name
+        def create_server():
+            hs = HttpServer(bind='127.0.0.1', port=10023)
+            hs.addRoute('/hello', inner_hello)
+            hs.serve()
+        def create_client():
+            r = requests.post('http://127.0.0.1:10023/hello', data={'name':'xiaoming'})
+            self.assertEqual(r.text, 'hello xiaoming')
+            print('test inner http ok')
+        tServer = threading.Thread(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = threading.Thread(target=create_client)
+        tClient.start()
+
 
 
 def create_http_server():
