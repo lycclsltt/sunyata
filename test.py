@@ -409,7 +409,7 @@ class TestRpcServerClient(unittest.TestCase):
         print('arr', arr, 'newarr', newarr)
 
     def test_inner_http_server(self):
-        def inner_hello(req):
+        async def inner_hello(req):
             name = req.data.get('name', '')
             return 'hello ' + name
         def create_server():

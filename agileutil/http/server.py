@@ -17,21 +17,22 @@ class HttpServer(object):
     def addRoute(self, route, method):
         self.routeMethodMap[route] = method
 
-    def handleRequest(self, httpRequest):
+    async def handleRequest(self, httpRequest):
         method = self.routeMethodMap.get(httpRequest.uri, None)
         if not method:
             return HttpFactory.genHttpResponse(HttpStatus404)
         try:
-            respString = method(httpRequest)
+            respString = await method(httpRequest)
             return HttpFactory.genHttpResponse(HttpStatus200, respString)
         except Exception as ex:
             return HttpFactory.genHttpResponse(HttpStatus500, format_exc())
     
     async def handleEcho(self, reader, writer):
         data = await reader.read(self.bufSize)
+        if data == b'': return
         #addr = writer.get_extra_info('peername')
         httpRequest = HttpFactory.genHttpRequest(data)
-        httpResponse = self.handleRequest(httpRequest)
+        httpResponse = await self.handleRequest(httpRequest)
         writer.write(httpResponse.toBytes())
         await writer.drain()
         writer.close()
