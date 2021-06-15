@@ -7,11 +7,12 @@ import asyncio
 
 class HttpServer(object):
 
+    routeMethodMap = {}
+
     def __init__(self, bind = '0.0.0.0', port=9989 ):
         super().__init__()
         self.bind = bind
         self.port = port
-        self.routeMethodMap = {}
         self.bufSize = 10240
         
     def addRoute(self, route, method):
@@ -44,3 +45,12 @@ class HttpServer(object):
 
     def serve(self):
         return asyncio.run(self.listenAndServe())
+
+    @classmethod
+    def route(cls, path):
+        def wrapper(method):
+            cls.routeMethodMap[path] = method
+            return method
+        return wrapper
+
+route = HttpServer.route
