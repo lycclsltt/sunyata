@@ -11,9 +11,6 @@ from multiprocessing import Process
 from agileutil.util import local_ip
 import socket
 import requests
-import agileutil.rpc.const
-from sanic.log import logger
-import logging
 import random
 from agileutil.rpc.compress import RpcCompress
 from agileutil.rpc.server import TcpRpcServer
@@ -30,7 +27,7 @@ from agileutil.http.server import HttpServer
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
-SLEEP = 1
+SLEEP = 1.5
 
 RpcServer.isPrintLogo = False
 
@@ -400,14 +397,6 @@ class TestRpcServerClient(unittest.TestCase):
         tClient = threading.Thread(target=create_client)
         tClient.start()
 
-    def test_msg_pack_serialize(self):
-        from agileutil.rpc.serialize import MsgpackSerialize
-        arr = [1,2,3,4,5]
-        bytearr = MsgpackSerialize.serialize(arr)
-        newarr = MsgpackSerialize.unserialize(bytearr)
-        self.assertEqual(arr, newarr)
-        print('arr', arr, 'newarr', newarr)
-
     def test_inner_http_server(self):
         async def inner_hello(req):
             name = req.data.get('name', '')
@@ -430,7 +419,6 @@ class TestRpcServerClient(unittest.TestCase):
 
 def create_http_server():
     server = HttpRpcServer('127.0.0.1', 10000)
-    server.disableLog()
     server.regist(sayHello)
     server.serve()
 
@@ -443,7 +431,6 @@ def create_http_client():
 def create_http_server_discovery():
     if socket.gethostname() == 'ubuntu': return
     server = HttpRpcServer('127.0.0.1', 10003)
-    server.disableLog()
     disconf = DiscoveryConfig(
         consulHost = CONSUL_HOST,
         consulPort = CONSUL_PORT,
@@ -470,19 +457,16 @@ def create_http_client_discovery():
 
 def create_http_server_10011():
     server = HttpRpcServer('127.0.0.1', 10011)
-    server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10012():
     server = HttpRpcServer('127.0.0.1', 10012)
-    server.disableLog()
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10013():
     server = HttpRpcServer('127.0.0.1', 10013)
-    server.disableLog()
     server.regist(sayHello)
     server.serve()
 
@@ -498,7 +482,6 @@ def create_http_client_multi():
 
 def create_http_server_timeout():
     server = HttpRpcServer('127.0.0.1', 10016)
-    server.disableLog()
     server.regist(testTimeout)
     server.regist(sayHello)
     server.serve()
@@ -518,7 +501,6 @@ def create_http_server_compress():
     RpcCompress.DEBUG = True
     RpcCompress.enableCompressLen = 200
     server = HttpRpcServer('127.0.0.1', 10021)
-    server.disableLog()
     server.regist(sayHello)
     server.serve()
 

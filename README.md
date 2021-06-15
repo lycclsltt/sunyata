@@ -17,7 +17,7 @@
   - [完整的服务端示例 (UDP/HTTP调用方式相同)](#完整的服务端示例-udphttp调用方式相同)
   - [完整的客户端示例（UDP/HTTP调用方式相同）](#完整的客户端示例udphttp调用方式相同)
 - [数据压缩](#数据压缩)
-- [HTTP Server](#http-server)
+- [内置Web框架](#内置web框架)
 
 ## 简介
 Agileutil是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul做服务注册发现。
@@ -109,7 +109,7 @@ print(resp)
 ```
 
 ### HTTP RPC 服务端
-底层是基于高性能的Sanic异步web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
+底层是基于内置web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
 ```python
 from agileutil.rpc.server import HttpRpcServer, rpc
 
@@ -247,7 +247,7 @@ print(resp)
 在数据传输大于4KB时，自动开启进行压缩。对端根据一个标记位进行判断，自动进行解压缩处理（或不处理，未经过压缩的情况）。开发者无需关心
 数据的压缩、解压缩过程，经过测试对性能的影响极低（由于采用了level1级别的压缩），最高可减少75%的网络IO。
 
-## HTTP Server
+## 内置Web框架
 Agileutil也可以作为一个web框架来使用：
 ```python
 from agileutil.http.server import HttpServer, route

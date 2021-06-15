@@ -14,7 +14,7 @@ class HttpResponse(object):
         self.headers['Content-Type'] = 'text/html'
         self.headers['Content-Length'] = len(self.body)
 
-    def toString(self):
+    def toBytes(self):
         resLine = "%s %s %s\r\n" % (self.httpVersion, self.status.code, self.status.msg)
         self.genHeaders()
         resHeaders = ''
@@ -22,9 +22,7 @@ class HttpResponse(object):
             resHeaders += "%s: %s\r\n" % (k, v)
         resHeaders += "\r\n"
         resBody = self.body
-        string = resLine + resHeaders + resBody
-        return string
-
-    def toBytes(self):
-        string = self.toString()
-        return str2bytes(string)
+        if type(resBody) == str:
+            resBody = str2bytes(resBody)
+        res = str2bytes(resLine) + str2bytes(resHeaders) + resBody
+        return res

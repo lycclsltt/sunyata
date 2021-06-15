@@ -9,40 +9,45 @@ class HttpFactory(object):
 
     @classmethod
     def genLineHeaderBody(self, lines):
-        reqLine = ''
+        reqLine = b''
         reqHeaders = []
-        reqBody = ''
+        reqBody = b''
         lenLines = len(lines)
         for index, line in enumerate(lines):
             if index == 0: 
                 reqLine = line
             elif index == lenLines - 1:
                 reqBody = line
-            elif index > 0 and line != '':
+            elif index > 0 and line != b'':
                 reqHeaders.append(line)
         return reqLine, reqHeaders, reqBody
         
     @classmethod
     def genHttpRequest(cls, linesStr):
-        linesStr = bytes2str(linesStr)
         req = HttpRequest()
-        lines = linesStr.split("\r\n")
+        lines = linesStr.split(b"\r\n")
         reqLine, reqHeaders, reqBody = cls.genLineHeaderBody(lines)
-        req.method, uri, req.httpVersion = reqLine.split(' ')
-        req.uri = uri.split('?')[0]
+        req.method, uri, req.httpVersion = reqLine.split(b' ')
+        req.uri = bytes2str( uri.split(b'?')[0] )
         req.body = reqBody
         for header in reqHeaders:
-            k, v = header.split(': ')
-            req.headers[k] = v
+            k, v = header.split(b': ')
+            req.headers[bytes2str(k)] = bytes2str(v)
         if req.body:
-            for kvPair in req.body.split('&'):
-                k, v = kvPair.split('=')
-                req.data[k] = v
+            try:
+                for kvPair in req.body.split(b'&'):
+                    k, v = kvPair.split(b'=')
+                    req.data[bytes2str(k)] = bytes2str(v)
+            except:
+                pass
         else:
-            kvPairs = uri.split('?')[1].split('&')
-            for kvPair in kvPairs:
-                k, v = kvPair.split('=')
-                req.data[k] = v
+            try:
+                kvPairs = uri.split(b'?')[1].split(b'&')
+                for kvPair in kvPairs:
+                    k, v = kvPair.split(b'=')
+                    req.data[bytes2str(k)] = bytes2str(v)
+            except:
+                pass
         return req
 
     @classmethod

@@ -1,6 +1,5 @@
 from socket import *
 import struct
-from agileutil.sanic import SanicApp
 from multiprocessing import cpu_count
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -210,13 +209,11 @@ class ClientUdpTransport(UdpTransport):
 
 class HttpTransport(RpcTransport):
 
-    def __init__(self, host, port, worker=cpu_count(), timeout = 10, poolConnection=20, poolMaxSize=20, maxRetries=2):
+    def __init__(self, host, port, timeout = 10, poolConnection=20, poolMaxSize=20, maxRetries=2):
         RpcTransport.__init__(self)
         self.host = host
         self.port = port
-        self.worker = worker
         self.timeout = timeout
-        self.app = SanicApp(host=host, port=port, worker_num=worker, debug=False)
         self.poolConnection = poolConnection
         self.poolMaxSize = poolMaxSize
         self.maxRetries = maxRetries

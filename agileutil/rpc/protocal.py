@@ -1,10 +1,6 @@
 from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
-from agileutil.rpc.serialize import BinarySerialize, JsonSerialize, RpcSerialize
-import json
-from abc import ABCMeta, abstractmethod
-from agileutil.sanic import SanicApp
+from agileutil.rpc.serialize import BinarySerialize, JsonSerialize
 from multiprocessing import cpu_count
-import requests
 
 
 class RpcProtocal(object):
@@ -54,7 +50,7 @@ class HttpProtocal(RpcProtocal):
         self.worker = worker
         self.serializeType = serializeType
         self.timeout = timeout
-        self.transport = HttpTransport(host, port, worker, timeout, poolConnection, poolMaxSize, maxRetries)
+        self.transport = HttpTransport(host, port, timeout, poolConnection, poolMaxSize, maxRetries)
 
 
 class TcpProtocal(RpcProtocal):

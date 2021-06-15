@@ -1,4 +1,3 @@
-from agileutil.rpc.transport import TcpTransport
 from agileutil.http.factory import HttpFactory
 from agileutil.http.status import *
 from traceback import format_exc

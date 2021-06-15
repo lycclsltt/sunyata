@@ -1,4 +1,4 @@
-DEFINE_VERSION = '0.0.19'
+DEFINE_VERSION = '0.0.20'
 from setuptools import setup
 
 requireList = [
@@ -6,8 +6,6 @@ requireList = [
     'requests==2.25.1',
     'PyMySQL==0.10.1',
     'DBUtils==1.3',
-    'sanic==20.12.3',
-    'msgpack==1.0.2'
 ]
 
 setup(

@@ -31,7 +31,7 @@ print('resp', resp)
 ```
 
 ### HTTP RPC Server
-Agileutil also provides Remote Procedure Call (RPC) based on HTTP protocol, with the underlying implementation based on HTTP protocol and high performance Sanic web framework.It is very simple to use and is very similar to TcpRpcServer.
+Agileutil also provides Remote Procedure Call (RPC) based on HTTP protocol, with the underlying implementation based on HTTP protocol and built-in web framework.It is very simple to use and is very similar to TcpRpcServer.
 ```python
 from agileutil.rpc.server import HttpRpcServer
 

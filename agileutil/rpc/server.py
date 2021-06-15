@@ -3,18 +3,15 @@ import multiprocessing
 from agileutil.rpc.exception import FuncNotFoundException
 import queue
 import threading
-import select
 import socket
 from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
-import functools
-from agileutil.sanic import SanicController
 from agileutil.rpc.compress import RpcCompress
-from types import MethodType,FunctionType,CoroutineType
+from types import FunctionType
 from agileutil.rpc.method import RpcMethod
 import asyncio
 import inspect
-from agileutil.eventloop import EventLoop
+from agileutil.http.server import HttpServer
 
 class RpcServer(object):
 
@@ -139,32 +136,21 @@ class BlockTcpRpcServer(SimpleTcpRpcServer):
             t.start()
 
 
-class HttpRpcServerController(SanicController):
-    
-    callBack = None
-
-    async def handle(self):
-        self.isRaw = True
-        body = self.body()
-        return self.callBack(body)
-
-    @classmethod
-    def setCallback(cls, callBack):
-        cls.callBack = callBack
-
-
-class HttpRpcServer(RpcServer, SanicController):
+class HttpRpcServer(RpcServer):
     
     def __init__(self, host, port, workers = multiprocessing.cpu_count()):
         RpcServer.__init__(self)
         self.host = host
         self.port = port
-        self.worker = workers
         self.protocal = HttpProtocal(host, port, workers)
-        HttpRpcServerController.setCallback(self.handle)
-        self.protocal.transport.app.route('/', HttpRpcServerController)
+        self.app = HttpServer(self.host, self.port)
+        self.app.addRoute('/', self.handle)
+
+    async def handle(self, request):
+        body = request.body
+        return await self.callback(body)
         
-    def handle(self, package):
+    async def callback(self, package):
         isEnableCompress = package[:1]
         msg = package[1:]
         if isEnableCompress == b'1':
@@ -176,18 +162,12 @@ class HttpRpcServer(RpcServer, SanicController):
         return resp
 
     def serve(self):
-        asyncio.run(self.asyncServe())
-
-    async def asyncServe(self):
         tRegist = None
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
         print(' HTTP serve on %s:%s' % (self.host, self.port) )
-        self.protocal.transport.app.run()
-
-    def disableLog(self):
-        self.protocal.transport.app.disableLog()
+        self.app.serve()
 
 
 class TcpRpcServer(BlockTcpRpcServer):
