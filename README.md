@@ -248,7 +248,7 @@ print(resp)
 数据的压缩、解压缩过程，经过测试对性能的影响极低（由于采用了level1级别的压缩），最高可减少75%的网络IO。
 
 ## 内置Web框架
-Agileutil也可以作为一个web框架来使用：
+Agileutil也可以作为一个web框架来使用, HttpRpcServer在此基础上构建。
 ```python
 from agileutil.http.server import HttpServer, route
 import json
