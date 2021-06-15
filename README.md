@@ -249,7 +249,7 @@ print(resp)
 
 ## HTTP Server
 Agileutil也可以作为一个web框架来使用：
-```
+```python
 from agileutil.http.server import HttpServer, route
 import json
 
