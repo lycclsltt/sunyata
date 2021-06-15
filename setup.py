@@ -23,7 +23,13 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     keywords='agileutil',
-    packages=['agileutil', 'agileutil/rpc', 'agileutil/algorithm', 'agileutil/cli'],
+    packages=[
+        'agileutil', 
+        'agileutil/rpc', 
+        'agileutil/algorithm', 
+        'agileutil/cli',
+        'agileutil/http'
+    ],
     include_package_data=True,
     entry_points = {
         'console_scripts' : [
