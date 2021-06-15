@@ -251,16 +251,13 @@ print(resp)
 Agileutil也可以作为一个web框架来使用, HttpRpcServer在此基础上构建。
 ```python
 from agileutil.http.server import HttpServer, route
-import json
 
-@route('/test')
-async def test(request):
-    a = request.data.get('a')
-    b = request.data.get('b')
-    c = int(a) + int(b)
-    return json.dumps({'sum':c})
+@route('/hello')
+async def hello(request):
+    name = request.data.get('name', '')
+    return 'Hello ' + name
 
-hs = HttpServer()
+hs = HttpServer(bind='0.0.0.0', port=9989)
 hs.serve()
 ```
 
