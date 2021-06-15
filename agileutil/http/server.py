@@ -17,6 +17,19 @@ class HttpServer(object):
     def addRoute(self, route, method):
         self.routeMethodMap[route] = method
 
+    def printLogo(self):
+        logo = """
+     _         _ _      _   _ _   _ _ 
+    / \   __ _(_) | ___| | | | |_(_) |
+   / _ \ / _` | | |/ _ \ | | | __| | |
+  / ___ \ (_| | | |  __/ |_| | |_| | |
+ /_/   \_\__, |_|_|\___|\___/ \__|_|_|
+         |___/      
+ 
+ HTTP server listening on %s:%s 
+         """  % (self.bind, self.port)
+        print(logo)
+
     async def handleRequest(self, httpRequest):
         method = self.routeMethodMap.get(httpRequest.uri, None)
         if not method:
@@ -39,7 +52,7 @@ class HttpServer(object):
     
     async def listenAndServe(self):
         server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
-        print('Http server listening on %s:%s' % (self.bind, self.port) )
+        self.printLogo()
         async with server: await server.serve_forever()
 
     def serve(self):
