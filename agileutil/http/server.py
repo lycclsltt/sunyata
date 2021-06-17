@@ -1,8 +1,8 @@
 from agileutil.http.factory import HttpFactory
 from agileutil.http.status import *
 from traceback import format_exc
+from agileutil.eventloop import EventLoop
 import asyncio
-
 
 class HttpServer(object):
 
@@ -55,11 +55,11 @@ class HttpServer(object):
     
     async def listenAndServe(self):
         server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
-        self.printLogo()
+        #self.printLogo()
         async with server: await server.serve_forever()
 
     def serve(self):
-        return asyncio.run(self.listenAndServe())
+        return EventLoop.runUntilComplete(self.listenAndServe())
 
     @classmethod
     def route(cls, path, methods = None):
