@@ -6,16 +6,17 @@ import asyncio
 
 class HttpServer(object):
 
-    routeMethodMap = {}
+    routerMap = {}
 
     def __init__(self, bind = '0.0.0.0', port=9989 ):
         super().__init__()
         self.bind = bind
         self.port = port
         self.bufSize = 10240
-        
-    def addRoute(self, route, method):
-        self.routeMethodMap[route] = method
+    
+    @classmethod
+    def addRoute(cls, path, func, methods = None):
+        cls.routerMap[path] = HttpFactory.genHttpRouter(path, func, methods)
 
     def printLogo(self):
         logo = """
@@ -31,11 +32,13 @@ class HttpServer(object):
         print(logo)
 
     async def handleRequest(self, httpRequest):
-        method = self.routeMethodMap.get(httpRequest.uri, None)
-        if not method:
+        router = self.routerMap.get(httpRequest.uri, None)
+        if not router:
             return HttpFactory.genHttpResponse(HttpStatus404)
+        if router.methods and httpRequest.method not in router.methods:
+            return HttpFactory.genHttpResponse(HttpStatus405)
         try:
-            respString = await method(httpRequest)
+            respString = await router.getFunc()(httpRequest)
             return HttpFactory.genHttpResponse(HttpStatus200, respString)
         except Exception as ex:
             return HttpFactory.genHttpResponse(HttpStatus500, format_exc())
@@ -59,10 +62,10 @@ class HttpServer(object):
         return asyncio.run(self.listenAndServe())
 
     @classmethod
-    def route(cls, path):
-        def wrapper(method):
-            cls.routeMethodMap[path] = method
-            return method
+    def route(cls, path, methods = None):
+        def wrapper(func):
+            cls.addRoute(path, func, methods)
+            return func
         return wrapper
 
 route = HttpServer.route

@@ -1,5 +1,6 @@
 from agileutil.http.request import HttpRequest
 from agileutil.http.response import HttpResponse
+from agileutil.http.router import HttpRouter
 from agileutil.util import bytes2str
 
 class HttpFactory(object):
@@ -27,7 +28,9 @@ class HttpFactory(object):
         req = HttpRequest()
         lines = linesStr.split(b"\r\n")
         reqLine, reqHeaders, reqBody = cls.genLineHeaderBody(lines)
-        req.method, uri, req.httpVersion = reqLine.split(b' ')
+        method, uri, httpVersion = reqLine.split(b' ')
+        req.method = bytes2str(method)
+        req.httpVersion = bytes2str(httpVersion)
         req.uri = bytes2str( uri.split(b'?')[0] )
         req.body = reqBody
         for header in reqHeaders:
@@ -56,3 +59,11 @@ class HttpFactory(object):
         httpResponse.status = status
         httpResponse.body = body
         return httpResponse
+
+    @classmethod
+    def genHttpRouter(cls, path, func, methods):
+        httpRouter = HttpRouter()
+        httpRouter.path = path
+        httpRouter.func = func
+        httpRouter.methods = methods
+        return httpRouter

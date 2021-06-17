@@ -28,6 +28,11 @@ class HttpStatus404(HttpStatus):
     msg = 'Not Found'
 
 
+class HttpStatus405(HttpStatus):
+    code = 405
+    msg = 'Method Not Allowed'
+
+
 class HttpStatus500(HttpStatus):
     code = 500
     msg = 'Internal Server Error'
