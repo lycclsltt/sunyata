@@ -53,21 +53,27 @@ class HttpServer(object):
         await writer.drain()
         writer.close()
     
-    async def listenAndServe(self):
-        server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
+    def listenAndServe(self):
+        loop = asyncio.get_event_loop()
+        coro = asyncio.start_server(self.handleEcho, self.bind, self.port, loop=loop)
+        server = loop.run_until_complete(coro)
+        print('Serving on {}'.format(server.sockets[0].getsockname()))
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        server.close()
+        loop.run_until_complete(server.wait_closed())
+        loop.close()
+
+        #server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
         #self.printLogo()
-        await server.serve_forever()
+        #await server.serve_forever()
         #async with server: 
         #    await server.serve_forever()
 
-    async def asyncServe(self):
-        httpServer = asyncio.ensure_future(self.listenAndServe())
-        #httpServer = asyncio.create_task( self.listenAndServe() )
-        await httpServer
-
     def serve(self):
-        EventLoop.runUntilComplete(self.listenAndServe())
-        #asyncio.run(self.asyncServe())
+        self.listenAndServe()
 
     @classmethod
     def route(cls, path, methods = None):

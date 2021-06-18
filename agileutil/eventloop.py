@@ -10,4 +10,5 @@ class EventLoop(object):
         asyncio.set_event_loop(loop)
         loop = asyncio.get_event_loop()
         loop.run_until_complete( asyncio.gather(*tasks) )
+        loop.run_forever()
         loop.close()
