@@ -80,12 +80,12 @@ class HttpServer(object):
 
     def handleConn(self, conn):
         data = conn.recv(65535)
+        if not data:
+            conn.close()
+            return
         #data = self.transport.recvFullHeader(conn)
-        #if data == b'': 
-        #    conn.close()
-        #    return
         req = HttpFactory.genHttpRequest(data)
-        req = HttpFactory.genHttpRequest(data + self.transport.recvn(conn, int( req.headers.get('Content-Length', 0) )))
+        #req = HttpFactory.genHttpRequest(data + self.transport.recvn(conn, int( req.headers.get('Content-Length', 0) )))
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
         conn.close()
@@ -93,7 +93,7 @@ class HttpServer(object):
     def workServe(self):
         while self.exitFlag == False:
             try:
-                conn = self.queue.get(block=True, timeout=2)
+                conn = self.queue.get(block=True, timeout=1)
                 self.handleConn(conn)
             except queue.Empty:
                 pass
