@@ -21,12 +21,9 @@ class Log:
         '_warningCallBack', '_isOutput'
     ]
 
-    __logList = {}
-    #__fmt = '%(asctime)s-%(filename)s-%(process)d-%(thread)d-%(funcName)s-[line:%(lineno)d]-%(levelname)s-%(message)s'
     __fmt = '%(asctime)s [%(levelname)s] [p:%(process)d] [t:%(thread)d] [%(threadName)s] %(message)s'
     __shortFmt = '%(asctime)s-%(levelname)s-%(message)s'
     __level = logging.DEBUG
-    __instance = None
 
     def __init__(self, path, isRotate=True, logSaveDays=10, isShortLog=False):
         self.__path = path

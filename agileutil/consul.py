@@ -2,7 +2,6 @@ import hashlib
 import json
 import requests
 from agileutil.util import local_ip
-import time
 
 
 class Instance(object):

@@ -1,6 +1,5 @@
 from socket import *
 import struct
-from multiprocessing import cpu_count
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from agileutil.rpc.const import SERVER_TIMEOUT

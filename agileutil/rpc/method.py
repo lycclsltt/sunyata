@@ -1,5 +1,4 @@
 import operator
-import asyncio
 from agileutil.eventloop import EventLoop
 
 class RpcMethod(object):
