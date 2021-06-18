@@ -56,8 +56,9 @@ class HttpServer(object):
     async def listenAndServe(self):
         server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
         #self.printLogo()
-        async with server: 
-            await server.serve_forever()
+        await server.serve_forever()
+        #async with server: 
+        #    await server.serve_forever()
 
     async def asyncServe(self):
         httpServer = asyncio.ensure_future(self.listenAndServe())
