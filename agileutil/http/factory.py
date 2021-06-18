@@ -55,10 +55,7 @@ class HttpFactory(object):
 
     @classmethod
     def genHttpResponse(cls, status, body = ''):
-        httpResponse = HttpResponse()
-        httpResponse.status = status
-        httpResponse.body = body
-        return httpResponse
+        return HttpResponse(status, body)
 
     @classmethod
     def genHttpRouter(cls, path, func, methods):

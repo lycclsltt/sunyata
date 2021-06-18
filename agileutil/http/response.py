@@ -3,26 +3,26 @@ from agileutil.util import str2bytes
 
 class HttpResponse(object):
 
-    def __init__(self) -> None:
+    def __init__(self, status, body) -> None:
         super().__init__()
         self.httpVersion = 'HTTP/1.1'
-        self.status = HttpStatus200()
+        self.status = status
         self.headers = {}
-        self.body = ''
+        self.body = body
 
     def genHeaders(self):
         self.headers['Content-Type'] = 'text/html'
         self.headers['Content-Length'] = len(self.body)
 
     def toBytes(self):
-        resLine = "%s %s %s\r\n" % (self.httpVersion, self.status.code, self.status.msg)
+        resLine = f"{self.httpVersion} {self.status.code} {self.status.msg}"
         self.genHeaders()
         resHeaders = ''
         for k, v in self.headers.items():
-            resHeaders += "%s: %s\r\n" % (k, v)
+            resHeaders += f"{k}: {v}\r\n"
         resHeaders += "\r\n"
         resBody = self.body
         if type(resBody) == str:
             resBody = str2bytes(resBody)
-        res = str2bytes(resLine) + str2bytes(resHeaders) + resBody
+        res = str2bytes(resLine + resHeaders) + resBody
         return res

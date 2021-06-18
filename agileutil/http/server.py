@@ -79,16 +79,13 @@ class HttpServer(object):
         loop.close()
 
     def handleConn(self, conn):
-        data = self.transport.recvFullHeader(conn)
-        if data == b'': 
-            conn.close()
-            return
+        data = conn.recv(65535)
+        #data = self.transport.recvFullHeader(conn)
+        #if data == b'': 
+        #    conn.close()
+        #    return
         req = HttpFactory.genHttpRequest(data)
-        if 'Content-Length' in req.headers:
-            bodyLen = req.headers['Content-Length']
-            body = self.transport.recvn(conn, int(bodyLen))
-            fulldata = data + body
-            req = HttpFactory.genHttpRequest(fulldata)
+        req = HttpFactory.genHttpRequest(data + self.transport.recvn(conn, int( req.headers.get('Content-Length', 0) )))
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
         conn.close()
