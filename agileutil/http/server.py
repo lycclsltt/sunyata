@@ -88,7 +88,7 @@ class HttpServer(object):
         conn.close()
 
     def workServe(self):
-        while self.exitFlag:
+        while self.exitFlag == False:
             try:
                 conn = self.queue.get()
                 self.handleConn(conn)
