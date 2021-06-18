@@ -64,7 +64,8 @@ class HttpServer(object):
         await httpServer
 
     def serve(self):
-        asyncio.run(self.asyncServe())
+        EventLoop.runUntilComplete(self.asyncServe())
+        #asyncio.run(self.asyncServe())
 
     @classmethod
     def route(cls, path, methods = None):
