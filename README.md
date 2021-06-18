@@ -127,9 +127,8 @@ s.serve()
 from agileutil.rpc.client import HttpRpcClient
 
 c = HttpRpcClient('127.0.0.1', 9988)
-for i in range(10):
-    resp = c.call('sayHello', 'zhangsan')
-    print(resp)
+resp = c.call('sayHello', 'zhangsan')
+print(resp)
 ```
 
 ### UDP RPC 服务端
@@ -155,9 +154,8 @@ server.serve()
 ```python
 from agileutil.rpc.client import UdpRpcClient
 cli = UdpRpcClient('127.0.0.1', 9988)
-for i in range(5000):
-    resp = cli.call('sayHello', name = 'xiaoming' )
-    print(resp)
+resp = cli.call('sayHello', name = 'xiaoming' )
+print(resp)
 ```
 
 ## 服务发现
@@ -265,8 +263,3 @@ hs.serve()
 [![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
 
 [![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)
-
-
-
-
-
