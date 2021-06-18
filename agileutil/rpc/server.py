@@ -148,7 +148,8 @@ class HttpRpcServer(RpcServer):
 
     def handle(self, request):
         body = request.body
-        return self.callback(body)
+        resp = self.callback(body)
+        return resp
         
     def callback(self, package):
         isEnableCompress = package[:1]

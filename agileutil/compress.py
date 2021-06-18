@@ -8,7 +8,6 @@ class Compress(object):
 
     @classmethod
     def compress(cls, bytearr: bytes):
-        print(cls.DEBUG)
         compressed = lb.compress(bytearr)
         if cls.DEBUG:
             print('debug, do compress', 'orig len', len(bytearr), 'compress len', len(compressed))

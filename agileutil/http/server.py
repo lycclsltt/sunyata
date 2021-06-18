@@ -84,13 +84,11 @@ class HttpServer(object):
             conn.close()
             return
         req = HttpFactory.genHttpRequest(data)
-        if 'Content-Length' not in req.headers:
-            conn.close()
-            raise Exception('Content-Length not found in headers')
-        bodyLen = req.headers['Content-Length']
-        body = self.transport.recvn(conn, int(bodyLen))
-        fulldata = data + body
-        req = HttpFactory.genHttpRequest(fulldata)
+        if 'Content-Length' in req.headers:
+            bodyLen = req.headers['Content-Length']
+            body = self.transport.recvn(conn, int(bodyLen))
+            fulldata = data + body
+            req = HttpFactory.genHttpRequest(fulldata)
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
         conn.close()
