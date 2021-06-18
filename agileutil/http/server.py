@@ -1,35 +1,30 @@
 from agileutil.http.factory import HttpFactory
 from agileutil.http.status import *
 from traceback import format_exc
-from agileutil.eventloop import EventLoop
+from agileutil.http.transport import TcpTransport
+from multiprocessing import cpu_count
 import asyncio
+import queue
+import threading
 
 class HttpServer(object):
 
     routerMap = {}
 
-    def __init__(self, bind = '0.0.0.0', port=9989 ):
+    def __init__(self, bind = '0.0.0.0', port=9989, isAsync=False, workers = cpu_count()):
         super().__init__()
         self.bind = bind
         self.port = port
         self.bufSize = 10240
+        self.transport = TcpTransport(self.bind, self.port)
+        self.queue = queue.Queue()
+        self.threadList = []
+        self.workers = workers
+        self.isAsync = isAsync
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
         cls.routerMap[path] = HttpFactory.genHttpRouter(path, func, methods)
-
-    def printLogo(self):
-        logo = """
-     _         _ _      _   _ _   _ _ 
-    / \   __ _(_) | ___| | | | |_(_) |
-   / _ \ / _` | | |/ _ \ | | | __| | |
-  / ___ \ (_| | | |  __/ |_| | |_| | |
- /_/   \_\__, |_|_|\___|\___/ \__|_|_|
-         |___/      
- 
- HTTP server listening on %s:%s 
-         """  % (self.bind, self.port)
-        print(logo)
 
     async def handleRequest(self, httpRequest):
         router = self.routerMap.get(httpRequest.uri, None)
@@ -39,6 +34,18 @@ class HttpServer(object):
             return HttpFactory.genHttpResponse(HttpStatus405)
         try:
             respString = await router.getFunc()(httpRequest)
+            return HttpFactory.genHttpResponse(HttpStatus200, respString)
+        except Exception as ex:
+            return HttpFactory.genHttpResponse(HttpStatus500, format_exc())
+
+    def syncHandleRequest(self, httpRequest):
+        router = self.routerMap.get(httpRequest.uri, None)
+        if not router:
+            return HttpFactory.genHttpResponse(HttpStatus404)
+        if router.methods and httpRequest.method not in router.methods:
+            return HttpFactory.genHttpResponse(HttpStatus405)
+        try:
+            respString = router.getFunc()(httpRequest)
             return HttpFactory.genHttpResponse(HttpStatus200, respString)
         except Exception as ex:
             return HttpFactory.genHttpResponse(HttpStatus500, format_exc())
@@ -67,8 +74,34 @@ class HttpServer(object):
         print('Http Server Closed.')
         loop.close()
 
+    def handleConn(self, conn):
+        data = self.transport.recvFullRequest(conn)
+        req = HttpFactory.genHttpRequest(data)
+        resp = self.syncHandleRequest(req)
+        self.transport.sendAll(conn, resp.toBytes())
+        conn.close()
+
+    def workServe(self):
+        while True:
+            conn = self.queue.get()
+            self.handleConn(conn)
+
+    def listenAndDispatch(self):
+        for i in range(self.workers):
+            th = threading.Thread(target=self.workServe)
+            th.start()
+            self.threadList.append(th)
+            print('Start worker %s' % th )
+        self.transport.bind()
+        while True:
+            conn, _ = self.transport.accept()
+            self.queue.put(conn)
+
     def serve(self):
-        self.listenAndServe()
+        if self.isAsync:
+            self.listenAndServe()
+        else:
+            self.listenAndDispatch()
 
     @classmethod
     def route(cls, path, methods = None):
