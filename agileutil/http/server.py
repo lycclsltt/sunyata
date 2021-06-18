@@ -65,7 +65,7 @@ class HttpServer(object):
         await httpServer
 
     def serve(self):
-        EventLoop.runUntilComplete(self.asyncServe())
+        EventLoop.runUntilComplete(self.listenAndServe())
         #asyncio.run(self.asyncServe())
 
     @classmethod
