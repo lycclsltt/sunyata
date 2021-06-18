@@ -57,20 +57,15 @@ class HttpServer(object):
         loop = asyncio.get_event_loop()
         coro = asyncio.start_server(self.handleEcho, self.bind, self.port, loop=loop)
         server = loop.run_until_complete(coro)
-        print('Serving on {}'.format(server.sockets[0].getsockname()))
+        print('Http Serving on {}'.format(server.sockets[0].getsockname()))
         try:
             loop.run_forever()
         except KeyboardInterrupt:
             pass
         server.close()
         loop.run_until_complete(server.wait_closed())
+        print('Http Server Closed.')
         loop.close()
-
-        #server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
-        #self.printLogo()
-        #await server.serve_forever()
-        #async with server: 
-        #    await server.serve_forever()
 
     def serve(self):
         self.listenAndServe()

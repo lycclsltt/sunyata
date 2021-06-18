@@ -24,10 +24,12 @@ from agileutil.rpc.client import HttpRpcClient
 from agileutil.rpc.server import RpcServer
 from agileutil.rpc import rpc
 from agileutil.http.server import HttpServer
+from multiprocessing import Process
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
 SLEEP = 1.5
+IS_TEST_DISCOVERY = False
 
 RpcServer.isPrintLogo = False
 
@@ -66,12 +68,13 @@ class TestRpcServerClient(unittest.TestCase):
                 resp = client.call('sayHello', 'zhangsan')
                 self.assertEqual(resp, 'hello zhangsan')
 
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(SLEEP)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
+    
     def test_udp_server_client(self):
         #测试UDP
         def create_server():
@@ -92,7 +95,7 @@ class TestRpcServerClient(unittest.TestCase):
         tClient.start()
 
     def test_tcp_server_discovery(self):
-        if socket.gethostname() == 'ubuntu': return
+        if not IS_TEST_DISCOVERY: return
         #测试TCP服务发现
         def create_server():
             disconf = DiscoveryConfig(
@@ -119,13 +122,14 @@ class TestRpcServerClient(unittest.TestCase):
                 resp = cli.call('sayHello', 'mary')
                 self.assertEqual(resp, 'hello mary')
 
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(SLEEP)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()      
     
     def test_udp_server_discovery(self): 
+        if not IS_TEST_DISCOVERY: return
         if socket.gethostname() == 'ubuntu': return 
         #测试UDP服务发现
         def create_server():
@@ -158,7 +162,7 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()  
-
+    
     def test_serialize_obj(self):
         #测试TCP
         def create_server():
@@ -174,12 +178,12 @@ class TestRpcServerClient(unittest.TestCase):
                 resp = client.call('retObj')
                 self.assertEqual(resp.val, 10)
 
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(SLEEP)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
     def test_multi_server(self):
         def create_server_10005():
             server = TcpRpcServer('127.0.0.1', 10005)
@@ -202,16 +206,16 @@ class TestRpcServerClient(unittest.TestCase):
             for i in range(10):
                 resp = client.call('sayHello', 'zhangsan')
                 self.assertEqual(resp, 'hello zhangsan')
-        tServer_10005 = threading.Thread(target=create_server_10005)
-        tServer_10006 = threading.Thread(target=create_server_10006)
-        tServer_10007 = threading.Thread(target=create_server_10007)
+        tServer_10005 = Process(target=create_server_10005)
+        tServer_10006 = Process(target=create_server_10006)
+        tServer_10007 = Process(target=create_server_10007)
         tServer_10005.start()
         tServer_10006.start()
         tServer_10007.start()
         time.sleep(SLEEP)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
     def test_multi_udp_server_client(self):
         #测试UDP
         def create_server_10008():
@@ -242,9 +246,9 @@ class TestRpcServerClient(unittest.TestCase):
         tServer_10009.start()
         tServer_10010.start()
         time.sleep(SLEEP)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
     def test_tcp_server_client_timeout(self):
         #测试TCP
         def create_server():
@@ -265,10 +269,10 @@ class TestRpcServerClient(unittest.TestCase):
             resp = client.call('sayHello', 'xiaoming')
             self.assertEqual(resp, 'hello xiaoming')
         
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
     
     def test_udp_server_client_timeout(self):
@@ -296,7 +300,7 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
-
+    
     def test_tcp_server_server_timeout(self):
         #测试TCP
         def create_server():
@@ -312,12 +316,12 @@ class TestRpcServerClient(unittest.TestCase):
             resp = client.call('sayHello', 'zhangsan')
             self.assertEqual(resp, 'hello zhangsan')
         
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
     def test_tcp_decorator(self):
         #测试TCP
         def create_server():
@@ -332,12 +336,12 @@ class TestRpcServerClient(unittest.TestCase):
             resp = client.call('add', n1=1, n2=1)
             self.assertEqual(resp, 2)
         
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
+    
     def test_tcp_compress(self):
         #测试TCP
         def create_server():
@@ -353,10 +357,10 @@ class TestRpcServerClient(unittest.TestCase):
             resp = client.call('sayHello', name)
             self.assertEqual(resp, 'hello ' + name)
         
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
     
     def test_udp_compress(self):
@@ -379,7 +383,7 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(SLEEP)
         tClient = threading.Thread(target=create_client)
         tClient.start()
-
+    
     def test_regist_class(self):
         def create_server():
             server = TcpRpcServer('127.0.0.1', 10022)
@@ -391,10 +395,10 @@ class TestRpcServerClient(unittest.TestCase):
             resp = client.call('TestService.add', n1=1,n2=2)
             self.assertEqual(resp, 3)
         
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
 
     def test_inner_http_server(self):
@@ -409,13 +413,11 @@ class TestRpcServerClient(unittest.TestCase):
             r = requests.post('http://127.0.0.1:10023/hello', data={'name':'xiaoming'})
             self.assertEqual(r.text, 'hello xiaoming')
             print('test inner http ok')
-        tServer = threading.Thread(target=create_server)
+        tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
-        tClient = threading.Thread(target=create_client)
+        tClient = Process(target=create_client)
         tClient.start()
-
-
 
 def create_http_server():
     server = HttpRpcServer('127.0.0.1', 10000)
@@ -429,7 +431,7 @@ def create_http_client():
         assert (resp == 'hello xiaoming')
 
 def create_http_server_discovery():
-    if socket.gethostname() == 'ubuntu': return
+    if not IS_TEST_DISCOVERY: return
     server = HttpRpcServer('127.0.0.1', 10003)
     disconf = DiscoveryConfig(
         consulHost = CONSUL_HOST,
@@ -443,7 +445,7 @@ def create_http_server_discovery():
     server.serve()
 
 def create_http_client_discovery():
-    if socket.gethostname() == 'ubuntu': return
+    if not IS_TEST_DISCOVERY: return
     client = HttpRpcClient()
     disconf = DiscoveryConfig(
         consulHost = CONSUL_HOST,
@@ -549,5 +551,4 @@ if __name__ == '__main__':
     time.sleep(SLEEP)
     httpClient = threading.Thread(target=create_http_client_compress)
     httpClient.start()
-    #测试其他
     unittest.main()

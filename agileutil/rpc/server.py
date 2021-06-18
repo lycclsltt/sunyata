@@ -166,7 +166,7 @@ class HttpRpcServer(RpcServer):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
-        print(' HTTP serve on %s:%s' % (self.host, self.port) )
+        print(' HTTP rpc serving on %s:%s' % (self.host, self.port) )
         self.app.serve()
 
 
@@ -207,12 +207,18 @@ class TcpRpcServer(BlockTcpRpcServer):
                 return
 
     async def main(self):
-        server = await asyncio.start_server(self.handle, self.host, self.port)
-        addr = server.sockets[0].getsockname()
-        self.printLogo()
-        print(' TCP serve on %s:%s' % (self.host, self.port) )
-        async with server:
-            await server.serve_forever()
+        loop = asyncio.get_event_loop()
+        coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
+        server = loop.run_until_complete(coro)
+        print(' TCP rpc serving on %s:%s' % (self.host, self.port))
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        # Close the server
+        server.close()
+        loop.run_until_complete(server.wait_closed())
+        loop.close()
 
     async def run(self, func, args, kwargs):
         try:
@@ -229,16 +235,25 @@ class TcpRpcServer(BlockTcpRpcServer):
             return Exception('server exception, ' + str(ex))
 
     def serve(self):
-        asyncio.run( self.asyncServe() )
-
-    async def asyncServe(self):
+        loop = asyncio.get_event_loop()
+        tasks = []
         tRegist = None
         if self.discovery and self.discoveryConfig:
-            tRegist = asyncio.create_task( self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True) )
-        tServer = asyncio.create_task( self.main() )
-        await tServer
-        if tRegist:
-            await tRegist
+            tRegist = self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
+            tasks.append(tRegist)
+        coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
+        tasks.append(coro)
+        rs = loop.run_until_complete(asyncio.gather(*tasks))
+        print(' TCP rpc serving on %s:%s' % (self.host, self.port) )
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        server = rs[-1]
+        # Close the server
+        server.close()
+        loop.run_until_complete(server.wait_closed())
+        loop.close()
 
 
 class UdpRpcServer(RpcServer):
@@ -268,13 +283,13 @@ class UdpRpcServer(RpcServer):
                 resp = self.run(func, args, kwargs)
                 self.protocal.transport.sendPeer(self.protocal.serialize(resp), addr = addr)
             except Exception as ex:
-                print('udp handler exception:', ex)
+                print('UDP handler exception:', ex)
     
     def serve(self):
         self.startWorkers()
         self.protocal.transport.bind()
         self.printLogo()
-        print(' UDP serve on %s:%s' % (self.host, self.port))
+        print(' UDP rpc serving on %s:%s' % (self.host, self.port))
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
