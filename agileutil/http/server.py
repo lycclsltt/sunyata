@@ -56,6 +56,7 @@ class HttpServer(object):
     async def handleEcho(self, reader, writer):
         data = await reader.read(self.bufSize)
         if data == b'': return
+        #print('data', data)
         #addr = writer.get_extra_info('peername')
         httpRequest = HttpFactory.genHttpRequest(data)
         httpResponse = await self.handleRequest(httpRequest)
@@ -78,11 +79,18 @@ class HttpServer(object):
         loop.close()
 
     def handleConn(self, conn):
-        data = self.transport.recvFullRequest(conn)
+        data = self.transport.recvFullHeader(conn)
         if data == b'': 
             conn.close()
             return
         req = HttpFactory.genHttpRequest(data)
+        if 'Content-Length' not in req.headers:
+            conn.close()
+            raise Exception('Content-Length not found in headers')
+        bodyLen = req.headers['Content-Length']
+        body = self.transport.recvn(conn, int(bodyLen))
+        fulldata = data + body
+        req = HttpFactory.genHttpRequest(fulldata)
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
         conn.close()

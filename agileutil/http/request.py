@@ -9,3 +9,6 @@ class HttpRequest(object):
         self.body = ''
         self.headers = {}
         self.data = {}
+
+    def setBody(self, body):
+        self.body = body

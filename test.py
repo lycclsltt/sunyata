@@ -402,7 +402,7 @@ class TestRpcServerClient(unittest.TestCase):
         tClient.start()
 
     def test_inner_http_server(self):
-        async def inner_hello(req):
+        def inner_hello(req):
             name = req.data.get('name', '')
             return 'hello ' + name
         def create_server():

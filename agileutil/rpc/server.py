@@ -146,11 +146,11 @@ class HttpRpcServer(RpcServer):
         self.app = HttpServer(self.host, self.port)
         self.app.addRoute('/', self.handle)
 
-    async def handle(self, request):
+    def handle(self, request):
         body = request.body
-        return await self.callback(body)
+        return self.callback(body)
         
-    async def callback(self, package):
+    def callback(self, package):
         isEnableCompress = package[:1]
         msg = package[1:]
         if isEnableCompress == b'1':

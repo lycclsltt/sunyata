@@ -46,21 +46,33 @@ class TcpTransport(object):
         index = 0 - len(until)
         while True:
             rbytes = conn.recv(1)
-            if rbytes == b'':
-                break
+            #if rbytes == b'':
+            #    break
             retbytearr += rbytes
             if retbytearr[index:] == until:
                 break
         return retbytearr
 
-    def recvFullRequest(self, conn):
+    def recvFullHeader(self, conn):
         fullbytes = b''
         while True:
             rbytes = self.recvUntil(conn, b'\r\n')
             fullbytes += rbytes
-            if rbytes == b'\r\n' or rbytes == b'':
+            #if rbytes == b'\r\n' or rbytes == b'':
+            if rbytes == b'\r\n':
                 break
         return fullbytes
+
+    def recvn(self, conn, n):
+        toRecv = n
+        hasRecv = 0
+        bytearr = b''
+        while True:
+            if hasRecv >= toRecv:
+                break
+            bytearr += conn.recv(1)
+            hasRecv += 1
+        return bytearr
 
     def sendAll(self, conn, bytearr):
         toSend = len(bytearr)
