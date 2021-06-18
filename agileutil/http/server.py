@@ -60,7 +60,8 @@ class HttpServer(object):
             await server.serve_forever()
 
     async def asyncServe(self):
-        httpServer = asyncio.create_task( self.listenAndServe() )
+        httpServer = asyncio.ensure_future(self.listenAndServe())
+        #httpServer = asyncio.create_task( self.listenAndServe() )
         await httpServer
 
     def serve(self):
