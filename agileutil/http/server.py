@@ -1,3 +1,4 @@
+import traceback
 from agileutil.http.factory import HttpFactory
 from agileutil.http.status import *
 from traceback import format_exc
@@ -17,7 +18,8 @@ class HttpServer(object):
         self.port = port
         self.bufSize = 10240
         self.transport = TcpTransport(self.bind, self.port)
-        self.queue = queue.Queue()
+        self.queueSize = 30000
+        self.queue = queue.Queue(self.queueSize)
         self.threadList = []
         self.workers = workers
         self.isAsync = isAsync
@@ -76,6 +78,9 @@ class HttpServer(object):
 
     def handleConn(self, conn):
         data = self.transport.recvFullRequest(conn)
+        if data == b'': 
+            conn.close()
+            return
         req = HttpFactory.genHttpRequest(data)
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
@@ -83,8 +88,11 @@ class HttpServer(object):
 
     def workServe(self):
         while True:
-            conn = self.queue.get()
-            self.handleConn(conn)
+            try:
+                conn = self.queue.get()
+                self.handleConn(conn)
+            except Exception as ex:
+                print(ex, format_exc())
 
     def listenAndDispatch(self):
         for i in range(self.workers):
@@ -94,8 +102,11 @@ class HttpServer(object):
             print('Start worker %s' % th )
         self.transport.bind()
         while True:
-            conn, _ = self.transport.accept()
-            self.queue.put(conn)
+            try:
+                conn, _ = self.transport.accept()
+                self.queue.put(conn)
+            except Exception as ex:
+                print(ex, format_exc())
 
     def serve(self):
         if self.isAsync:

@@ -8,12 +8,13 @@ class TcpTransport(object):
         self.timeout = timeout
         self.socket = None
         self.keepaliveTimeout = keepaliveTimeout
+        self.backlog = 100
 
     def bind(self):
         self.socket = socket(AF_INET, SOCK_STREAM)
         self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.socket.bind( (self.host, self.port) )
-        self.socket.listen(10)
+        self.socket.listen(self.backlog)
 
     def setKeepaliveTimeout(self, keepaliveTimeout: int):
         self.keepaliveTimeout = keepaliveTimeout
@@ -45,6 +46,8 @@ class TcpTransport(object):
         index = 0 - len(until)
         while True:
             rbytes = conn.recv(1)
+            if rbytes == b'':
+                break
             retbytearr += rbytes
             if retbytearr[index:] == until:
                 break
@@ -55,7 +58,7 @@ class TcpTransport(object):
         while True:
             rbytes = self.recvUntil(conn, b'\r\n')
             fullbytes += rbytes
-            if rbytes == b'\r\n':
+            if rbytes == b'\r\n' or rbytes == b'':
                 break
         return fullbytes
 
