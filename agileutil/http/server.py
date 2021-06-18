@@ -56,10 +56,15 @@ class HttpServer(object):
     async def listenAndServe(self):
         server = await asyncio.start_server(self.handleEcho, self.bind, self.port)
         #self.printLogo()
-        async with server: await server.serve_forever()
+        async with server: 
+            await server.serve_forever()
+
+    async def asyncServe(self):
+        httpServer = asyncio.create_task( self.listenAndServe() )
+        await httpServer
 
     def serve(self):
-        return EventLoop.runUntilComplete(self.listenAndServe())
+        asyncio.run(self.asyncServe())
 
     @classmethod
     def route(cls, path, methods = None):
