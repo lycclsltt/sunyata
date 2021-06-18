@@ -30,7 +30,7 @@ Agileutil是一个Python3 RPC框架，client和server既可以直连，也可以
 - 支持服务注册、发现
 
 ## 安装
-Python 版本 >= 3.6
+Python 版本 >= 3.7
 ```
 pip install agileutil
 ```
