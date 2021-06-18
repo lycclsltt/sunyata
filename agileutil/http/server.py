@@ -23,6 +23,7 @@ class HttpServer(object):
         self.threadList = []
         self.workers = workers
         self.isAsync = isAsync
+        self.exitFlag = False
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
@@ -87,10 +88,13 @@ class HttpServer(object):
         conn.close()
 
     def workServe(self):
-        while True:
+        while self.exitFlag:
             try:
                 conn = self.queue.get()
                 self.handleConn(conn)
+            except KeyboardInterrupt:
+                print('%s exit' % threading.current_thread())
+                return
             except Exception as ex:
                 print(ex, format_exc())
 
@@ -105,6 +109,14 @@ class HttpServer(object):
             try:
                 conn, _ = self.transport.accept()
                 self.queue.put(conn)
+            except KeyboardInterrupt:
+                print('Server is closing...')
+                self.exitFlag = True
+                self.transport.close()
+                for th in self.threadList:
+                    th.join()
+                print('Server closed.')
+                return
             except Exception as ex:
                 print(ex, format_exc())
 
