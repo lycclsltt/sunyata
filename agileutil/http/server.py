@@ -113,7 +113,7 @@ class HttpServer(object):
         while True:
             try:
                 conn, _ = self.transport.accept()
-                self.queue.put(conn)
+                self.queue.put(conn, block=False)
             except KeyboardInterrupt:
                 print('Server is closing...')
                 self.exitFlag = True

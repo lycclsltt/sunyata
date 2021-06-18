@@ -28,7 +28,7 @@ class TcpTransport(object):
 
     def accept(self):
         cli, addr = self.socket.accept()
-        #cli.settimeout(self.keepaliveTimeout)
+        cli.settimeout(self.keepaliveTimeout)
         return cli, addr
 
     def close(self):
@@ -46,8 +46,8 @@ class TcpTransport(object):
         index = 0 - len(until)
         while True:
             rbytes = conn.recv(1)
-            #if rbytes == b'':
-            #    break
+            if rbytes == b'':
+                break
             retbytearr += rbytes
             if retbytearr[index:] == until:
                 break
@@ -58,8 +58,7 @@ class TcpTransport(object):
         while True:
             rbytes = self.recvUntil(conn, b'\r\n')
             fullbytes += rbytes
-            #if rbytes == b'\r\n' or rbytes == b'':
-            if rbytes == b'\r\n':
+            if rbytes == b'\r\n' or rbytes == b'':
                 break
         return fullbytes
 
@@ -76,9 +75,6 @@ class TcpTransport(object):
 
     def sendAll(self, conn, bytearr):
         toSend = len(bytearr)
-        hasSend = 0
-        while True:
-            if hasSend >= toSend:
-                break
-            hasSend += conn.send(bytearr) 
-        return hasSend
+        while toSend > 0:
+            toSend -= conn.send(bytearr)
+            bytearr = bytearr[0-toSend:] 
