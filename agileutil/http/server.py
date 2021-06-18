@@ -90,11 +90,10 @@ class HttpServer(object):
     def workServe(self):
         while self.exitFlag == False:
             try:
-                conn = self.queue.get()
+                conn = self.queue.get(block=True, timeout=2)
                 self.handleConn(conn)
-            except KeyboardInterrupt:
-                print('%s exit' % threading.current_thread())
-                return
+            except queue.Empty:
+                pass
             except Exception as ex:
                 print(ex, format_exc())
 
@@ -112,9 +111,9 @@ class HttpServer(object):
             except KeyboardInterrupt:
                 print('Server is closing...')
                 self.exitFlag = True
-                self.transport.close()
                 for th in self.threadList:
                     th.join()
+                self.transport.close()
                 print('Server closed.')
                 return
             except Exception as ex:
