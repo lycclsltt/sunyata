@@ -10,6 +10,8 @@ import threading
 
 class HttpServer(object):
 
+    __slots__ = ['bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag']
+
     routerMap = {}
 
     def __init__(self, bind = '0.0.0.0', port=9989, isAsync=False, workers = cpu_count()):
