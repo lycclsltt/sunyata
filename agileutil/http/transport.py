@@ -2,6 +2,8 @@ from socket import *
 
 class TcpTransport(object):
 
+    __slots__ = ('host', 'port', 'timeout', 'socket', 'keepaliveTimeout', 'backlog')
+
     def __init__(self, host, port, timeout = 30, keepaliveTimeout=30):
         self.host = host
         self.port = port

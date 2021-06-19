@@ -3,6 +3,8 @@ from agileutil.util import str2bytes
 
 class HttpResponse(object):
 
+    __slots__ = ('httpVersion', 'status', 'headers', 'body')
+
     def __init__(self, status, body) -> None:
         super().__init__()
         self.httpVersion = 'HTTP/1.1'

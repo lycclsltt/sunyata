@@ -1,4 +1,3 @@
-import traceback
 from agileutil.http.factory import HttpFactory
 from agileutil.http.status import *
 from traceback import format_exc
@@ -10,7 +9,7 @@ import threading
 
 class HttpServer(object):
 
-    __slots__ = ['bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag']
+    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag')
 
     routerMap = {}
 

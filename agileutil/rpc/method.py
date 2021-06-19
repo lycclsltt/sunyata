@@ -3,6 +3,8 @@ from agileutil.eventloop import EventLoop
 
 class RpcMethod(object):
 
+    __slots__ = ('_methodType', '_method', '_classDefine', '_isCoroutine', '_methodType')
+
     TYPE_WITHOUT_CLASS = 0
     TYPE_WITH_CLASS = 1
 

@@ -5,6 +5,8 @@ from multiprocessing import cpu_count
 
 class RpcProtocal(object):
 
+    __slots__ = ('transport')
+
     def __init__(self):
         self.transport = RpcTransport()
 

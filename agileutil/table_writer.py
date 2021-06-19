@@ -19,6 +19,9 @@ print(string)
 
 
 class TableWriter:
+
+    __slots__ = ['_maxCol', '_header', '_rows', '_colMaxLengthList', '_lWidth', '_rWidth']
+
     def __init__(self, header=[], rows=[], lWidth=2, rWidth=2):
         if type(header) != list or type(rows) != list:
             raise Exception('param headers, rows must be list type')

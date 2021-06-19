@@ -1,10 +1,12 @@
 
 class HttpRouter(object):
 
+    __slots__ = ('path', 'methods', 'func')
+
     def __init__(self) -> None:
         super().__init__()
         self.path = ''
-        self.method = None
+        self.methods = None
         self.func = None
 
     def getFunc(self):

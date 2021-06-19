@@ -14,6 +14,8 @@ class RpcTransport(object):
 
 class TcpTransport(RpcTransport):
 
+    __slots__ = ('host', 'port', 'timeout', 'socket', 'keepaliveTimeout')
+
     def __init__(self, host, port, timeout):
         RpcTransport.__init__(self)
         self.host = host
@@ -151,6 +153,8 @@ class TcpTransport(RpcTransport):
 
 
 class UdpTransport(RpcTransport):
+
+    __slots__ = ('host', 'port', 'socket', 'timeout')
     
     def __init__(self, host, port, timeout = SERVER_TIMEOUT):
         RpcTransport.__init__(self)
@@ -200,6 +204,8 @@ class UdpTransport(RpcTransport):
 
 class ClientUdpTransport(UdpTransport):
 
+    __slots__ = ('timeout')
+
     def __init__(self, host, port, timeout = 10):
         UdpTransport.__init__(self, host, port)
         self.timeout = timeout
@@ -207,6 +213,8 @@ class ClientUdpTransport(UdpTransport):
 
 
 class HttpTransport(RpcTransport):
+
+    __slots__ = ('host', 'port', 'timeout', 'poolConnection', 'poolMaxSize', 'maxRetries', 'requestSession', 'url', 'headers')
 
     def __init__(self, host, port, timeout = 10, poolConnection=20, poolMaxSize=20, maxRetries=2):
         RpcTransport.__init__(self)

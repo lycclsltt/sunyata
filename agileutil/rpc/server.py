@@ -15,6 +15,8 @@ from agileutil.http.server import HttpServer
 
 class RpcServer(object):
 
+    __slots__ = ('discoveryConfig', 'discovery', 'protocal')
+
     funcMap = {}
     funcList = []
     isPrintLogo = True

@@ -10,6 +10,8 @@ class RpcDiscovery(object):
 
 class DiscoveryConfig(object):
 
+    __slots__ = ('consulHost', 'consulPort', 'serviceName', 'serviceHost', 'servicePort')
+
     def __init__(self, consulHost, consulPort, serviceName, serviceHost = '', servicePort = 0):
         self.consulHost = consulHost
         self.consulPort = consulPort

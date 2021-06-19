@@ -8,12 +8,16 @@ import socket
 
 class Address(object):
 
+    __slots__ = ('host', 'port')
+
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
 
-class RpcClient(object): 
+class RpcClient(object):
+
+    __slots__ = ('discoveryConfig', 'discovery', 'instanceIndex', 'protocalMap', 'isSync', 'syncInterval', 'protocal', 'servers', 'serversCount', 'serversProtocalMap', 'serverIndex', 'lastServer', 'timeout') 
 
     def __init__(self):
         self.discoveryConfig = None

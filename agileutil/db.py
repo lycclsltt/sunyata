@@ -10,6 +10,19 @@ if sys.version[0:1] == '3': unicode = str
 
 
 class PoolDB(object):
+
+    __slots__ = (
+        'host',
+        'port',
+        'user',
+        'passwd',
+        'dbName',
+        'log',
+        'connectTimeout',
+        'readTimeout',
+        'minConnNum',
+    )
+
     def __init__(self,
                  host,
                  port,
@@ -19,8 +32,7 @@ class PoolDB(object):
                  log=None,
                  connect_timeout=10,
                  read_timeout=None,
-                 min_conn_num=10,
-                 auto_commit = True):
+                 min_conn_num=10):
         self.host = host
         self.port = port
         self.user = user

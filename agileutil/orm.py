@@ -140,6 +140,8 @@ class Model(OrmModel):
 
 
 class OrmQuerySet(Model):
+
+    __slots__ = ['set', 'index']
     
     def __init__(self):
         self.set = []

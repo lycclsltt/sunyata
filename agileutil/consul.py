@@ -6,6 +6,8 @@ from agileutil.util import local_ip
 
 class Instance(object):
 
+    __slots__ = ('service', 'address', 'port')
+
     def __init__(self, service, address, port):
         self.service = service
         self.address = address
@@ -13,6 +15,8 @@ class Instance(object):
 
 
 class ConsulApi(object):
+
+    __slots__ = ('host', 'port', 'baseUrl', 'token', 'timeout')
 
     def __init__(self, host: str, port: int):
         self.host = host
