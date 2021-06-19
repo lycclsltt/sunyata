@@ -3,6 +3,7 @@ from agileutil.http.status import *
 from traceback import format_exc
 from agileutil.http.transport import TcpTransport
 from multiprocessing import cpu_count
+from types import MethodType,FunctionType
 import asyncio
 import queue
 import threading
@@ -28,7 +29,16 @@ class HttpServer(object):
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
-        cls.routerMap[path] = HttpFactory.genHttpRouter(path, func, methods)
+        if isinstance(func, FunctionType) or isinstance(func, MethodType):
+            cls.routerMap[path] = HttpFactory.genHttpRouter(path, func, methods)
+        elif isinstance(func, object):
+            controllerObj = func()
+            if not path.endswith('/'): path += '/'
+            for classFunc in dir(controllerObj):
+                if classFunc.startswith('_'):
+                    continue
+                cls.routerMap[path + classFunc] = HttpFactory.genHttpRouter(path + classFunc, getattr(controllerObj, classFunc), methods)
+
 
     async def handleRequest(self, httpRequest):
         router = self.routerMap.get(httpRequest.uri, None)
