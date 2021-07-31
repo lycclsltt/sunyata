@@ -404,6 +404,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_inner_http_server(self):
         def inner_hello(req):
             name = req.data.get('name', '')
+            print('get param name:', name)
             return 'hello ' + name
         def create_server():
             hs = HttpServer(bind='127.0.0.1', port=10023)
