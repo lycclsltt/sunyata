@@ -50,6 +50,10 @@ class RpcServer(object):
                     cls.funcMap [ funcName ] = RpcMethod(RpcMethod.TYPE_WITH_CLASS, funcObj, classDefine)
                     cls.funcList = cls.funcMap.keys()
 
+    @classmethod
+    def getRegistedMethods(cls):
+        return list(cls.funcMap.keys())
+
     def run(self, func, args, kwargs):
         try:
             if func not in self.funcList:
