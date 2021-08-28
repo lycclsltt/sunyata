@@ -78,6 +78,7 @@ class RpcServer(object):
     @classmethod
     def rpc(cls, func):
         cls.regist(func)
+        return func
 
     def printLogo(self):
         if self.isPrintLogo == False:
