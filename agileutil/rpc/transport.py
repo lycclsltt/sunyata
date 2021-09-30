@@ -47,9 +47,15 @@ class TcpTransport(RpcTransport):
 
     def send(self, msg: bytes):
         isEnableCompress = b'0'
+        oldMsgLen = len(msg)
+        oldMsg = msg
         if len(msg) >= RpcCompress.enableCompressLen:
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
+            newMsgLen = len(msg)
+            if newMsgLen > oldMsgLen:
+                isEnableCompress = b'0'
+                msg = oldMsg
         newbyte = struct.pack("i", len(msg))
         try:
             self.socket.sendall(newbyte + isEnableCompress + msg)

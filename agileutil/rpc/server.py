@@ -12,6 +12,7 @@ from agileutil.rpc.method import RpcMethod
 import asyncio
 import inspect
 from agileutil.http.server import HttpServer
+import traceback
 
 class RpcServer(object):
 
@@ -189,16 +190,26 @@ class TcpRpcServer(BlockTcpRpcServer):
         while 1:
             try:
                 data = await reader.read(5)
+                if data == b'':
+                    raise Exception('peer closed')
                 lengthField = data[:4]
                 compressField = data[4:5]
                 isEnableCompress = 0
                 if compressField == b'1':
                     isEnableCompress = 1
                 toread = struct.unpack("i", lengthField)[0]
-                msg = await reader.read(toread)
+                msg = b''
+                readn = toread 
+                while 1:
+                    rmsg = await reader.read(readn)
+                    if rmsg == b'':
+                        raise Exception('peer closed')
+                    msg = msg + rmsg
+                    if len(msg) == toread:
+                        readn = toread - len(rmsg)
+                        break
                 if isEnableCompress:
                     msg = RpcCompress.decompress(msg)
-
                 request = self.protocal.unserialize(msg)
                 func, args, kwargs = self.protocal.parseRequest(request)
                 resp = await self.run(func, args, kwargs) 
@@ -211,6 +222,7 @@ class TcpRpcServer(BlockTcpRpcServer):
                 lenbytes = struct.pack("i", len(respbytes))
                 writer.write( lenbytes + isEnableCompress + respbytes)
             except Exception as ex:
+                #print(ex, traceback.format_exc())
                 writer.close()
                 return
 

@@ -10,7 +10,7 @@ import threading
 
 class HttpServer(object):
 
-    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag')
+    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag', 'maxPostSize')
 
     routerMap = {}
 
@@ -26,6 +26,7 @@ class HttpServer(object):
         self.workers = workers
         self.isAsync = isAsync
         self.exitFlag = False
+        self.maxPostSize = 2 * 1024 * 1024
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
@@ -90,7 +91,7 @@ class HttpServer(object):
         loop.close()
 
     def handleConn(self, conn):
-        data = conn.recv(65535)
+        data = conn.recv(self.maxPostSize)
         if not data:
             conn.close()
             return

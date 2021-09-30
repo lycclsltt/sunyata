@@ -2,7 +2,7 @@ import lz4.block as lb
 
 class Compress(object):
 
-    level = 2
+    level = 3
 
     DEBUG = False
 

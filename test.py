@@ -28,7 +28,7 @@ from multiprocessing import Process
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
-SLEEP = 1.5
+SLEEP = 2.1
 IS_TEST_DISCOVERY = False
 
 RpcServer.isPrintLogo = False
@@ -38,7 +38,9 @@ RpcServer.isPrintLogo = False
 class TestService(object):
     def add(self, n1, n2):
         return n1 + n2
-
+    def big_array(self, array):
+        array.sort()
+        return array
 
 def sayHello(name): return 'hello ' + name
 
@@ -54,7 +56,7 @@ class A(object):
 
 
 class TestRpcServerClient(unittest.TestCase):
-
+    
     def test_tcp_server_client(self):
         #测试TCP
         def create_server():
@@ -73,7 +75,6 @@ class TestRpcServerClient(unittest.TestCase):
         time.sleep(SLEEP)
         tClient = Process(target=create_client)
         tClient.start()
-    
     
     def test_udp_server_client(self):
         #测试UDP
@@ -271,7 +272,7 @@ class TestRpcServerClient(unittest.TestCase):
         
         tServer = Process(target=create_server)
         tServer.start()
-        time.sleep(1)
+        time.sleep(3)
         tClient = Process(target=create_client)
         tClient.start()
     
@@ -420,6 +421,22 @@ class TestRpcServerClient(unittest.TestCase):
         tClient = Process(target=create_client)
         tClient.start()
 
+    def test_tcp_big_param(self):
+        def create_server():
+            server = TcpRpcServer('127.0.0.1', 10024)
+            server.regist(TestService)
+            server.serve()
+        def create_client():
+            client = TcpRpcClient('127.0.0.1', 10024, timeout = 30)
+            resp = client.call('TestService.big_array', array=[ random.randint(0,10000) for _ in range(10000000) ])
+            self.assertEqual(len(resp), 10000000)
+            print('test_tcp_big_param ok')
+        tServer = Process(target=create_server)
+        tServer.start()
+        time.sleep(1)
+        tClient = Process(target=create_client)
+        tClient.start()
+
 def create_http_server():
     server = HttpRpcServer('127.0.0.1', 10000)
     server.regist(sayHello)
@@ -552,4 +569,5 @@ if __name__ == '__main__':
     time.sleep(SLEEP)
     httpClient = threading.Thread(target=create_http_client_compress)
     httpClient.start()
+    print('\n\n\n')
     unittest.main()
