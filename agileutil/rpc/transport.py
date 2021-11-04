@@ -171,6 +171,7 @@ class UdpTransport(RpcTransport):
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.settimeout(self.timeout)
         self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.maxUdpPackageSize = 65535
 
     def bind(self):
         self.socket.bind( (self.host, self.port) )
@@ -188,6 +189,8 @@ class UdpTransport(RpcTransport):
         if len(msg) >= RpcCompress.enableCompressLen:
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
+        if len(msg) >= self.maxUdpPackageSize:
+            raise Exception('msg too long > udp allow size 65535')
         addr = (self.host, self.port)
         package = isEnableCompress + msg
         self.socket.sendto(package, addr)
@@ -247,6 +250,7 @@ class HttpTransport(RpcTransport):
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
         msg = isEnableCompress + msg
-        r = self.requestSession.post(self.url, headers = self.headers, data=msg, timeout = self.timeout)
+        print('len msg:', len(msg))
+        r = self.requestSession.post(self.url, headers = {}, data=msg, timeout = self.timeout)
         resp = r.content
         return resp

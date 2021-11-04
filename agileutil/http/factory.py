@@ -1,3 +1,4 @@
+from datetime import date
 from agileutil.http.request import HttpRequest
 from agileutil.http.response import HttpResponse
 from agileutil.http.router import HttpRouter
@@ -5,11 +6,39 @@ from agileutil.util import bytes2str
 
 class HttpFactory(object):
 
+    maxContentLength = 1 * 1024 * 1024 #1M限制
+
     def __init__(self) -> None:
         super().__init__()
 
     @classmethod
     def genLineHeaderBody(self, lines):
+        getHeader = 1
+        reqHeaders = []
+        reqBody = b''
+        reqLine = lines[0]
+        for l in lines[1:]:
+            if not l:
+                getHeader = 0
+            if getHeader:
+                reqHeaders.append(l)
+            else:
+                reqBody = reqBody + l
+        return reqLine, reqHeaders, reqBody
+        '''
+        reqHeaders = []
+        reqLine = lines[0]
+        for l in lines[1:]:
+            if l and b': ' in l:
+                reqHeaders.append(l)
+            else:
+                reqHeaders = [l for l in lines[1:-2] if l != b'' and b': ' in l]
+        '''
+            
+        #reqBody = lines[-1]
+        #reqHeaders = [l for l in lines[1:-2] if l != b'' and b': ' in l]
+        return reqLine, reqHeaders, reqBody
+        '''
         reqLine = b''
         reqHeaders = []
         reqBody = b''
@@ -22,20 +51,30 @@ class HttpFactory(object):
             elif index > 0 and line != b'':
                 reqHeaders.append(line)
         return reqLine, reqHeaders, reqBody
+        '''
         
     @classmethod
-    def genHttpRequest(cls, linesStr):
+    def genHttpRequest(cls, linesStr, conn):
         req = HttpRequest()
         lines = linesStr.split(b"\r\n")
         reqLine, reqHeaders, reqBody = cls.genLineHeaderBody(lines)
+        print('reqLine', reqLine)
+        print('reqHeaders', reqHeaders)
+        #print('reqBody', reqBody)
+    
         method, uri, httpVersion = reqLine.split(b' ')
         req.method = bytes2str(method)
         req.httpVersion = bytes2str(httpVersion)
         req.uri = bytes2str( uri.split(b'?')[0] )
         req.body = reqBody
         for header in reqHeaders:
+            if header == b'':
+                continue
             k, v = header.split(b': ')
-            req.headers[bytes2str(k)] = bytes2str(v)
+            try:
+                req.headers[bytes2str(k)] = bytes2str(v)
+            except:
+                req.headers[str(k)] = str(v)
         if req.body:
             try:
                 for kvPair in req.body.split(b'&'):
@@ -51,6 +90,23 @@ class HttpFactory(object):
                     req.data[bytes2str(k)] = bytes2str(v)
             except:
                 pass
+        print('req.data', req.data)
+        contentLength = int(req.headers.get('Content-Length'))
+        if contentLength > cls.maxContentLength:
+            raise Exception('content-length over')
+        print('contentLength', contentLength)
+        hasRead = len(req.body)
+        print('hasRead', hasRead)
+        toRead = contentLength - hasRead
+        bufsize = 1024 
+        while toRead:
+            rdata = conn.recv(bufsize)
+            print('rdata', rdata)
+            if not rdata:
+                raise Exception('peer closed')
+            req.body = req.body + rdata
+            hasRead = hasRead + len(rdata)
+            toRead = contentLength - hasRead
         return req
 
     @classmethod

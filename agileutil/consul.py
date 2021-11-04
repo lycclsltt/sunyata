@@ -36,7 +36,6 @@ class ConsulApi(object):
         r = requests.get(url, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
-        #print(r.text)
         return json.loads(r.text)
 
     def genInstanceID(self, service: str, host: str, port: int):
@@ -67,7 +66,6 @@ class ConsulApi(object):
             'DeregisterCriticalServiceAfter' : degisterAfter,
             'TTL' : '%ss' % ttl,
         }
-        #print('params', json.dumps(params))
         url = self.baseUrl + '/v1/agent/service/register'
         r = requests.put(url, data=json.dumps(params), timeout = self.timeout)
         print(r.text, r.status_code)

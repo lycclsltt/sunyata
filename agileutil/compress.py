@@ -15,7 +15,6 @@ class Compress(object):
 
     @classmethod
     def decompress(cls, bytearr):
-        print(cls.DEBUG)
         if cls.DEBUG:
             print('debug, do decompress')
         origin = lb.decompress(bytearr)

@@ -10,7 +10,7 @@ import threading
 
 class HttpServer(object):
 
-    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag', 'maxPostSize')
+    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag', 'maxContentLength')
 
     routerMap = {}
 
@@ -26,7 +26,7 @@ class HttpServer(object):
         self.workers = workers
         self.isAsync = isAsync
         self.exitFlag = False
-        self.maxPostSize = 2 * 1024 * 1024
+        self.maxContentLength = 1 * 1024 * 1024 # 1M限制
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
@@ -68,7 +68,6 @@ class HttpServer(object):
     async def handleEcho(self, reader, writer):
         data = await reader.read(self.bufSize)
         if data == b'': return
-        #print('data', data)
         #addr = writer.get_extra_info('peername')
         httpRequest = HttpFactory.genHttpRequest(data)
         httpResponse = await self.handleRequest(httpRequest)
@@ -91,13 +90,11 @@ class HttpServer(object):
         loop.close()
 
     def handleConn(self, conn):
-        data = conn.recv(self.maxPostSize)
+        data = conn.recv(self.maxContentLength)
         if not data:
             conn.close()
             return
-        #data = self.transport.recvFullHeader(conn)
-        req = HttpFactory.genHttpRequest(data)
-        #req = HttpFactory.genHttpRequest(data + self.transport.recvn(conn, int( req.headers.get('Content-Length', 0) )))
+        req = HttpFactory.genHttpRequest(data, conn)
         resp = self.syncHandleRequest(req)
         self.transport.sendAll(conn, resp.toBytes())
         conn.close()
