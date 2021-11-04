@@ -250,7 +250,6 @@ class HttpTransport(RpcTransport):
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
         msg = isEnableCompress + msg
-        print('len msg:', len(msg))
         r = self.requestSession.post(self.url, headers = {}, data=msg, timeout = self.timeout)
         resp = r.content
         return resp

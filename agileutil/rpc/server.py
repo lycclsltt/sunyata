@@ -264,6 +264,7 @@ class TcpRpcServer(BlockTcpRpcServer):
         coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
         tasks.append(coro)
         rs = loop.run_until_complete(asyncio.gather(*tasks))
+        self.printLogo()
         print(' TCP rpc serving on %s:%s' % (self.host, self.port) )
         try:
             loop.run_forever()

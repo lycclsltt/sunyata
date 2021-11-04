@@ -58,9 +58,6 @@ class HttpFactory(object):
         req = HttpRequest()
         lines = linesStr.split(b"\r\n")
         reqLine, reqHeaders, reqBody = cls.genLineHeaderBody(lines)
-        print('reqLine', reqLine)
-        print('reqHeaders', reqHeaders)
-        #print('reqBody', reqBody)
     
         method, uri, httpVersion = reqLine.split(b' ')
         req.method = bytes2str(method)
@@ -90,18 +87,14 @@ class HttpFactory(object):
                     req.data[bytes2str(k)] = bytes2str(v)
             except:
                 pass
-        print('req.data', req.data)
         contentLength = int(req.headers.get('Content-Length'))
         #if contentLength > cls.maxContentLength:
         #    raise Exception('content-length over')
-        print('contentLength', contentLength)
         hasRead = len(req.body)
-        print('hasRead', hasRead)
         toRead = contentLength - hasRead
         bufsize = 1024 
         while toRead:
             rdata = conn.recv(bufsize)
-            print('rdata', rdata)
             if not rdata:
                 raise Exception('peer closed')
             req.body = req.body + rdata
