@@ -92,8 +92,8 @@ class HttpFactory(object):
                 pass
         print('req.data', req.data)
         contentLength = int(req.headers.get('Content-Length'))
-        if contentLength > cls.maxContentLength:
-            raise Exception('content-length over')
+        #if contentLength > cls.maxContentLength:
+        #    raise Exception('content-length over')
         print('contentLength', contentLength)
         hasRead = len(req.body)
         print('hasRead', hasRead)
