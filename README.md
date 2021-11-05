@@ -1,13 +1,6 @@
-## 特性
-- 像本地函数一样调用
-- 使用简单，用户只需要关注业务即可
-- HTTP/UDP/TCP 全协议支持
-- 支持异步 async/await
-- 支持服务注册、发现
-
 ## 快速开始
-myservice.py
-```python
+myservice.py:
+```Python hl_lines="2"
 from agileutil.rpc.server import rpc
 
 @rpc
@@ -25,8 +18,8 @@ agileutil --run myservice
 ```
 from agileutil.rpc.client import TcpRpcClient
 
-cli = TcpRpcClient('127.0.0.1', 9988, timeout=100000)
-res = cli.add(1, 2
+cli = TcpRpcClient('127.0.0.1', 9988, timeout=10)
+res = cli.add(1, 2)
 print(res)
 ``` 
 
