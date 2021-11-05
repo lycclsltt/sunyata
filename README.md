@@ -11,7 +11,7 @@ def add(n1, n2):
 ```shell
 agileutil --run myservice
 ```
-![pic1.jpeg](./docs/pic1.jpeg)
+![pic2.png](./docs/pic2.png)
 
 
 请求
