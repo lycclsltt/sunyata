@@ -21,6 +21,6 @@ from agileutil.rpc.client import TcpRpcClient
 cli = TcpRpcClient('127.0.0.1', 9988, timeout=100000)
 res = cli.add(1, 2
 print(res)
-```
+``` 
 
 [文档](./DETAIL.md)

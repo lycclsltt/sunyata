@@ -88,9 +88,10 @@ from agileutil.rpc.client import TcpRpcClient
 
 cli = TcpRpcClient('127.0.0.1', 9988, timeout = 2)
 
-resp = cli.call('TestService.hello', 'xiaoming')
+resp = cli.TestService.hello('xiaoming')
 print(resp)
 
+#或者使用call方法
 resp = cli.call('TestService.add', a=1, b=2, c=3)
 print(resp)
 
