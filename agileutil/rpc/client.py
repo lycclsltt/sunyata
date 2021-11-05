@@ -15,6 +15,21 @@ class Address(object):
         self.port = port
 
 
+class Callable(object):
+
+    def __init__(self, rpcClient, remoteMethodName):
+        self.rpcClient = rpcClient
+        self.remoteMethodName = remoteMethodName
+
+    def __call__(self, *args, **kwargs):
+        return self.rpcClient.call(self.remoteMethodName, *args, **kwargs)
+
+    def __getattr__(self, key):
+        if key in dir(self):
+            return getattr(self, key)
+        return Callable(self.rpcClient, self.remoteMethodName+'.'+f"{key}")
+
+
 class RpcClient(object):
 
     __slots__ = ('discoveryConfig', 'discovery', 'instanceIndex', 'protocalMap', 'isSync', 'syncInterval', 'protocal', 'servers', 'serversCount', 'serversProtocalMap', 'serverIndex', 'lastServer', 'timeout') 
@@ -74,6 +89,20 @@ class RpcClient(object):
 
     def debugGetLastServer(self):
         return self.lastServer
+
+    @retryTimes(retryTimes=3)
+    def call(self, func, *args, **kwargs):
+        pass
+
+    def __getattr__(self, key):
+        #def remote_attr(*args, **kwargs):
+        #    print(f'{key}方法不存在, 参数为:{args}, {kwargs}')
+        #    return self.call(f'{key}', *args, **kwargs)
+        #def remote_attr(*args, **kwargs):
+        #    return Callable(self, f"{key}")
+        if key in dir(self):
+            return getattr(self, key)
+        return Callable(self, f"{key}")
 
 
 class TcpRpcClient(RpcClient):
