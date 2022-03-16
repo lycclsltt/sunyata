@@ -10,11 +10,12 @@ class RpcDiscovery(object):
 
 class DiscoveryConfig(object):
 
-    __slots__ = ('consulHost', 'consulPort', 'serviceName', 'serviceHost', 'servicePort')
+    __slots__ = ('consulHost', 'consulPort', 'serviceName', 'serviceHost', 'servicePort', 'consulToken')
 
-    def __init__(self, consulHost, consulPort, serviceName, serviceHost = '', servicePort = 0):
+    def __init__(self, consulHost, consulPort, serviceName, serviceHost = '', servicePort = 0, consulToken=''):
         self.consulHost = consulHost
         self.consulPort = consulPort
+        self.consulToken = consulToken
         self.serviceName = serviceName
         self.serviceHost = serviceHost
         self.servicePort = servicePort
@@ -22,10 +23,11 @@ class DiscoveryConfig(object):
 
 class ConsulRpcDiscovery(RpcDiscovery):
 
-    def __init__(self, consulHost, consulPort):
+    def __init__(self, consulHost, consulPort, consulToken):
         self.consulHost = consulHost
         self.consulPort = consulPort
-        self.consulApi = ConsulApi(consulHost, consulPort)
+        self.consulToken = consulToken
+        self.consulApi = ConsulApi(consulHost, consulPort, consulToken)
         self.instanceList = []
         self.heartbeatInterval = 10
 

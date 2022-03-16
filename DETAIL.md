@@ -215,11 +215,13 @@ def sayHello(name):
 disconf = DiscoveryConfig(
     consulHost = '192.168.19.103',
     consulPort = 8500,
-    serviceName = 'test-rpc-server',
+    consulToken = 'd8ba9c48-c01a-a78e-ce8d-b65593a56419',
+    serviceName = 'UserService',
     serviceHost = local_ip(),
-    servicePort = 10001
+    servicePort = 9988,
 )
-server = TcpRpcServer('0.0.0.0', 10001)
+
+server = TcpRpcServer('0.0.0.0', 9988)
 server.setDiscoverConfig(disconf)
 server.serve()
 ```

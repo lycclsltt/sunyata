@@ -1,6 +1,7 @@
 import hashlib
 import json
 import requests
+from requests.api import head
 from agileutil.util import local_ip
 
 
@@ -16,24 +17,27 @@ class Instance(object):
 
 class ConsulApi(object):
 
-    __slots__ = ('host', 'port', 'baseUrl', 'token', 'timeout')
+    __slots__ = ('host', 'port', 'baseUrl', 'token', 'timeout', 'headers')
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, token = ''):
         self.host = host
         self.port = port
         self.baseUrl = 'http://%s:%s' % (self.host, self.port)
-        self.token = None
+        self.token = token
         self.timeout = 5
+        self.headers = {}
+        if self.token:
+            self.headers = {'X-Consul-Token':self.token}
 
     def put(self, k: str, v: str):
         url = self.baseUrl + '/v1/kv/%s' % k        
-        r = requests.put(url, data=v, timeout = self.timeout)
+        r = requests.put(url, headers=self.headers, data=v, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
 
     def getInstanceMap(self):
         url = self.baseUrl + '/v1/agent/services'
-        r = requests.get(url, timeout = self.timeout)
+        r = requests.get(url, headers=self.headers, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
         return json.loads(r.text)
@@ -67,20 +71,21 @@ class ConsulApi(object):
             'TTL' : '%ss' % ttl,
         }
         url = self.baseUrl + '/v1/agent/service/register'
-        r = requests.put(url, data=json.dumps(params), timeout = self.timeout)
+        
+        r = requests.put(url, headers = self.headers, data=json.dumps(params), timeout = self.timeout)
         print(r.text, r.status_code)
 
 
     def deregistService(self, serviceName: str, port: int, address = None):
         instanceId = self.genInstanceID(serviceName, address, port)
         url = self.baseUrl + '/v1/agent/service/deregister/%s' % instanceId
-        r = requests.put(url, timeout = self.timeout)
+        r = requests.put(url, headers=self.headers, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
 
     def get(self, k: str):
         url = self.baseUrl + '/v1/kv/%s?raw=true' % k  
-        r = requests.get(url, timeout = self.timeout)
+        r = requests.get(url, headers=self.headers, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
         return r.text
@@ -90,6 +95,7 @@ class ConsulApi(object):
         instanceList = []
         for instanceID, info in instanceMap.items():
             if info.get('Service') == serviceName:
+                print('info', info)
                 instance = Instance(
                     service = serviceName,
                     address = info.get('Address'),
@@ -100,6 +106,6 @@ class ConsulApi(object):
 
     def ttlHeartbeat(self, service, address, port):
         url = self.baseUrl + '/v1/agent/check/pass/%s' % ('service:' + self.genInstanceID(service, address, port))
-        r = requests.put(url, timeout = self.timeout)
+        r = requests.put(url, headers=self.headers, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)

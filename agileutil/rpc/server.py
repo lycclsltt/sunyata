@@ -71,7 +71,7 @@ class RpcServer(object):
 
     def setDiscoverConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
-        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort)
+        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
 
     def setKeepaliveTimeout(self, keepaliveTimeout: int):
         self.protocal.transport.setKeepaliveTimeout(keepaliveTimeout)
