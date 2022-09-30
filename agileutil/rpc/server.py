@@ -80,6 +80,19 @@ class RpcServer(object):
         cls.regist(func)
         print('call rpc')
         return func
+    
+    def printLogo(self):
+        logo = """
+     _         _ _      _   _ _   _ _ 
+    / \   __ _(_) | ___| | | | |_(_) |
+   / _ \ / _` | | |/ _ \ | | | __| | |
+  / ___ \ (_| | | |  __/ |_| | |_| | |
+ /_/   \_\__, |_|_|\___|\___/ \__|_|_|
+         |___/      
+ 
+ RPC server is ready! 
+         """
+        print(logo)
 
 
 class SimpleTcpRpcServer(RpcServer):
@@ -92,6 +105,7 @@ class SimpleTcpRpcServer(RpcServer):
     
     def serve(self):
         self.protocal.transport.bind(self.keepaliveTimeout)
+        self.printLogo()
         while 1:
             msg = self.protocal.transport.recv()
             request = self.protocal.unserialize(msg)
@@ -120,6 +134,7 @@ class BlockTcpRpcServer(SimpleTcpRpcServer):
 
     def serve(self):
         self.protocal.transport.bind()
+        self.printLogo()
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
@@ -158,6 +173,7 @@ class HttpRpcServer(RpcServer):
         tRegist = None
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
+        self.printLogo()
         print(' HTTP rpc serving on %s:%s' % (self.host, self.port) )
         self.app.serve()
 
@@ -247,6 +263,7 @@ class TcpRpcServer(BlockTcpRpcServer):
         coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
         tasks.append(coro)
         rs = loop.run_until_complete(asyncio.gather(*tasks))
+        self.printLogo()
         print(' TCP rpc serving on %s:%s' % (self.host, self.port) )
         try:
             loop.run_forever()
@@ -291,6 +308,7 @@ class UdpRpcServer(RpcServer):
     def serve(self):
         self.startWorkers()
         self.protocal.transport.bind()
+        self.printLogo()
         print(' UDP rpc serving on %s:%s' % (self.host, self.port))
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
