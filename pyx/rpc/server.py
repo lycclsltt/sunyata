@@ -83,8 +83,12 @@ class RpcServer(object):
     
     def printLogo(self):
         logo = """
-
- RPC server is ready! 
+                     
+    ___                    
+  //   ) ) //   / / \\ / / 
+ //___/ / ((___/ /   \/ /  
+//            / /    / /\  
+RPC server is ready! 
          """
         print(logo)
 
