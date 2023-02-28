@@ -48,7 +48,6 @@ def hello(name):
 ```shell
 pyx --run myservice
 ```
-![pic2.png](./docs/pic2.png)
 
 ## 详细介绍
 
