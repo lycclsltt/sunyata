@@ -8,7 +8,7 @@
   - [TCP RPC 客户端](#tcp-rpc-客户端)
   - [指定多个服务端地址](#指定多个服务端地址)
   - [HTTP RPC 服务端](#http-rpc-服务端)
-  - [HTTP RPC Client](#http-rpc-client)
+  - [HTTP RPC 客户端](#http-rpc-客户端)
   - [UDP RPC 服务端](#udp-rpc-服务端)
   - [UDP RPC 客户端](#udp-rpc-客户端)
 - [服务发现](#服务发现)
@@ -122,7 +122,7 @@ s = HttpRpcServer('0.0.0.0', 9988, workers=1)
 s.serve()
 ```
 
-### HTTP RPC Client
+### HTTP RPC 客户端
 客户端使用对应的HttpRpcClient对象:
 ```python
 from pyx.rpc.client import HttpRpcClient
