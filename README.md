@@ -11,7 +11,6 @@ def add(n1, n2):
 ```shell
 pyx --run myservice
 ```
-![pic2.png](./docs/pic2.png)
 
 
 请求
