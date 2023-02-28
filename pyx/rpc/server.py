@@ -78,7 +78,6 @@ class RpcServer(object):
     @classmethod
     def rpc(cls, func):
         cls.regist(func)
-        print('call rpc')
         return func
     
     def printLogo(self):

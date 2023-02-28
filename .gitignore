@@ -17,3 +17,4 @@ test_perf.py
 todo.txt
 test*.py
 .vscode
+myservice.py
