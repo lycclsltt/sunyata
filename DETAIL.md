@@ -263,6 +263,6 @@ hs.serve()
 ```
 
 
-[![Stargazers repo roster for @lycclsltt/agileutil](https://reporoster.com/stars/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/stargazers)
+[![Stargazers repo roster for @lycclsltt/pyx](https://reporoster.com/stars/lycclsltt/pyx)](https://github.com/lycclsltt/pyx/stargazers)
 
-[![Forkers repo roster for @lycclsltt/agileutil](https://reporoster.com/forks/lycclsltt/agileutil)](https://github.com/lycclsltt/agileutil/network/members)
+[![Forkers repo roster for @lycclsltt/pyx](https://reporoster.com/forks/lycclsltt/pyx)](https://github.com/lycclsltt/pyx/network/members)
