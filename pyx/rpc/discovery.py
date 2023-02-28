@@ -1,4 +1,4 @@
-from agileutil.consul import ConsulApi, Instance
+from pyx.consul import ConsulApi, Instance
 import time
 import threading
 import asyncio

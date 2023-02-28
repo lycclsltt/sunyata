@@ -9,7 +9,7 @@ requireList = [
 ]
 
 setup(
-    name='agileutil',
+    name='pyx',
     version=DEFINE_VERSION,
     description='Light, simple, asynchronous RPC framework for Python',
     author='tank',
@@ -22,18 +22,18 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
-    keywords='agileutil',
+    keywords='pyx',
     packages=[
-        'agileutil', 
-        'agileutil/rpc', 
-        'agileutil/algorithm', 
-        'agileutil/cli',
-        'agileutil/http'
+        'pyx', 
+        'pyx/rpc', 
+        'pyx/algorithm', 
+        'pyx/cli',
+        'pyx/http'
     ],
     include_package_data=True,
     entry_points = {
         'console_scripts' : [
-            'agileutil=agileutil.cli.entry:main'
+            'pyx=pyx.cli.entry:main'
         ]
     }
 )

@@ -1,5 +1,5 @@
 '''
-from agileutil.orm import Model, IntField, CharField
+from pyx.orm import Model, IntField, CharField
 
 #orm init
 Model.init('127.0.0.1', 3306, 'root', '', 'test2', min_conn_num=10)
@@ -34,8 +34,8 @@ obj = Nation.filter('id', '=', 30).first()
 print(obj)
 '''
 
-from agileutil.db import PoolDB
-from agileutil.db import Orm
+from pyx.db import PoolDB
+from pyx.db import Orm
 
 class OrmObject(object):
 

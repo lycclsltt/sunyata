@@ -1,17 +1,17 @@
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
+from pyx.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
 import multiprocessing
-from agileutil.rpc.exception import FuncNotFoundException
+from pyx.rpc.exception import FuncNotFoundException
 import queue
 import threading
 import socket
-from agileutil.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
+from pyx.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
-from agileutil.rpc.compress import RpcCompress
+from pyx.rpc.compress import RpcCompress
 from types import FunctionType
-from agileutil.rpc.method import RpcMethod
+from pyx.rpc.method import RpcMethod
 import asyncio
 import inspect
-from agileutil.http.server import HttpServer
+from pyx.http.server import HttpServer
 import traceback
 
 class RpcServer(object):
@@ -83,13 +83,7 @@ class RpcServer(object):
     
     def printLogo(self):
         logo = """
-     _         _ _      _   _ _   _ _ 
-    / \   __ _(_) | ___| | | | |_(_) |
-   / _ \ / _` | | |/ _ \ | | | __| | |
-  / ___ \ (_| | | |  __/ |_| | |_| | |
- /_/   \_\__, |_|_|\___|\___/ \__|_|_|
-         |___/      
- 
+
  RPC server is ready! 
          """
         print(logo)

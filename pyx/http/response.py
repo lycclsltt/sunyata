@@ -1,5 +1,5 @@
-from agileutil.http.status import HttpStatus200
-from agileutil.util import str2bytes
+from pyx.http.status import HttpStatus200
+from pyx.util import str2bytes
 
 class HttpResponse(object):
 

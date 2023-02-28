@@ -1,4 +1,4 @@
-from agileutil.compress import Compress
+from pyx.compress import Compress
 
 class RpcCompress(Compress):
 

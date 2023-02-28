@@ -17,10 +17,10 @@ if len(sys.argv) != 3:
     sys.exit(1)
 
 cmdList = [
-    "rm -rf ./agileutil.egg-info", "rm -rf ./dist",
+    "rm -rf ./pyx.egg-info", "rm -rf ./dist",
     "%s setup.py sdist" % binExec,
     "%s -m twine upload -u '%s' -p '%s' dist/*" %
-    (binExec, sys.argv[1], sys.argv[2]), "rm -rf ./agileutil.egg-info",
+    (binExec, sys.argv[1], sys.argv[2]), "rm -rf ./pyx.egg-info",
     "rm -rf ./dist"
 ]
 

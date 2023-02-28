@@ -1,7 +1,7 @@
 ## 快速开始
 myservice.py:
 ```Python hl_lines="2"
-from agileutil.rpc.server import rpc
+from pyx.rpc.server import rpc
 
 @rpc
 def add(n1, n2):
@@ -9,14 +9,14 @@ def add(n1, n2):
 ```
 启动：
 ```shell
-agileutil --run myservice
+pyx --run myservice
 ```
 ![pic2.png](./docs/pic2.png)
 
 
 请求
 ```
-from agileutil.rpc.client import TcpRpcClient
+from pyx.rpc.client import TcpRpcClient
 
 cli = TcpRpcClient('127.0.0.1', 9988, timeout=10)
 res = cli.add(1, 2)

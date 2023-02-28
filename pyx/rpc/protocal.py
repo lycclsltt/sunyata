@@ -1,5 +1,5 @@
-from agileutil.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
-from agileutil.rpc.serialize import BinarySerialize, JsonSerialize
+from pyx.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
+from pyx.rpc.serialize import BinarySerialize, JsonSerialize
 from multiprocessing import cpu_count
 
 

@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from agileutil.algorithm.sort.base import Sort
+from pyx.algorithm.sort.base import Sort
 import random
 
 class QuickSort(Sort):

@@ -89,8 +89,8 @@ class Orm:
     ORDER_ASC = 'asc'
     ORDER_DESC = 'desc'
 
-    def __init__(self, agileutilDb):
-        self.db = agileutilDb
+    def __init__(self, pyxDb):
+        self.db = pyxDb
         self.tableName = ''
         self.whereCon = ''
         self.updateData = None

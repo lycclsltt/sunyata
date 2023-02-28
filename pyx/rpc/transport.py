@@ -2,8 +2,8 @@ from socket import *
 import struct
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from agileutil.rpc.const import SERVER_TIMEOUT
-from agileutil.rpc.compress import RpcCompress
+from pyx.rpc.const import SERVER_TIMEOUT
+from pyx.rpc.compress import RpcCompress
 
 
 class RpcTransport(object): 

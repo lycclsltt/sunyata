@@ -1,7 +1,7 @@
 import argparse
 import sys
 import os
-from agileutil.rpc.server import TcpRpcServer
+from pyx.rpc.server import TcpRpcServer
 
 class Cli(object):
 
@@ -10,7 +10,7 @@ class Cli(object):
         self.runServer(args)
 
     def parseArgs(self):
-        parser = argparse.ArgumentParser(description="Agileutil console cli tool")
+        parser = argparse.ArgumentParser(description="pyx console cli tool")
         parser.add_argument('-r', '--run', type=str, help = 'module', required=True, metavar='module', dest='module')
         parser.add_argument('-b', '--bind', type=str, help='bind interface, default 0.0.0.0', default='0.0.0.0', required=False, metavar='0.0.0.0', dest='bind')
         parser.add_argument('-p', '--port', type=int, help='bind port, default 9988', default=9988, required=False, metavar='9988', dest='port')

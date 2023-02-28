@@ -1,5 +1,5 @@
 import operator
-from agileutil.eventloop import EventLoop
+from pyx.eventloop import EventLoop
 
 class RpcMethod(object):
 

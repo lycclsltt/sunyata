@@ -1,6 +1,6 @@
 class Encrypt(object):
 
-    PRIVATE_KEY = b'agileutil'
+    PRIVATE_KEY = b'pyx'
 
     @classmethod
     def encrypt(cls, bytearr):

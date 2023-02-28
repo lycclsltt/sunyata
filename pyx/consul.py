@@ -2,7 +2,7 @@ import hashlib
 import json
 import requests
 from requests.api import head
-from agileutil.util import local_ip
+from pyx.util import local_ip
 
 
 class Instance(object):

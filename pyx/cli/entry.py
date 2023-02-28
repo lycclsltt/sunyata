@@ -1,4 +1,4 @@
-from agileutil.cli.cli import Cli
+from pyx.cli.cli import Cli
 
 def main():
     cli = Cli()

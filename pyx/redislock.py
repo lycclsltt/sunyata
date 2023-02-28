@@ -1,7 +1,7 @@
 '''
 example:
 
-from agileutil.redislock import get_redis_lock
+from pyx.redislock import get_redis_lock
 import time
 
 rlock = get_redis_lock('192.168.1.1', 6379, 'abcd1234')

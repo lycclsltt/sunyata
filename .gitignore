@@ -1,7 +1,7 @@
 build
 dist
 pub.sh
-agileutil.egg-info
+pyx.egg-info
 __pycache__
 .idea
 MANIFEST.in

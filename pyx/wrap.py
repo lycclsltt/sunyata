@@ -19,7 +19,7 @@ def stdout_log(func):
     return wrapper
 
 
-EXCEPTION = 'agileutil_wrap_exception'
+EXCEPTION = 'pyx_wrap_exception'
 
 
 def safe(func):

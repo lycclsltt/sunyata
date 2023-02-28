@@ -1,9 +1,9 @@
-from agileutil.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
-from agileutil.rpc.exception import FuncNotFoundException
-from agileutil.rpc.discovery import DiscoveryConfig
-from agileutil.rpc.discovery import ConsulRpcDiscovery
-from agileutil.wrap import retryTimes
-from agileutil.rpc.discovery import Instance
+from pyx.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
+from pyx.rpc.exception import FuncNotFoundException
+from pyx.rpc.discovery import DiscoveryConfig
+from pyx.rpc.discovery import ConsulRpcDiscovery
+from pyx.wrap import retryTimes
+from pyx.rpc.discovery import Instance
 import socket
 
 class Address(object):

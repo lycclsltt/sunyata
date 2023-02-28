@@ -1,8 +1,8 @@
 from datetime import date
-from agileutil.http.request import HttpRequest
-from agileutil.http.response import HttpResponse
-from agileutil.http.router import HttpRouter
-from agileutil.util import bytes2str
+from pyx.http.request import HttpRequest
+from pyx.http.response import HttpResponse
+from pyx.http.router import HttpRouter
+from pyx.util import bytes2str
 
 class HttpFactory(object):
 

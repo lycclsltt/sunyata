@@ -1,7 +1,7 @@
-from agileutil.http.factory import HttpFactory
-from agileutil.http.status import *
+from pyx.http.factory import HttpFactory
+from pyx.http.status import *
 from traceback import format_exc
-from agileutil.http.transport import TcpTransport
+from pyx.http.transport import TcpTransport
 from multiprocessing import cpu_count
 from types import MethodType,FunctionType
 import asyncio
