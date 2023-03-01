@@ -2,7 +2,7 @@ import hashlib
 import json
 import requests
 from requests.api import head
-from pyx.util import local_ip
+from sunyata.util import local_ip
 
 
 class Instance(object):

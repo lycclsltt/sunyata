@@ -1,4 +1,4 @@
-from pyx.consul import ConsulApi, Instance
+from sunyata.consul import ConsulApi, Instance
 import time
 import threading
 import asyncio

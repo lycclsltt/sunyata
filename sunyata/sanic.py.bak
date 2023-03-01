@@ -1,7 +1,7 @@
 '''
 Usage:
 
-from pyx.sanic import SanicApp, SanicController
+from sunyata.sanic import SanicApp, SanicController
 
 class TestController(SanicController):
 
@@ -39,7 +39,7 @@ from sanic import Sanic
 from sanic.response import text, raw
 from sanic.views import HTTPMethodView
 import ujson
-from pyx.log import Log
+from sunyata.log import Log
 try:
     from decouple import config
 except:
@@ -189,7 +189,7 @@ class SanicApp(object):
 
     def initApp(self):
         if self.app == None:
-            self.app = Sanic(name='pyx' + str(uuid.uuid1()))
+            self.app = Sanic(name='sunyata' + str(uuid.uuid1()))
 
     def initLog(self):
         if self.logger == None and self.log != '':

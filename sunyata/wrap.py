@@ -19,7 +19,7 @@ def stdout_log(func):
     return wrapper
 
 
-EXCEPTION = 'pyx_wrap_exception'
+EXCEPTION = 'sunyata_wrap_exception'
 
 
 def safe(func):

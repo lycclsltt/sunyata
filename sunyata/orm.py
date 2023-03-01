@@ -1,5 +1,5 @@
 '''
-from pyx.orm import Model, IntField, CharField
+from sunyata.orm import Model, IntField, CharField
 
 #orm init
 Model.init('127.0.0.1', 3306, 'root', '', 'test2', min_conn_num=10)
@@ -34,8 +34,8 @@ obj = Nation.filter('id', '=', 30).first()
 print(obj)
 '''
 
-from pyx.db import PoolDB
-from pyx.db import Orm
+from sunyata.db import PoolDB
+from sunyata.db import Orm
 
 class OrmObject(object):
 

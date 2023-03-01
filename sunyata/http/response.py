@@ -1,5 +1,5 @@
-from pyx.http.status import HttpStatus200
-from pyx.util import str2bytes
+from sunyata.http.status import HttpStatus200
+from sunyata.util import str2bytes
 
 class HttpResponse(object):
 

@@ -17,10 +17,10 @@ if len(sys.argv) != 3:
     sys.exit(1)
 
 cmdList = [
-    "rm -rf ./pyx.egg-info", "rm -rf ./dist",
+    "rm -rf ./sunyata.egg-info", "rm -rf ./dist",
     "%s setup.py sdist" % binExec,
     "%s -m twine upload -u '%s' -p '%s' dist/*" %
-    (binExec, sys.argv[1], sys.argv[2]), "rm -rf ./pyx.egg-info",
+    (binExec, sys.argv[1], sys.argv[2]), "rm -rf ./sunyata.egg-info",
     "rm -rf ./dist"
 ]
 

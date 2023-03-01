@@ -3,7 +3,7 @@
 '''
 Usage:
 
-from pyx.algorithm.trie import TrieNode, Trie
+from sunyata.algorithm.trie import TrieNode, Trie
 import random
 arr = [u'运维', u'运维开发', u'运营']
 print('arr', arr)

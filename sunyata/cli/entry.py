@@ -1,4 +1,4 @@
-from pyx.cli.cli import Cli
+from sunyata.cli.cli import Cli
 
 def main():
     cli = Cli()

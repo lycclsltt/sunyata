@@ -20,7 +20,7 @@
 - [内置Web框架](#内置web框架)
 
 ## 简介
-pyx是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul做服务注册发现。
+sunyata是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul做服务注册发现。
 
 ## 特性
 - 像本地函数一样调用
@@ -32,13 +32,13 @@ pyx是一个Python3 RPC框架，client和server既可以直连，也可以通过
 ## 安装
 Python 版本 >= 3.6
 ```
-pip install pyx
+pip install sunyata
 ```
 
 ## 快速开始
 创建文件myservice.py
 ```python
-from pyx.rpc import rpc
+from sunyata.rpc import rpc
 
 @rpc
 def hello(name):
@@ -46,7 +46,7 @@ def hello(name):
 ```
 启动：
 ```shell
-pyx --run myservice
+sunyata --run myservice
 ```
 ![pic.png](./docs/pic.png)
 
@@ -58,7 +58,7 @@ pyx --run myservice
 - 通过@rpc装饰器注册需要被客户端请求的方法
 - 调用serve()方法，开始处理客户端请求
 ```python
-from pyx.rpc.server import TcpRpcServer, rpc
+from sunyata.rpc.server import TcpRpcServer, rpc
 import asyncio
 
 @rpc
@@ -84,7 +84,7 @@ server.serve()
 - 通过call()方法，指定服务端方法名称和参数（注意：如果方法名不存在，或者服务端未调用@rpc装饰器注册，那么call()方法将抛出异常）
 - call() 方法的返回值和在本地调用一样，原来是什么返回类型，就还是什么（例如返回字典、列表、对象甚至内置类型，经过序列化后，不会发生改变）
 ```python
-from pyx.rpc.client import TcpRpcClient
+from sunyata.rpc.client import TcpRpcClient
 
 cli = TcpRpcClient('127.0.0.1', 9988, timeout = 2)
 
@@ -102,7 +102,7 @@ print(resp)
 ### 指定多个服务端地址
 - 通过servers参数，你可以创建一个指定多个服务端地址的client对象，默认采用轮询的负载均衡策略，将请求转发到多个server上，如果请求其中一个server出现了失败，那么会自动重试。
 ```python
-from pyx.rpc.client import TcpRpcClient
+from sunyata.rpc.client import TcpRpcClient
 
 c = TcpRpcClient(servers = ['127.0.0.1:9988', '127.0.0.1:9989'])
 resp = c.call('hello', 'zhangsan')
@@ -112,7 +112,7 @@ print(resp)
 ### HTTP RPC 服务端
 底层是基于内置web框架实现的，使用起来非常简单，和TcpRpcServer的用法类似:
 ```python
-from pyx.rpc.server import HttpRpcServer, rpc
+from sunyata.rpc.server import HttpRpcServer, rpc
 
 @rpc
 def sayHello(name):
@@ -125,7 +125,7 @@ s.serve()
 ### HTTP RPC 客户端
 客户端使用对应的HttpRpcClient对象:
 ```python
-from pyx.rpc.client import HttpRpcClient
+from sunyata.rpc.client import HttpRpcClient
 
 c = HttpRpcClient('127.0.0.1', 9988)
 resp = c.call('sayHello', 'zhangsan')
@@ -139,7 +139,7 @@ print(resp)
 - 调用serve()方法开始处理客户端请求
 - 返回的内容和调用本地方法没有差别，框架内部通过序列化和反序列化，将数据转化为程序内的对象（字典、列表、内置类型、各种类对象等等）
 ```python
-from pyx.rpc.server import UdpRpcServer, rpc
+from sunyata.rpc.server import UdpRpcServer, rpc
 
 @rpc
 def sayHello(name): 
@@ -153,7 +153,7 @@ server.serve()
 - 调用call()方法，并指定服务端的方法名称和参数
 - 返回的内容和调用本地方法没有差别，框架内部通过序列化和反序列化，将数据转化为程序内的对象（字典、列表、内置类型、各种类对象等等）
 ```python
-from pyx.rpc.client import UdpRpcClient
+from sunyata.rpc.client import UdpRpcClient
 cli = UdpRpcClient('127.0.0.1', 9988)
 resp = cli.call('sayHello', name = 'xiaoming' )
 print(resp)
@@ -172,7 +172,7 @@ print(resp)
 指定用于服务注册发现的Consul的地址和端口。同时通过serviceName参数指定一个全局唯一的服务名称（用于标记服务端服务）。同时指定服务端监听的地址和端口。
 
 ```python
-from pyx.rpc.discovery import DiscoveryConfig
+from sunyata.rpc.discovery import DiscoveryConfig
 
 disconf = DiscoveryConfig(
     consulHost = '192.168.19.103',
@@ -204,9 +204,9 @@ s.serve()
 ```
 ### 完整的服务端示例 (UDP/HTTP调用方式相同)
 ```python
-from pyx.rpc.server import TcpRpcServer, rpc
-from pyx.rpc.discovery import DiscoveryConfig
-from pyx.util import local_ip
+from sunyata.rpc.server import TcpRpcServer, rpc
+from sunyata.rpc.discovery import DiscoveryConfig
+from sunyata.util import local_ip
 
 @rpc
 def sayHello(name): 
@@ -230,8 +230,8 @@ server.serve()
 - 创建DiscoveryConfig对象，指定Consul的地址端口（serviceName参数和服务端的保持一致，且全局唯一）
 - 调用setDiscoveryConfig()方法传入服务发现配置
 ```python
-from pyx.rpc.client import TcpRpcClient
-from pyx.rpc.discovery import DiscoveryConfig
+from sunyata.rpc.client import TcpRpcClient
+from sunyata.rpc.discovery import DiscoveryConfig
 cli = TcpRpcClient()
 disconf = DiscoveryConfig(
     consulHost= '192.168.19.103',
@@ -249,9 +249,9 @@ print(resp)
 数据的压缩、解压缩过程，经过测试对性能的影响极低（由于采用了level1级别的压缩），最高可减少75%的网络IO。
 
 ## 内置Web框架
-pyx也可以作为一个web框架来使用, HttpRpcServer在此基础上构建。
+sunyata也可以作为一个web框架来使用, HttpRpcServer在此基础上构建。
 ```python
-from pyx.http.server import HttpServer, route
+from sunyata.http.server import HttpServer, route
 
 @route('/hello', methods=['GET'])
 def hello(request):
@@ -263,6 +263,6 @@ hs.serve()
 ```
 
 
-[![Stargazers repo roster for @lycclsltt/pyx](https://reporoster.com/stars/lycclsltt/pyx)](https://github.com/lycclsltt/pyx/stargazers)
+[![Stargazers repo roster for @lycclsltt/sunyata](https://reporoster.com/stars/lycclsltt/sunyata)](https://github.com/lycclsltt/sunyata/stargazers)
 
-[![Forkers repo roster for @lycclsltt/pyx](https://reporoster.com/forks/lycclsltt/pyx)](https://github.com/lycclsltt/pyx/network/members)
+[![Forkers repo roster for @lycclsltt/sunyata](https://reporoster.com/forks/lycclsltt/sunyata)](https://github.com/lycclsltt/sunyata/network/members)

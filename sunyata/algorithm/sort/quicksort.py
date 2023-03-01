@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from pyx.algorithm.sort.base import Sort
+from sunyata.algorithm.sort.base import Sort
 import random
 
 class QuickSort(Sort):

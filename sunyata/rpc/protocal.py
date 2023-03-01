@@ -1,5 +1,5 @@
-from pyx.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
-from pyx.rpc.serialize import BinarySerialize, JsonSerialize
+from sunyata.rpc.transport import TcpTransport, UdpTransport, HttpTransport, ClientUdpTransport, RpcTransport
+from sunyata.rpc.serialize import BinarySerialize, JsonSerialize
 from multiprocessing import cpu_count
 
 

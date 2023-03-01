@@ -1,7 +1,7 @@
-from pyx.http.factory import HttpFactory
-from pyx.http.status import *
+from sunyata.http.factory import HttpFactory
+from sunyata.http.status import *
 from traceback import format_exc
-from pyx.http.transport import TcpTransport
+from sunyata.http.transport import TcpTransport
 from multiprocessing import cpu_count
 from types import MethodType,FunctionType
 import asyncio

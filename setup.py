@@ -9,7 +9,7 @@ requireList = [
 ]
 
 setup(
-    name='pyx',
+    name='sunyata',
     version=DEFINE_VERSION,
     description='Light, simple, asynchronous RPC framework for Python',
     author='tank',
@@ -26,18 +26,18 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    keywords='pyx',
+    keywords='sunyata',
     packages=[
-        'pyx', 
-        'pyx/rpc', 
-        'pyx/algorithm', 
-        'pyx/cli',
-        'pyx/http'
+        'sunyata', 
+        'sunyata/rpc', 
+        'sunyata/algorithm', 
+        'sunyata/cli',
+        'sunyata/http'
     ],
     include_package_data=True,
     entry_points = {
         'console_scripts' : [
-            'pyx=pyx.cli.entry:main'
+            'sunyata=sunyata.cli.entry:main'
         ]
     }
 )

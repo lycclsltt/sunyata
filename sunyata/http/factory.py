@@ -1,8 +1,8 @@
 from datetime import date
-from pyx.http.request import HttpRequest
-from pyx.http.response import HttpResponse
-from pyx.http.router import HttpRouter
-from pyx.util import bytes2str
+from sunyata.http.request import HttpRequest
+from sunyata.http.response import HttpResponse
+from sunyata.http.router import HttpRouter
+from sunyata.util import bytes2str
 
 class HttpFactory(object):
 

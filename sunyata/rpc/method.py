@@ -1,5 +1,5 @@
 import operator
-from pyx.eventloop import EventLoop
+from sunyata.eventloop import EventLoop
 
 class RpcMethod(object):
 

@@ -1,6 +1,6 @@
 class Encrypt(object):
 
-    PRIVATE_KEY = b'pyx'
+    PRIVATE_KEY = b'sunyata'
 
     @classmethod
     def encrypt(cls, bytearr):

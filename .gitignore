@@ -1,7 +1,7 @@
 build
 dist
 pub.sh
-pyx.egg-info
+sunyata.egg-info
 __pycache__
 .idea
 MANIFEST.in

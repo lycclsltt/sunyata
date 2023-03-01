@@ -2,8 +2,8 @@ from socket import *
 import struct
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from pyx.rpc.const import SERVER_TIMEOUT
-from pyx.rpc.compress import RpcCompress
+from sunyata.rpc.const import SERVER_TIMEOUT
+from sunyata.rpc.compress import RpcCompress
 
 
 class RpcTransport(object): 

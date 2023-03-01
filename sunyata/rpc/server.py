@@ -1,17 +1,17 @@
-from pyx.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
+from sunyata.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal
 import multiprocessing
-from pyx.rpc.exception import FuncNotFoundException
+from sunyata.rpc.exception import FuncNotFoundException
 import queue
 import threading
 import socket
-from pyx.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
+from sunyata.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
 import struct
-from pyx.rpc.compress import RpcCompress
+from sunyata.rpc.compress import RpcCompress
 from types import FunctionType
-from pyx.rpc.method import RpcMethod
+from sunyata.rpc.method import RpcMethod
 import asyncio
 import inspect
-from pyx.http.server import HttpServer
+from sunyata.http.server import HttpServer
 import traceback
 
 class RpcServer(object):

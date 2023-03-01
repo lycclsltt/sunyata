@@ -8,22 +8,22 @@ import threading
 import time
 import unittest
 from multiprocessing import Process
-from pyx.util import local_ip
+from sunyata.util import local_ip
 import socket
 import requests
 import random
-from pyx.rpc.compress import RpcCompress
-from pyx.rpc.server import TcpRpcServer
-from pyx.rpc.client import TcpRpcClient
-from pyx.rpc.server import UdpRpcServer
-from pyx.rpc.client import UdpRpcClient
-from pyx.rpc.discovery import DiscoveryConfig
-from pyx.rpc.compress import RpcCompress
-from pyx.rpc.server import HttpRpcServer
-from pyx.rpc.client import HttpRpcClient
-from pyx.rpc.server import RpcServer
-from pyx.rpc import rpc
-from pyx.http.server import HttpServer
+from sunyata.rpc.compress import RpcCompress
+from sunyata.rpc.server import TcpRpcServer
+from sunyata.rpc.client import TcpRpcClient
+from sunyata.rpc.server import UdpRpcServer
+from sunyata.rpc.client import UdpRpcClient
+from sunyata.rpc.discovery import DiscoveryConfig
+from sunyata.rpc.compress import RpcCompress
+from sunyata.rpc.server import HttpRpcServer
+from sunyata.rpc.client import HttpRpcClient
+from sunyata.rpc.server import RpcServer
+from sunyata.rpc import rpc
+from sunyata.http.server import HttpServer
 from multiprocessing import Process
 
 CONSUL_HOST = '192.168.19.103'

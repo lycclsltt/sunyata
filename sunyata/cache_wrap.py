@@ -5,7 +5,7 @@ import pickle
 FUNC_CACHE_MAP = {}
 
 def _get_key(funcname, *args, **kwargs):
-    key = 'pyx_cache_func:'+funcname + ':'
+    key = 'sunyata_cache_func:'+funcname + ':'
     if len(args) > 0:
         key = key + str(list(args)) + ':'
     if len(kwargs) > 0:

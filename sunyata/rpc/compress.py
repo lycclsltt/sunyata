@@ -1,4 +1,4 @@
-from pyx.compress import Compress
+from sunyata.compress import Compress
 
 class RpcCompress(Compress):
 

@@ -1,9 +1,9 @@
-from pyx.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
-from pyx.rpc.exception import FuncNotFoundException
-from pyx.rpc.discovery import DiscoveryConfig
-from pyx.rpc.discovery import ConsulRpcDiscovery
-from pyx.wrap import retryTimes
-from pyx.rpc.discovery import Instance
+from sunyata.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
+from sunyata.rpc.exception import FuncNotFoundException
+from sunyata.rpc.discovery import DiscoveryConfig
+from sunyata.rpc.discovery import ConsulRpcDiscovery
+from sunyata.wrap import retryTimes
+from sunyata.rpc.discovery import Instance
 import socket
 
 class Address(object):
