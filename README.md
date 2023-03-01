@@ -48,7 +48,6 @@ def hello(name):
 ```shell
 sunyata --run myservice
 ```
-![pic.png](./docs/pic.png)
 
 ## 详细介绍
 
