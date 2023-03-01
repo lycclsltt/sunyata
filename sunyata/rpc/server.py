@@ -81,26 +81,7 @@ class RpcServer(object):
         return func
     
     def printLogo(self):
-        logo = """
-ppppp   pppppppppyyyyyyy           yyyyyyyxxxxxxx      xxxxxxx
-p::::ppp:::::::::py:::::y         y:::::y  x:::::x    x:::::x 
-p:::::::::::::::::py:::::y       y:::::y    x:::::x  x:::::x  
-pp::::::ppppp::::::py:::::y     y:::::y      x:::::xx:::::x   
- p:::::p     p:::::p y:::::y   y:::::y        x::::::::::x    
- p:::::p     p:::::p  y:::::y y:::::y          x::::::::x     
- p:::::p     p:::::p   y:::::y:::::y           x::::::::x     
- p:::::p    p::::::p    y:::::::::y           x::::::::::x    
- p:::::ppppp:::::::p     y:::::::y           x:::::xx:::::x   
- p::::::::::::::::p       y:::::y           x:::::x  x:::::x  
- p::::::::::::::pp       y:::::y           x:::::x    x:::::x 
- p::::::pppppppp        y:::::y           xxxxxxx      xxxxxxx
- p:::::p               y:::::y                                
- p:::::p              y:::::y                                 
-p:::::::p            y:::::y                                  
-p:::::::p           y:::::y                                   
-p:::::::p          yyyyyyy                                    
-ppppppppp              
-"""
+        logo = """"""
         print(logo)
 
 
