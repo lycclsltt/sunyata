@@ -28,7 +28,7 @@ from multiprocessing import Process
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
-SLEEP = 2.1
+SLEEP = 2
 IS_TEST_DISCOVERY = False
 
 RpcServer.isPrintLogo = False
@@ -570,4 +570,4 @@ if __name__ == '__main__':
     httpClient = threading.Thread(target=create_http_client_compress)
     httpClient.start()
     print('\n\n\n')
-    unittest.main()
+    time.sleep(30)
