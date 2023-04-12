@@ -1,6 +1,6 @@
 #coding=utf-8
 
-from sunyata.algorithm.avlsearchtree import AVLSearchTree
+from sunyata.algorithm.bintree import BinTree
 
-class RBTree(AVLSearchTree):
+class RBTree(BinTree):
     pass

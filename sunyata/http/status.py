@@ -24,7 +24,7 @@ class HttpStatus403(HttpStatus):
 
 
 class HttpStatus404(HttpStatus):
-    code = 403
+    code = 404
     msg = 'Not Found'
 
 
