@@ -11,7 +11,7 @@ from types import FunctionType
 from sunyata.rpc.method import RpcMethod
 import asyncio
 import inspect
-from sunyata.http.server import HttpServer
+from sunyata.http.rawserver import HttpServer
 import traceback
 
 class RpcServer(object):
@@ -164,7 +164,7 @@ class HttpRpcServer(RpcServer):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
-        print(' http rpc running on http://%s:%s' % (self.host, self.port) )
+        print('http rpc running on http://%s:%s' % (self.host, self.port) )
         self.app.serve()
 
 
@@ -299,7 +299,7 @@ class UdpRpcServer(RpcServer):
         self.startWorkers()
         self.protocal.transport.bind()
         self.printLogo()
-        print(' udp rpc running on udp://%s:%s' % (self.host, self.port))
+        print('udp rpc running on udp://%s:%s' % (self.host, self.port))
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
