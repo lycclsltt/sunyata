@@ -27,3 +27,9 @@ class HttpResponse(object):
             resBody = str2bytes(resBody)
         res = str2bytes(resLine + resHeaders) + resBody
         return res
+    
+    def responseBody(self):
+        resBody = self.body
+        if type(resBody) == str:
+            resBody = str2bytes(resBody)
+        return resBody

@@ -95,11 +95,6 @@ class RpcClient(object):
         pass
 
     def __getattr__(self, key):
-        #def remote_attr(*args, **kwargs):
-        #    print(f'{key}方法不存在, 参数为:{args}, {kwargs}')
-        #    return self.call(f'{key}', *args, **kwargs)
-        #def remote_attr(*args, **kwargs):
-        #    return Callable(self, f"{key}")
         if key in dir(self):
             return getattr(self, key)
         return Callable(self, f"{key}")
