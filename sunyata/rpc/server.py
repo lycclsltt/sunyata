@@ -11,8 +11,7 @@ from types import FunctionType
 from sunyata.rpc.method import RpcMethod
 import asyncio
 import inspect
-from sunyata.http.rawserver import HttpServer
-import traceback
+from sunyata.http.server import HttpServer
 
 class RpcServer(object):
 
