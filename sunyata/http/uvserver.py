@@ -11,12 +11,13 @@ class UvHttpServer(HttpServer):
 
     routerMap = {}
 
-    def __init__(self, bind = '0.0.0.0', port=9989, log_level='debug'):
+    def __init__(self, bind = '0.0.0.0', port=9989, log_level='error'):
         HttpServer.__init__(self, bind=bind, port=port)
         self.config = uvicorn.Config("sunyata.http.uvserver:UvHttpServer", host=self.bind, port=self.port, log_level=log_level)
 
     def serve(self):
         server = uvicorn.Server(self.config)
+        print('http running on http://%s:%s' % (self.bind, self.port) )
         server.run()
     
     async def genHttpRequest(self, scheme, httpVersion, method, path, queryString, headers, body, clientTuple):

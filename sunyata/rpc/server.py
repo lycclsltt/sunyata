@@ -164,7 +164,7 @@ class HttpRpcServer(RpcServer):
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
-        print(' HTTP rpc serving on %s:%s' % (self.host, self.port) )
+        print(' http rpc running on http://%s:%s' % (self.host, self.port) )
         self.app.serve()
 
 
@@ -219,7 +219,7 @@ class TcpRpcServer(BlockTcpRpcServer):
         loop = asyncio.get_event_loop()
         coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
         server = loop.run_until_complete(coro)
-        print('TCP rpc serving on %s:%s' % (self.host, self.port))
+        print('tcp rpc running on tcp://%s:%s' % (self.host, self.port))
         try:
             loop.run_forever()
         except KeyboardInterrupt:
@@ -254,7 +254,7 @@ class TcpRpcServer(BlockTcpRpcServer):
         tasks.append(coro)
         rs = loop.run_until_complete(asyncio.gather(*tasks))
         self.printLogo()
-        print('TCP rpc serving on %s:%s' % (self.host, self.port) )
+        print('tcp rpc running on tcp://%s:%s' % (self.host, self.port) )
         try:
             loop.run_forever()
         except KeyboardInterrupt:
@@ -299,7 +299,7 @@ class UdpRpcServer(RpcServer):
         self.startWorkers()
         self.protocal.transport.bind()
         self.printLogo()
-        print(' UDP rpc serving on %s:%s' % (self.host, self.port))
+        print(' udp rpc running on udp://%s:%s' % (self.host, self.port))
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:

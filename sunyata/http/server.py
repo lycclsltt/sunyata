@@ -62,6 +62,7 @@ class HttpServer(object):
             await task
 
     def serve(self):
+        print('http running on http://%s:%s' % (self.bind, self.port) )
         asyncio.run(self.listenAndServe())
 
     @classmethod
