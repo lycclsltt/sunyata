@@ -1,4 +1,3 @@
-from sunyata.http.status import HttpStatus200
 from sunyata.util import str2bytes
 
 class HttpResponse(object):

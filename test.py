@@ -571,3 +571,4 @@ if __name__ == '__main__':
     httpClient.start()
     print('\n\n\n')
     time.sleep(30)
+    print('all ok')

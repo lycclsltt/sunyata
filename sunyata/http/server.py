@@ -1,31 +1,20 @@
 from sunyata.http.factory import HttpFactory
 from sunyata.http.status import *
-from sunyata.http.transport import TcpTransport
 from sunyata.http.request_stream import RequestStream
 from traceback import format_exc
-from multiprocessing import cpu_count
 from types import MethodType,FunctionType
 import asyncio
 import inspect
 
-class HttpServer(object):
 
-    __slots__ = ('bind', 'port', 'bufSize', 'transport', 'queueSize', 'queue', 'threadList', 'workers', 'isAsync', 'exitFlag', 'maxContentLength')
+class HttpServer(object):
 
     routerMap = {}
 
-    def __init__(self, bind = '0.0.0.0', port=9989, workers = cpu_count()):
+    def __init__(self, bind = '0.0.0.0', port=9989):
         super().__init__()
         self.bind = bind
         self.port = port
-        self.bufSize = 1024 * 1024
-        self.transport = TcpTransport(self.bind, self.port)
-        self.queueSize = 30000
-        self.threadList = []
-        self.workers = workers
-        self.queue = asyncio.Queue(self.queueSize)
-        self.exitFlag = False
-        self.maxContentLength = 1 * 1024 * 1024 # 1M限制
     
     @classmethod
     def addRoute(cls, path, func, methods = None):

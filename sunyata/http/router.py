@@ -1,4 +1,3 @@
-
 class HttpRouter(object):
 
     __slots__ = ('path', 'methods', 'func')

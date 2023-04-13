@@ -1,11 +1,12 @@
-DEFINE_VERSION = '0.0.30'
+DEFINE_VERSION = '0.0.32'
 from setuptools import setup
 
 requireList = [
-    'lz4==3.1.3',
-    'requests==2.25.1',
-    'PyMySQL==0.10.1',
-    'DBUtils==1.3',
+    'lz4',
+    'requests',
+    'ujson',
+    #'PyMySQL==0.10.1',
+    #'DBUtils==1.3',
 ]
 
 setup(

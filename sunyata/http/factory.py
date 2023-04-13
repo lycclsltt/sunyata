@@ -1,12 +1,10 @@
-from datetime import date
 from sunyata.http.request import HttpRequest
 from sunyata.http.response import HttpResponse
 from sunyata.http.router import HttpRouter
 from sunyata.util import bytes2str
+import ujson
 
 class HttpFactory(object):
-
-    maxContentLength = 1 * 1024 * 1024 #1M限制
 
     def __init__(self) -> None:
         super().__init__()
@@ -25,33 +23,25 @@ class HttpFactory(object):
             else:
                 reqBody = reqBody + l
         return reqLine, reqHeaders, reqBody
-        '''
-        reqHeaders = []
-        reqLine = lines[0]
-        for l in lines[1:]:
-            if l and b': ' in l:
-                reqHeaders.append(l)
-            else:
-                reqHeaders = [l for l in lines[1:-2] if l != b'' and b': ' in l]
-        '''
-            
-        #reqBody = lines[-1]
-        #reqHeaders = [l for l in lines[1:-2] if l != b'' and b': ' in l]
-        return reqLine, reqHeaders, reqBody
-        '''
-        reqLine = b''
-        reqHeaders = []
-        reqBody = b''
-        lenLines = len(lines)
-        for index, line in enumerate(lines):
-            if index == 0: 
-                reqLine = line
-            elif index == lenLines - 1:
-                reqBody = line
-            elif index > 0 and line != b'':
-                reqHeaders.append(line)
-        return reqLine, reqHeaders, reqBody
-        '''
+
+    @classmethod
+    def parseRequestData(cls, uri, body):
+        requestData = {}
+        if uri:
+            try:
+                kvPairs = uri.split(b'?')[1].split(b'&')
+                for kvPair in kvPairs:
+                    k, v = kvPair.split(b'=')
+                    requestData[bytes2str(k)] = bytes2str(v)
+            except:
+                pass
+        if body:
+            try:
+                bodydic = ujson.decode(body)
+                requestData.update(bodydic)
+            except:
+                pass
+        return requestData
         
     @classmethod
     async def genHttpRequest(cls, requestStream):
@@ -72,24 +62,8 @@ class HttpFactory(object):
                 req.headers[bytes2str(k)] = bytes2str(v)
             except:
                 req.headers[str(k)] = str(v)
-        if req.body:
-            try:
-                for kvPair in req.body.split(b'&'):
-                    k, v = kvPair.split(b'=')
-                    req.data[bytes2str(k)] = bytes2str(v)
-            except:
-                pass
-        else:
-            try:
-                kvPairs = uri.split(b'?')[1].split(b'&')
-                for kvPair in kvPairs:
-                    k, v = kvPair.split(b'=')
-                    req.data[bytes2str(k)] = bytes2str(v)
-            except:
-                pass
+        req.data = cls.parseRequestData(uri, req.body)
         contentLength = int(req.headers.get('Content-Length', 0))
-        #if contentLength > cls.maxContentLength:
-        #    raise Exception('content-length over')
         hasRead = len(req.body)
         toRead = contentLength - hasRead
         while toRead:
