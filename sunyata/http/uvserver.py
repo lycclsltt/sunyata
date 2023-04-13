@@ -11,9 +11,9 @@ class UvHttpServer(HttpServer):
 
     routerMap = {}
 
-    def __init__(self, bind = '0.0.0.0', port=9989):
+    def __init__(self, bind = '0.0.0.0', port=9989, log_level='debug'):
         HttpServer.__init__(self, bind=bind, port=port)
-        self.config = uvicorn.Config("sunyata.http.uvserver:UvHttpServer", host=self.bind, port=self.port, log_level="debug")
+        self.config = uvicorn.Config("sunyata.http.uvserver:UvHttpServer", host=self.bind, port=self.port, log_level=log_level)
 
     def serve(self):
         server = uvicorn.Server(self.config)
