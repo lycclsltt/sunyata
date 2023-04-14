@@ -54,3 +54,7 @@ class HttpResponse(object):
     @classmethod
     def responseConvertToStr(cls, resp):
         return str(resp)
+    
+    @classmethod
+    def responseConvertRaw(self, resp):
+        return resp

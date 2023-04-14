@@ -18,7 +18,7 @@ class RawHttpServer(object):
         dict: HttpResponse.responseConvertToJson,
         list: HttpResponse.responseConvertToJson,
         tuple: HttpResponse.responseConvertToJson,
-        bytes: HttpResponse.responseConverBytesToStr,
+        bytes: HttpResponse.responseConvertRaw,
     }
 
     def __init__(self, bind = '0.0.0.0', port=9989):
