@@ -10,8 +10,11 @@ from sunyata.rpc.compress import RpcCompress
 from types import FunctionType
 from sunyata.rpc.method import RpcMethod
 import asyncio
+import uvloop
 import inspect
 from sunyata.http.server import HttpServer
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
 
 class RpcServer(object):
 

@@ -5,7 +5,9 @@ from sunyata.http.response import HttpResponse
 from traceback import format_exc
 from types import MethodType,FunctionType
 import asyncio
+import uvloop
 import inspect
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
 class RawHttpServer(object):

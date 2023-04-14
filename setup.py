@@ -5,6 +5,7 @@ requireList = [
     'lz4',
     'requests',
     'ujson',
+    'uvloop==0.17.0'
     #'PyMySQL==0.10.1',
     #'DBUtils==1.3',
 ]
