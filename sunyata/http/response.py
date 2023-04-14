@@ -36,6 +36,10 @@ class HttpResponse(object):
         return resBody
     
     @classmethod
+    def responseConvertSetToJson(cls, resp):
+        return ujson.encode(list(resp))
+    
+    @classmethod
     def responseConverBytesToStr(cls, resp):
         return bytes2str(resp)
     

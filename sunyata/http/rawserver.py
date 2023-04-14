@@ -12,6 +12,7 @@ class RawHttpServer(object):
 
     routerMap = {}
     responseTypeConvertMap = {
+        set: HttpResponse.responseConvertSetToJson,
         dict: HttpResponse.responseConvertToJson,
         list: HttpResponse.responseConvertToJson,
         tuple: HttpResponse.responseConvertToJson,
