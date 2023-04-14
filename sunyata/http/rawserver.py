@@ -1,6 +1,7 @@
 from sunyata.http.factory import HttpFactory
 from sunyata.http.status import *
 from sunyata.http.request_stream import RequestStream
+from sunyata.http.response import HttpResponse
 from traceback import format_exc
 from types import MethodType,FunctionType
 import asyncio
@@ -10,6 +11,12 @@ import inspect
 class RawHttpServer(object):
 
     routerMap = {}
+    responseTypeConvertMap = {
+        dict: HttpResponse.responseConvertToJson,
+        list: HttpResponse.responseConvertToJson,
+        tuple: HttpResponse.responseConvertToJson,
+        bytes: HttpResponse.responseConverBytesToStr,
+    }
 
     def __init__(self, bind = '0.0.0.0', port=9989):
         super().__init__()
@@ -36,10 +43,13 @@ class RawHttpServer(object):
             return HttpFactory.genHttpResponse(HttpStatus405)
         try:
             if inspect.iscoroutinefunction(router.getFunc()):
-                respString = await router.getFunc()(httpRequest)
+                resp = await router.getFunc()(httpRequest)
             else:
-                respString = router.getFunc()(httpRequest)
-            return HttpFactory.genHttpResponse(HttpStatus200, respString)
+                resp = router.getFunc()(httpRequest)
+            respType = type(resp)
+            convertMethod = self.responseTypeConvertMap.get(respType, HttpResponse.responseConvertToStr)
+            resp = convertMethod(resp)
+            return HttpFactory.genHttpResponse(HttpStatus200, resp)
         except Exception as ex:
             return HttpFactory.genHttpResponse(HttpStatus500, format_exc())
     

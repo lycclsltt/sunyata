@@ -1,4 +1,5 @@
-from sunyata.util import str2bytes
+from sunyata.util import str2bytes, bytes2str
+import ujson
 
 class HttpResponse(object):
 
@@ -33,3 +34,19 @@ class HttpResponse(object):
         if type(resBody) == str:
             resBody = str2bytes(resBody)
         return resBody
+    
+    @classmethod
+    def responseConverBytesToStr(cls, resp):
+        return bytes2str(resp)
+    
+    @classmethod
+    def responseConvertToJson(cls, resp):
+        return ujson.encode(resp)
+    
+    @classmethod
+    def responseConvertToBytes(cls, resp):
+        return bytes(resp)
+    
+    @classmethod
+    def responseConvertToStr(cls, resp):
+        return str(resp)
