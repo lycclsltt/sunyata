@@ -1,18 +1,15 @@
 import hashlib
 import json
 import requests
-from requests.api import head
 from sunyata.util import local_ip
+from dataclasses import dataclass
 
 
+@dataclass
 class Instance(object):
-
-    __slots__ = ('service', 'address', 'port')
-
-    def __init__(self, service, address, port):
-        self.service = service
-        self.address = address
-        self.port = port
+    service: str
+    address: str
+    port: int
 
 
 class ConsulApi(object):
@@ -29,11 +26,11 @@ class ConsulApi(object):
         if self.token:
             self.headers = {'X-Consul-Token':self.token}
 
-    def put(self, k: str, v: str):
-        url = self.baseUrl + '/v1/kv/%s' % k        
-        r = requests.put(url, headers=self.headers, data=v, timeout = self.timeout)
-        if r.status_code != 200:
-            raise Exception(r.text)
+#    def put(self, k: str, v: str):
+#        url = self.baseUrl + '/v1/kv/%s' % k        
+#        r = requests.put(url, headers=self.headers, data=v, timeout = self.timeout)
+#        if r.status_code != 200:
+#            raise Exception(r.text)
 
     def getInstanceMap(self):
         url = self.baseUrl + '/v1/agent/services'
@@ -76,12 +73,12 @@ class ConsulApi(object):
         print(r.text, r.status_code)
 
 
-    def deregistService(self, serviceName: str, port: int, address = None):
-        instanceId = self.genInstanceID(serviceName, address, port)
-        url = self.baseUrl + '/v1/agent/service/deregister/%s' % instanceId
-        r = requests.put(url, headers=self.headers, timeout = self.timeout)
-        if r.status_code != 200:
-            raise Exception(r.text)
+#   def deregistService(self, serviceName: str, port: int, address = None):
+#        instanceId = self.genInstanceID(serviceName, address, port)
+#        url = self.baseUrl + '/v1/agent/service/deregister/%s' % instanceId
+#        r = requests.put(url, headers=self.headers, timeout = self.timeout)
+#        if r.status_code != 200:
+#            raise Exception(r.text)
 
     def get(self, k: str):
         url = self.baseUrl + '/v1/kv/%s?raw=true' % k  
@@ -99,7 +96,7 @@ class ConsulApi(object):
                 instance = Instance(
                     service = serviceName,
                     address = info.get('Address'),
-                    port = info.get('Port')
+                    port = int(info.get('Port'))
                 )
                 instanceList.append(instance)
         return instanceList

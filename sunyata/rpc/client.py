@@ -1,9 +1,8 @@
 from sunyata.rpc.protocal import TcpProtocal, UdpProtocal, HttpProtocal, RpcProtocal, ClientUdpProtocal
 from sunyata.rpc.exception import FuncNotFoundException
 from sunyata.rpc.discovery import DiscoveryConfig
-from sunyata.rpc.discovery import ConsulRpcDiscovery
+from sunyata.rpc.discovery import RpcDiscovery
 from sunyata.wrap import retryTimes
-from sunyata.rpc.discovery import Instance
 import socket
 
 class Address(object):
@@ -76,7 +75,7 @@ class RpcClient(object):
 
     def setDiscoveryConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
-        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
+        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
 
     def close(self):
         self.protocal.transport.close()

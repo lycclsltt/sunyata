@@ -4,7 +4,7 @@ from sunyata.rpc.exception import FuncNotFoundException
 import queue
 import threading
 import socket
-from sunyata.rpc.discovery import DiscoveryConfig, ConsulRpcDiscovery
+from sunyata.rpc.discovery import DiscoveryConfig, RpcDiscovery
 import struct
 from sunyata.rpc.compress import RpcCompress
 from types import FunctionType
@@ -72,7 +72,7 @@ class RpcServer(object):
 
     def setDiscoverConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
-        self.discovery = ConsulRpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
+        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
 
     def setKeepaliveTimeout(self, keepaliveTimeout: int):
         self.protocal.transport.setKeepaliveTimeout(keepaliveTimeout)
