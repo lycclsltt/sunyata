@@ -72,7 +72,7 @@ class RpcServer(object):
 
     def setDiscoverConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
-        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
+        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken, self.discoveryConfig.etcdHost, self.discoveryConfig.etcdPort)
 
     def setKeepaliveTimeout(self, keepaliveTimeout: int):
         self.protocal.transport.setKeepaliveTimeout(keepaliveTimeout)
@@ -132,6 +132,7 @@ class BlockTcpRpcServer(SimpleTcpRpcServer):
         while 1:
             conn, _ = self.protocal.transport.accept()
             t = threading.Thread(target=self.handle, args=(conn,) )
+            t.setDaemon(True)
             t.start()
 
 
@@ -282,6 +283,7 @@ class UdpRpcServer(RpcServer):
     def startWorkers(self):
         for i in range(self.worker):
             t = threading.Thread(target=self.handle)
+            t.setDaemon(True)
             t.start()
 
     def handle(self):

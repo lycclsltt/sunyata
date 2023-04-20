@@ -1,5 +1,5 @@
 import hashlib
-import json
+import ujson
 import requests
 from sunyata.util import local_ip
 from dataclasses import dataclass
@@ -37,7 +37,7 @@ class ConsulApi(object):
         r = requests.get(url, headers=self.headers, timeout = self.timeout)
         if r.status_code != 200:
             raise Exception(r.text)
-        return json.loads(r.text)
+        return ujson.loads(r.text)
 
     def genInstanceID(self, service: str, host: str, port: int):
         key = "%s:%s:%s" % (service, host, port)
@@ -68,9 +68,7 @@ class ConsulApi(object):
             'TTL' : '%ss' % ttl,
         }
         url = self.baseUrl + '/v1/agent/service/register'
-        
-        r = requests.put(url, headers = self.headers, data=json.dumps(params), timeout = self.timeout)
-        print(r.text, r.status_code)
+        r = requests.put(url, headers = self.headers, data=ujson.dumps(params), timeout = self.timeout)
 
 
 #   def deregistService(self, serviceName: str, port: int, address = None):
@@ -92,7 +90,6 @@ class ConsulApi(object):
         instanceList = []
         for instanceID, info in instanceMap.items():
             if info.get('Service') == serviceName:
-                print('info', info)
                 instance = Instance(
                     service = serviceName,
                     address = info.get('Address'),

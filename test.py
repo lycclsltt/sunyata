@@ -28,10 +28,11 @@ from multiprocessing import Process
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
+CONSUL_TOKEN = 'c594c65b-0f00-bc9b-5ba1-e8242e287f12'
+ETCD_HOST = '192.168.19.103'
+ETCD_PORT = 2379
 SLEEP = 2
-IS_TEST_DISCOVERY = False
-
-RpcServer.isPrintLogo = False
+IS_TEST_DISCOVERY = True
 
 
 @rpc
@@ -60,7 +61,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_client(self):
         #测试TCP
         def create_server():
-            server = TcpRpcServer('127.0.0.1', 9988)
+            server = TcpRpcServer('0.0.0.0', 9988)
             server.regist(sayHello)
             server.serve()
 
@@ -79,7 +80,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_udp_server_client(self):
         #测试UDP
         def create_server():
-            server = UdpRpcServer('127.0.0.1', 9999)
+            server = UdpRpcServer('0.0.0.0', 9999)
             server.regist(sayHello)
             server.serve()
 
@@ -104,7 +105,8 @@ class TestRpcServerClient(unittest.TestCase):
                 consulPort = CONSUL_PORT,
                 serviceName = 'test-rpc-server',
                 serviceHost = local_ip(),
-                servicePort = 10001
+                servicePort = 10001,
+                consulToken=CONSUL_TOKEN
             )
             server = TcpRpcServer('0.0.0.0', 10001)
             server.setDiscoverConfig(disconf)
@@ -116,7 +118,8 @@ class TestRpcServerClient(unittest.TestCase):
             disconf = DiscoveryConfig(
                 consulHost= CONSUL_HOST,
                 consulPort= CONSUL_PORT,
-                serviceName='test-rpc-server'
+                serviceName='test-rpc-server',
+                consulToken=CONSUL_TOKEN
             )
             cli.setDiscoveryConfig(disconf)
             for i in range(3):
@@ -139,7 +142,8 @@ class TestRpcServerClient(unittest.TestCase):
                 consulPort = CONSUL_PORT,
                 serviceName = 'test-udp-rpc-server',
                 serviceHost = local_ip(),
-                servicePort = 10002
+                servicePort = 10002,
+                consulToken=CONSUL_TOKEN
             )
             server = UdpRpcServer('0.0.0.0', 10002)
             server.setDiscoverConfig(disconf)
@@ -151,7 +155,8 @@ class TestRpcServerClient(unittest.TestCase):
             disconf = DiscoveryConfig(
                 consulHost= CONSUL_HOST,
                 consulPort= CONSUL_PORT,
-                serviceName='test-udp-rpc-server'
+                serviceName='test-udp-rpc-server',
+                consulToken=CONSUL_TOKEN
             )
             client.setDiscoveryConfig(disconf)
             for i in range(3):
@@ -169,7 +174,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_server():
             def retObj():
                 return A(10)
-            server = TcpRpcServer('127.0.0.1', 10004)
+            server = TcpRpcServer('0.0.0.0', 10004)
             server.regist(retObj)
             server.serve()
 
@@ -187,15 +192,15 @@ class TestRpcServerClient(unittest.TestCase):
     
     def test_multi_server(self):
         def create_server_10005():
-            server = TcpRpcServer('127.0.0.1', 10005)
+            server = TcpRpcServer('0.0.0.0', 10005)
             server.regist(sayHello)
             server.serve()
         def create_server_10006():
-            server = TcpRpcServer('127.0.0.1', 10006)
+            server = TcpRpcServer('0.0.0.0', 10006)
             server.regist(sayHello)
             server.serve()
         def create_server_10007():
-            server = TcpRpcServer('127.0.0.1', 10007)
+            server = TcpRpcServer('0.0.0.0', 10007)
             server.regist(sayHello)
             server.serve()
         def create_client():
@@ -220,15 +225,15 @@ class TestRpcServerClient(unittest.TestCase):
     def test_multi_udp_server_client(self):
         #测试UDP
         def create_server_10008():
-            server = UdpRpcServer('127.0.0.1', 10008)
+            server = UdpRpcServer('0.0.0.0', 10008)
             server.regist(sayHello)
             server.serve()
         def create_server_10009():
-            server = UdpRpcServer('127.0.0.1', 10009)
+            server = UdpRpcServer('0.0.0.0', 10009)
             server.regist(sayHello)
             server.serve()
         def create_server_10010():
-            server = UdpRpcServer('127.0.0.1', 10010)
+            server = UdpRpcServer('0.0.0.0', 10010)
             server.regist(sayHello)
             server.serve()
         def create_client():
@@ -253,7 +258,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_client_timeout(self):
         #测试TCP
         def create_server():
-            server = TcpRpcServer('127.0.0.1', 10014)
+            server = TcpRpcServer('0.0.0.0', 10014)
             server.regist(testTimeout)
             server.regist(sayHello)
             server.serve()
@@ -279,7 +284,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_udp_server_client_timeout(self):
         #测试UDP
         def create_server():
-            server = UdpRpcServer('127.0.0.1', 10015)
+            server = UdpRpcServer('0.0.0.0', 10015)
             server.regist(sayHello)
             server.regist(testTimeout)
             server.serve()
@@ -305,7 +310,7 @@ class TestRpcServerClient(unittest.TestCase):
     def test_tcp_server_server_timeout(self):
         #测试TCP
         def create_server():
-            server = TcpRpcServer('127.0.0.1', 10017)
+            server = TcpRpcServer('0.0.0.0', 10017)
             server.regist(sayHello)
             server.serve()
 
@@ -329,7 +334,7 @@ class TestRpcServerClient(unittest.TestCase):
             @rpc
             def add(n1, n2):
                 return n1 +n2
-            server = TcpRpcServer('127.0.0.1', 10018)
+            server = TcpRpcServer('0.0.0.0', 10018)
             server.serve()
 
         def create_client():
@@ -348,7 +353,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_server():
             RpcCompress.DEBUG = True
             RpcCompress.enableCompressLen = 200
-            server = TcpRpcServer('127.0.0.1', 10019)
+            server = TcpRpcServer('0.0.0.0', 10019)
             server.regist(sayHello)
             server.serve()
 
@@ -369,7 +374,7 @@ class TestRpcServerClient(unittest.TestCase):
         def create_server():
             RpcCompress.DEBUG = True
             RpcCompress.enableCompressLen = 200
-            server = UdpRpcServer('127.0.0.1', 10020)
+            server = UdpRpcServer('0.0.0.0', 10020)
             server.regist(sayHello)
             server.serve()
 
@@ -387,7 +392,7 @@ class TestRpcServerClient(unittest.TestCase):
     
     def test_regist_class(self):
         def create_server():
-            server = TcpRpcServer('127.0.0.1', 10022)
+            server = TcpRpcServer('0.0.0.0', 10022)
             server.regist(TestService)
             server.serve()
 
@@ -408,7 +413,7 @@ class TestRpcServerClient(unittest.TestCase):
             print('get param name:', name)
             return 'hello ' + name
         def create_server():
-            hs = HttpServer(bind='127.0.0.1', port=10023)
+            hs = HttpServer(bind='0.0.0.0', port=10023)
             hs.addRoute('/hello', inner_hello)
             hs.serve()
         def create_client():
@@ -423,7 +428,7 @@ class TestRpcServerClient(unittest.TestCase):
 
     def test_tcp_big_param(self):
         def create_server():
-            server = TcpRpcServer('127.0.0.1', 10024)
+            server = TcpRpcServer('0.0.0.0', 10024)
             server.regist(TestService)
             server.serve()
         def create_client():
@@ -438,7 +443,7 @@ class TestRpcServerClient(unittest.TestCase):
         tClient.start()
 
 def create_http_server():
-    server = HttpRpcServer('127.0.0.1', 10000)
+    server = HttpRpcServer('0.0.0.0', 10000)
     server.regist(sayHello)
     server.serve()
 
@@ -450,13 +455,14 @@ def create_http_client():
 
 def create_http_server_discovery():
     if not IS_TEST_DISCOVERY: return
-    server = HttpRpcServer('127.0.0.1', 10003)
+    server = HttpRpcServer('0.0.0.0', 10003)
     disconf = DiscoveryConfig(
         consulHost = CONSUL_HOST,
         consulPort = CONSUL_PORT,
         serviceName = 'test-http-rpc-server',
         serviceHost = local_ip(),
         servicePort = 10003,
+        consulToken=CONSUL_TOKEN
     )
     server.setDiscoverConfig(disconf)
     server.regist(sayHello)
@@ -469,6 +475,7 @@ def create_http_client_discovery():
         consulHost = CONSUL_HOST,
         consulPort = CONSUL_PORT,
         serviceName = 'test-http-rpc-server',
+        consulToken=CONSUL_TOKEN
     )
     client.setDiscoveryConfig(disconf)
     for i in range(3):
@@ -476,17 +483,17 @@ def create_http_client_discovery():
         assert (resp == 'hello xiaoming')
 
 def create_http_server_10011():
-    server = HttpRpcServer('127.0.0.1', 10011)
+    server = HttpRpcServer('0.0.0.0', 10011)
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10012():
-    server = HttpRpcServer('127.0.0.1', 10012)
+    server = HttpRpcServer('0.0.0.0', 10012)
     server.regist(sayHello)
     server.serve()
 
 def create_http_server_10013():
-    server = HttpRpcServer('127.0.0.1', 10013)
+    server = HttpRpcServer('0.0.0.0', 10013)
     server.regist(sayHello)
     server.serve()
 
@@ -501,7 +508,7 @@ def create_http_client_multi():
         assert (resp == 'hello xiaoming')
 
 def create_http_server_timeout():
-    server = HttpRpcServer('127.0.0.1', 10016)
+    server = HttpRpcServer('0.0.0.0', 10016)
     server.regist(testTimeout)
     server.regist(sayHello)
     server.serve()
@@ -520,7 +527,7 @@ def create_http_client_timeout():
 def create_http_server_compress():
     RpcCompress.DEBUG = True
     RpcCompress.enableCompressLen = 200
-    server = HttpRpcServer('127.0.0.1', 10021)
+    server = HttpRpcServer('0.0.0.0', 10021)
     server.regist(sayHello)
     server.serve()
 
@@ -530,6 +537,33 @@ def create_http_client_compress():
     name = ''.join([ random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(2000) ])
     resp = client.call('sayHello', name)
     assert( resp == 'hello ' + name )
+
+def create_http_server_etcd_discovery():
+    if not IS_TEST_DISCOVERY: return
+    server = HttpRpcServer('0.0.0.0', 10031)
+    disconf = DiscoveryConfig(
+        etcdHost='192.168.19.103',
+        etcdPort=2379,
+        serviceName = 'test-http-rpc-server-etcd',
+        serviceHost = local_ip(),
+        servicePort = 10031
+    )
+    server.setDiscoverConfig(disconf)
+    server.regist(sayHello)
+    server.serve()
+
+def create_http_client_etcd_discovery():
+    if not IS_TEST_DISCOVERY: return
+    client = HttpRpcClient()
+    disconf = DiscoveryConfig(
+        etcdHost = '192.168.19.103',
+        etcdPort = 2379,
+        serviceName = 'test-http-rpc-server-etcd',
+    )
+    client.setDiscoveryConfig(disconf)
+    for i in range(3):
+        resp = client.call('sayHello', 'xiaoming')
+        assert (resp == 'hello xiaoming')
 
 if __name__ == '__main__':
     #测试HTTP
@@ -570,5 +604,11 @@ if __name__ == '__main__':
     httpClient = threading.Thread(target=create_http_client_compress)
     httpClient.start()
     print('\n\n\n')
+    #测试etcd服务发现
+    httpServer = Process(target=create_http_server_etcd_discovery)
+    httpServer.start()
+    time.sleep(SLEEP)
+    httpClient = threading.Thread(target=create_http_client_etcd_discovery)
+    httpClient.start()
     time.sleep(30)
     print('all ok')

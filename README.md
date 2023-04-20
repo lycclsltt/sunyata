@@ -20,7 +20,7 @@
 - [内置Web框架](#内置web框架)
 
 ## 简介
-sunyata是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul做服务注册发现。
+sunyata是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul或ETCD做服务注册发现。
 
 ## 特性
 - 像本地函数一样调用
@@ -163,7 +163,7 @@ print(resp)
 目前仅支持基于Consul的服务发现，未来计划支持etcd。下面的例子以TCP为例。
 
 
-### 健康检查
+### 基于Consul的服务注册发现
 基于Consul的Check机制，服务注册后，自动添加一个定期的检查任务。默认为TCP端口检查，支持TCP/HTTP RPC服务端，UDP服务端暂不支持。一旦服务进程挂掉，那么客户端会请求到其他健康的服务端节点上。
 
 ### 快速开始
@@ -241,6 +241,56 @@ cli.setDiscoveryConfig(disconf)
 resp = cli.call('sayHello', name = 'mary')
 print(resp)
 ```
+
+### 基于Etcd的服务注册发现
+> 说明:
+> 1.etcdHost 和 etcdPort 参数指定etcd的地址和端口 
+> 2.ServiceName 参数用于标记服务端名称，并通过服务名称进行服务发现，需要保证全局唯一 
+> 3.serviceHost和servicePort参数指定服务端监听的端口和地址
+
+- 第二步、调用setDiscoverConfig()方法将DiscoveryConfig对象传入
+- 第三步，调用serve()方法，开始处理请求
+
+### 完整的服务端示例
+```
+from sunyata.rpc.server import HttpRpcServer
+from sunyata.rpc.discovery import DiscoveryConfig
+from sunyata.util import local_ip
+
+def sayHello(name): 
+    return 'hello ' + name
+
+server = HttpRpcServer('0.0.0.0', 10031)
+disconf = DiscoveryConfig(
+    etcdHost='192.168.19.103',
+    etcdPort=2379,
+    serviceName = 'test-http-rpc-server-etcd',
+    serviceHost = local_ip(),
+    servicePort = 10031
+)
+server.setDiscoverConfig(disconf)
+server.regist(sayHello)
+server.serve()
+```
+### 完整的客户端示例
+```
+from sunyata.rpc.client import HttpRpcClient
+from sunyata.rpc.discovery import DiscoveryConfig
+
+client = HttpRpcClient()
+disconf = DiscoveryConfig(
+    etcdHost='192.168.19.103',
+    etcdPort=2379,
+    serviceName = 'myservice'
+)
+client.setDiscoveryConfig(disconf)
+resp = client.sayHello('xiaoming')
+assert (resp == 'hello xiaoming')
+```
+
+
+
+
 
 ## 数据压缩
 默认采用lz4进行压缩、解压缩（经过测试，它的压缩效果和gzip, zlib比较接近，压缩、解压缩性能是zlib的10倍左右）。

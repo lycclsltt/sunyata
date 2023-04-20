@@ -1,5 +1,5 @@
 import pickle
-import json
+import ujson
 from abc import ABCMeta, abstractmethod
 
 
@@ -31,8 +31,8 @@ class JsonSerialize(RpcSerialize):
 
     @classmethod
     def serialize(cls, obj) -> bytes:
-        return json.dumps(obj)
+        return ujson.dumps(obj)
 
     @classmethod
     def unserialize(cls, bytearr):
-        return json.loads(bytearr)
+        return ujson.loads(bytearr)

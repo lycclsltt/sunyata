@@ -75,7 +75,7 @@ class RpcClient(object):
 
     def setDiscoveryConfig(self, config: DiscoveryConfig):
         self.discoveryConfig = config
-        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken)
+        self.discovery = RpcDiscovery(self.discoveryConfig.consulHost, self.discoveryConfig.consulPort, self.discoveryConfig.consulToken, self.discoveryConfig.etcdHost, self.discoveryConfig.etcdPort)
 
     def close(self):
         self.protocal.transport.close()
