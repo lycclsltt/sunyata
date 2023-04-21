@@ -27,7 +27,7 @@ sunyata是一个Python3 RPC框架，client和server既可以直连，也可以�
 - 使用简单，用户只需要关注业务即可
 - 支持HTTP/UDP/TCP协议
 - 支持异步async/await
-- 支持通过consul或etcd的服务注册、发现
+- 支持通过consul或etcd的服务注册发现
 - 支持所有数据类型，包括自定义的类对象等都可作为参数
 
 ## 安装
@@ -161,7 +161,7 @@ print(resp)
 
 ## 服务发现
 除了客户端与服务端直连，也支持服务注册发现（客户端与服务端直连的例子，请参考上面的TcpRpcServer部分）。
-目前仅支持基于Consul的服务发现，未来计划支持etcd。下面的例子以TCP为例。
+目前支持基于Consul 或 etcd 进行服务注册发现， 下面的例子先以Consul为例。
 
 
 ### 基于Consul的服务注册发现

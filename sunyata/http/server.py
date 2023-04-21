@@ -19,6 +19,11 @@ class HttpServer(RawHttpServer):
         server = uvicorn.Server(self.config)
         print('http running on http://%s:%s' % (self.bind, self.port) )
         server.run()
+
+    async def asyncServe(self):
+        server = uvicorn.Server(self.config)
+        server.config.setup_event_loop()
+        await server.serve()
     
     async def genHttpRequest(self, scheme, httpVersion, method, path, queryString, headers, body, clientTuple):
         httpRequest = HttpRequest()

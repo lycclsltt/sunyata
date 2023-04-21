@@ -18,14 +18,10 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 class RpcServer(object):
 
-    __slots__ = ('discoveryConfig', 'discovery', 'protocal')
-
     funcMap = {}
     funcList = []
 
     def __init__(self):
-        #self.funcMap = {}
-        #self.funcList = []
         self.discoveryConfig = None
         self.discovery = None
         self.protocal = RpcProtocal()
@@ -161,14 +157,25 @@ class HttpRpcServer(RpcServer):
         resp = self.run(func, args, kwargs)
         resp = self.protocal.serialize(resp)
         return resp
+    
+    async def asyncServe(self):
+        tasks = []
+        tasks.append(self.app.asyncServe())
+        if self.discovery and self.discoveryConfig:
+            registTask = asyncio.create_task(self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True))
+            tasks.append(registTask)
+        await asyncio.wait(tasks)
 
     def serve(self):
+        asyncio.run(self.asyncServe())
+        """
         tRegist = None
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         self.printLogo()
         print('http rpc running on http://%s:%s' % (self.host, self.port) )
         self.app.serve()
+        """
 
 
 class TcpRpcServer(BlockTcpRpcServer):

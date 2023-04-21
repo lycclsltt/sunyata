@@ -29,7 +29,6 @@ class EtcdApi(object):
         url = self.baseUrl + '/v2/keys/sunyata-services/%s' % serviceName
         r = requests.get(url, timeout=self.timeout, headers=self.headers)
         dic = ujson.loads(r.text)
-        print(r.status_code, r.text)
         nodes = dic.get('node').get('nodes', [])
         instanceList = []
         for node in nodes:
