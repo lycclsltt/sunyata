@@ -167,6 +167,7 @@ class HttpRpcServer(RpcServer):
         await asyncio.wait(tasks)
 
     def serve(self):
+        print('http rpc running on http://%s:%s' % (self.host, self.port) )
         asyncio.run(self.asyncServe())
         """
         tRegist = None
