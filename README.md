@@ -18,6 +18,7 @@
   - [完整的客户端示例（UDP/HTTP调用方式相同）](#完整的客户端示例udphttp调用方式相同)
 - [数据压缩](#数据压缩)
 - [内置Web框架](#内置web框架)
+- [微服务案例](#微服务案例)
 
 ## 简介
 sunyata是一个Python3 RPC框架，client和server既可以直连，也可以通过Consul或ETCD做服务注册发现。
@@ -311,6 +312,43 @@ def hello(request):
 hs = HttpServer(bind='0.0.0.0', port=9989)
 hs.serve()
 ```
+
+## 微服务案例
+下面是一个dns查询场景的微服务案例,dns_service.py负责提供底层dns查询服务,dns_web.py启动http api负责提供对外接口。dns_web与dns_service之间通过rpc进行通信。
+
+dns_service.py
+```python
+from sunyata.rpc.server import HttpRpcServer, rpc
+
+@rpc
+class DnsService(object):
+
+    def query(self, domain):
+        print('domain', domain)
+        return domain + ' A IN 192.168.1.1'
+
+rpcServer = HttpRpcServer(host='0.0.0.0', port=9988)
+rpcServer.serve()
+```
+
+dns_web.py
+```python
+from sunyata.http.server import HttpServer, route
+from sunyata.rpc.client import HttpRpcClient
+
+@route('/query', methods=['GET'])
+def query(request):
+    domain = request.data.get('domain')
+    cli = HttpRpcClient('127.0.0.1', 9988)
+    ip = cli.DnsService.query(domain)
+    return ip
+
+app = HttpServer()
+app.serve()
+```
+
+请求dns_web curl 'http://127.0.0.1:9989/query?domain=www.a.com' 返回  www.a.com A IN 192.168.1.1
+
 
 
 [![Stargazers repo roster for @lycclsltt/sunyata](https://reporoster.com/stars/lycclsltt/sunyata)](https://github.com/lycclsltt/sunyata/stargazers)
