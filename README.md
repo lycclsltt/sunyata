@@ -254,7 +254,7 @@ print(resp)
 - 第三步，调用serve()方法，开始处理请求
 
 ### 完整的服务端示例
-```
+```python
 from sunyata.rpc.server import HttpRpcServer
 from sunyata.rpc.discovery import DiscoveryConfig
 from sunyata.util import local_ip
@@ -275,7 +275,7 @@ server.regist(sayHello)
 server.serve()
 ```
 ### 完整的客户端示例
-```
+```python
 from sunyata.rpc.client import HttpRpcClient
 from sunyata.rpc.discovery import DiscoveryConfig
 
@@ -349,7 +349,9 @@ app.serve()
 
 请求dns_web curl 'http://127.0.0.1:9989/query?domain=www.a.com' 返回  www.a.com A IN 192.168.1.1
 
-
+### 局限性
+由于底层通过python特有的pickle方式进行序列化，目前只支持python语言编写的服务之间的rpc通信，暂不支持其他语言。好处是不需要
+编写protobuf文件。
 
 [![Stargazers repo roster for @lycclsltt/sunyata](https://reporoster.com/stars/lycclsltt/sunyata)](https://github.com/lycclsltt/sunyata/stargazers)
 
