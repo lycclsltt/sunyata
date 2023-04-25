@@ -1,8 +1,7 @@
 import ujson
-import requests
 from sunyata.util import local_ip
 from sunyata.consul import Instance
-
+import aiohttp
 
 class EtcdApi(object):
 
@@ -13,34 +12,40 @@ class EtcdApi(object):
         self.timeout = 5
         self.headers = {}
 
-    def registService(self, serviceName: str, port = 80, address=None, ttl=30):
-        url = self.baseUrl + '/v2/keys/sunyata-services/%s?dir=true&ttl=%s' % (serviceName, ttl)
-        r = requests.put(url, timeout=self.timeout, headers=self.headers)
-        if address:
-            key  = address + ':' + str(port)
-        else:
-            key = local_ip() + ':' + str(port)
-        val = key
-        url = self.baseUrl + '/v2/keys/sunyata-services/%s/%s?value=%s&ttl=%s' % (serviceName, key, val, ttl)
-        r = requests.put(url, timeout=self.timeout, headers=self.headers)
-        print(r.text, r.status_code)
+    async def registService(self, serviceName: str, port = 80, address=None, ttl=30):
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v2/keys/sunyata-services/%s?dir=true&ttl=%s&prevExist=true' % (serviceName, ttl)
+            async with sess.put(url, headers=self.headers, timeout=self.timeout) as r:
+                text = await r.text()
+                print('[etcd] regist dir', text, r.status)
+            if address:
+                key  = address + ':' + str(port)
+            else:
+                key = local_ip() + ':' + str(port)
+            val = key
+            url = self.baseUrl + '/v2/keys/sunyata-services/%s/%s?value=%s&ttl=%s' % (serviceName, key, val, ttl)
+            async with sess.put(url, headers=self.headers, timeout=self.timeout) as r:
+                text = await r.text()
+                print('[etcd] regist key', text, r.status)
 
-    def getServiceInstanceList(self, serviceName: str) -> list:
-        url = self.baseUrl + '/v2/keys/sunyata-services/%s' % serviceName
-        r = requests.get(url, timeout=self.timeout, headers=self.headers)
-        dic = ujson.loads(r.text)
-        nodes = dic.get('node').get('nodes', [])
-        instanceList = []
-        for node in nodes:
-            value = node.get('value')
-            ip, port = value.split(':')
-            instance = Instance(
-                service=serviceName,
-                address=ip,
-                port=int(port)
-            )
-            instanceList.append(instance)
-        return instanceList
+    async def getServiceInstanceList(self, serviceName: str) -> list:
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v2/keys/sunyata-services/%s' % serviceName
+            async with sess.get(url, timeout=self.timeout, headers=self.headers) as r:
+                text = await r.text()
+                dic = ujson.loads(text)
+                nodes = dic.get('node').get('nodes', [])
+                instanceList = []
+                for node in nodes:
+                    value = node.get('value')
+                    ip, port = value.split(':')
+                    instance = Instance(
+                        service=serviceName,
+                        address=ip,
+                        port=int(port)
+                    )
+                    instanceList.append(instance)
+                return instanceList
     
-    def ttlHeartbeat(self, service, address, port):
-        self.registService(serviceName=service, address=address, port=port)
+    async def ttlHeartbeat(self, service, address, port):
+        await self.registService(serviceName=service, address=address, port=port)

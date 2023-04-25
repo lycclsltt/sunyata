@@ -4,6 +4,8 @@ from sunyata.rpc.discovery import DiscoveryConfig
 from sunyata.rpc.discovery import RpcDiscovery
 from sunyata.wrap import retryTimes
 import socket
+import asyncio
+
 
 class Address(object):
 
@@ -49,7 +51,7 @@ class RpcClient(object):
         self.timeout = 10
 
     def getInstance(self):
-        instanceList = self.discovery.getInstanceList(self.discoveryConfig.serviceName)
+        instanceList = asyncio.run(self.discovery.getInstanceList(self.discoveryConfig.serviceName))
         instanceLength  = len(instanceList)
         if instanceLength == 0:
             raise Exception('no instance found')

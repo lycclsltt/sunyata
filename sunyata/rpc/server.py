@@ -160,7 +160,7 @@ class HttpRpcServer(RpcServer):
     
     async def asyncServe(self):
         tasks = []
-        tasks.append(self.app.asyncServe())
+        tasks.append(asyncio.create_task(self.app.asyncServe()))
         if self.discovery and self.discoveryConfig:
             registTask = asyncio.create_task(self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True))
             tasks.append(registTask)
@@ -169,14 +169,6 @@ class HttpRpcServer(RpcServer):
     def serve(self):
         print('http rpc running on http://%s:%s' % (self.host, self.port) )
         asyncio.run(self.asyncServe())
-        """
-        tRegist = None
-        if self.discovery and self.discoveryConfig:
-            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
-        self.printLogo()
-        print('http rpc running on http://%s:%s' % (self.host, self.port) )
-        self.app.serve()
-        """
 
 
 class TcpRpcServer(BlockTcpRpcServer):

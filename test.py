@@ -544,7 +544,7 @@ def create_http_server_etcd_discovery():
     disconf = DiscoveryConfig(
         etcdHost='192.168.19.103',
         etcdPort=2379,
-        serviceName = 'test-http-rpc-server-etcd',
+        serviceName = 'test-http-rpc-server-etcd-1',
         serviceHost = local_ip(),
         servicePort = 10031
     )
@@ -558,7 +558,7 @@ def create_http_client_etcd_discovery():
     disconf = DiscoveryConfig(
         etcdHost = '192.168.19.103',
         etcdPort = 2379,
-        serviceName = 'test-http-rpc-server-etcd',
+        serviceName = 'test-http-rpc-server-etcd-1',
     )
     client.setDiscoveryConfig(disconf)
     for i in range(3):

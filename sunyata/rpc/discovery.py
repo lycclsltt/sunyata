@@ -34,33 +34,33 @@ class RpcDiscovery(object):
         self.instanceList = []
         self.heartbeatInterval = 15
 
-    def doHeartbeat(self, service, address, port, interval):
-        while 1:
-            try:
-                self.api.ttlHeartbeat(service, address, port)
-            except:
-                pass
-            time.sleep(interval)
+    #def doHeartbeat(self, service, address, port, interval):
+    #    while 1:
+    #        try:
+    #            self.api.ttlHeartbeat(service, address, port)
+    #        except:
+    #            pass
+    #        time.sleep(interval)
     
     async def asyncDoHeartbeat(self, service, address, port, interval):
         while 1:
             try:
-                self.api.ttlHeartbeat(service, address, port)
+                await self.api.ttlHeartbeat(service, address, port)
             except:
                 pass
             await asyncio.sleep(interval)
 
-    def regist(self, service, address, port, ttlHeartBeat = True):
-        self.api.registService(serviceName = service, address = address, port=port)
-        if ttlHeartBeat:
-            t = threading.Thread(target=self.doHeartbeat, args=(service, address, port, self.heartbeatInterval))
-            t.setDaemon(True)
-            t.start()
+    #def regist(self, service, address, port, ttlHeartBeat = True):
+    #    self.api.registService(serviceName = service, address = address, port=port)
+    #    if ttlHeartBeat:
+    #        t = threading.Thread(target=self.doHeartbeat, args=(service, address, port, self.heartbeatInterval))
+    #        t.setDaemon(True)
+    #        t.start()
 
     async def asyncRegist(self, service, address, port, ttlHeartBeat = True):
-        self.api.registService(serviceName = service, address = address, port=port)
+        await self.api.registService(serviceName = service, address = address, port=port)
         await self.asyncDoHeartbeat(service, address, port, self.heartbeatInterval)
 
-    def getInstanceList(self, service):
-        instanceList = self.api.getServiceInstanceList(service)
+    async def getInstanceList(self, service):
+        instanceList = await self.api.getServiceInstanceList(service)
         return instanceList

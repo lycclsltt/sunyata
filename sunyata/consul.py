@@ -3,6 +3,7 @@ import ujson
 import requests
 from sunyata.util import local_ip
 from dataclasses import dataclass
+import aiohttp
 
 
 @dataclass
@@ -26,18 +27,14 @@ class ConsulApi(object):
         if self.token:
             self.headers = {'X-Consul-Token':self.token}
 
-#    def put(self, k: str, v: str):
-#        url = self.baseUrl + '/v1/kv/%s' % k        
-#        r = requests.put(url, headers=self.headers, data=v, timeout = self.timeout)
-#        if r.status_code != 200:
-#            raise Exception(r.text)
-
-    def getInstanceMap(self):
-        url = self.baseUrl + '/v1/agent/services'
-        r = requests.get(url, headers=self.headers, timeout = self.timeout)
-        if r.status_code != 200:
-            raise Exception(r.text)
-        return ujson.loads(r.text)
+    async def getInstanceMap(self):
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v1/agent/services'
+            async with sess.get(url, headers=self.headers, timeout = self.timeout) as r:
+                text = await r.text()
+                if r.status != 200:
+                    raise Exception(text)
+                return ujson.loads(text)
 
     def genInstanceID(self, service: str, host: str, port: int):
         key = "%s:%s:%s" % (service, host, port)
@@ -45,7 +42,7 @@ class ConsulApi(object):
         m.update(key.encode())
         return m.hexdigest()
 
-    def registService(self, serviceName: str, port = 80, address=None, ttl=30, degisterAfter = '1m'):
+    async def registService(self, serviceName: str, port = 80, address=None, ttl=30, degisterAfter = '1m'):
         params = {
             'Name' : serviceName,
             'Port' : port
@@ -67,26 +64,22 @@ class ConsulApi(object):
             'DeregisterCriticalServiceAfter' : degisterAfter,
             'TTL' : '%ss' % ttl,
         }
-        url = self.baseUrl + '/v1/agent/service/register'
-        r = requests.put(url, headers = self.headers, data=ujson.dumps(params), timeout = self.timeout)
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v1/agent/service/register'
+            async with sess.put(url, headers = self.headers, data=ujson.dumps(params), timeout = self.timeout) as r:
+                text = await r.text()
+                print('[consul] regist ', text, r.status)
 
+    async def get(self, k: str):
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v1/kv/%s?raw=true' % k  
+            async with sess.get(url, headers=self.headers, timeout = self.timeout) as r:
+                if r.status_code != 200:
+                    raise Exception(r.text)
+                return r.text
 
-#   def deregistService(self, serviceName: str, port: int, address = None):
-#        instanceId = self.genInstanceID(serviceName, address, port)
-#        url = self.baseUrl + '/v1/agent/service/deregister/%s' % instanceId
-#        r = requests.put(url, headers=self.headers, timeout = self.timeout)
-#        if r.status_code != 200:
-#            raise Exception(r.text)
-
-    def get(self, k: str):
-        url = self.baseUrl + '/v1/kv/%s?raw=true' % k  
-        r = requests.get(url, headers=self.headers, timeout = self.timeout)
-        if r.status_code != 200:
-            raise Exception(r.text)
-        return r.text
-
-    def getServiceInstanceList(self, serviceName: str) -> list:
-        instanceMap = self.getInstanceMap()
+    async def getServiceInstanceList(self, serviceName: str) -> list:
+        instanceMap = await self.getInstanceMap()
         instanceList = []
         for instanceID, info in instanceMap.items():
             if info.get('Service') == serviceName:
@@ -98,8 +91,9 @@ class ConsulApi(object):
                 instanceList.append(instance)
         return instanceList
 
-    def ttlHeartbeat(self, service, address, port):
-        url = self.baseUrl + '/v1/agent/check/pass/%s' % ('service:' + self.genInstanceID(service, address, port))
-        r = requests.put(url, headers=self.headers, timeout = self.timeout)
-        if r.status_code != 200:
-            raise Exception(r.text)
+    async def ttlHeartbeat(self, service, address, port):
+        async with aiohttp.ClientSession() as sess:
+            url = self.baseUrl + '/v1/agent/check/pass/%s' % ('service:' + self.genInstanceID(service, address, port))
+            async with sess.put(url, headers=self.headers, timeout = self.timeout) as r:
+                if r.status_code != 200:
+                    raise Exception(r.text)
