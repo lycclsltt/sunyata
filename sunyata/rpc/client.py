@@ -215,7 +215,7 @@ class HttpRpcClient(RpcClient):
             'kwargs' : kwargs,
         }
         msg = self.protocal.serialize(package)
-        respmsg = self.protocal.transport.send(msg)
+        respmsg = asyncio.run(self.protocal.transport.send(msg))
         resp = self.protocal.unserialize(respmsg)
         if isinstance(resp, FuncNotFoundException):
             raise resp

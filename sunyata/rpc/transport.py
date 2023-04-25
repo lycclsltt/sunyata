@@ -1,9 +1,8 @@
 from socket import *
 import struct
-import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from sunyata.rpc.const import SERVER_TIMEOUT
 from sunyata.rpc.compress import RpcCompress
+import aiohttp
 
 
 class RpcTransport(object): 
@@ -223,33 +222,26 @@ class ClientUdpTransport(UdpTransport):
 
 class HttpTransport(RpcTransport):
 
-    __slots__ = ('host', 'port', 'timeout', 'poolConnection', 'poolMaxSize', 'maxRetries', 'requestSession', 'url', 'headers')
-
     def __init__(self, host, port, timeout = 10, poolConnection=20, poolMaxSize=20, maxRetries=2):
         RpcTransport.__init__(self)
         self.host = host
         self.port = port
         self.timeout = timeout
-        self.poolConnection = poolConnection
-        self.poolMaxSize = poolMaxSize
-        self.maxRetries = maxRetries
-        self.requestSession = requests.Session()
-        self.requestSession.mount('http://', requests.adapters.HTTPAdapter(pool_connections=self.poolConnection, pool_maxsize=self.poolMaxSize, max_retries=self.maxRetries))
         self.url = self.makeUrl()
         self.headers = {
             'Content-type' : 'application/octet-stream'
         }
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     def makeUrl(self):
         return "http://%s:%s/" % (self.host, self.port)
 
-    def send(self, msg):
+    async def send(self, msg):
         isEnableCompress = b'0'
         if len(msg) >= RpcCompress.enableCompressLen:
             isEnableCompress = b'1'
             msg = RpcCompress.compress(msg)
         msg = isEnableCompress + msg
-        r = self.requestSession.post(self.url, headers = {}, data=msg, timeout = self.timeout)
-        resp = r.content
-        return resp
+        async with aiohttp.ClientSession() as sess:
+            async with sess.post(self.url, headers = {}, data=msg, timeout = self.timeout) as r:
+                content = await r.read()
+                return content

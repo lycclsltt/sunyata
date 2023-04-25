@@ -10,7 +10,6 @@ import unittest
 from multiprocessing import Process
 from sunyata.util import local_ip
 import socket
-import requests
 import random
 from sunyata.rpc.compress import RpcCompress
 from sunyata.rpc.server import TcpRpcServer
@@ -21,10 +20,12 @@ from sunyata.rpc.discovery import DiscoveryConfig
 from sunyata.rpc.compress import RpcCompress
 from sunyata.rpc.server import HttpRpcServer
 from sunyata.rpc.client import HttpRpcClient
-from sunyata.rpc.server import RpcServer
 from sunyata.rpc import rpc
 from sunyata.http.server import HttpServer
 from multiprocessing import Process
+import asyncio
+import aiohttp
+
 
 CONSUL_HOST = '192.168.19.103'
 CONSUL_PORT = 8500
@@ -416,10 +417,14 @@ class TestRpcServerClient(unittest.TestCase):
             hs = HttpServer(bind='0.0.0.0', port=10023)
             hs.addRoute('/hello', inner_hello)
             hs.serve()
+        async def async_create_client():
+            async with aiohttp.ClientSession() as sess:
+                async with sess.post('http://127.0.0.1:10023/hello', data={'name':'xiaoming'}) as r:
+                    text = await r.text()
+                    self.assertEqual(r.text, 'hello xiaoming')
+                    print('test inner http ok')
         def create_client():
-            r = requests.post('http://127.0.0.1:10023/hello', data={'name':'xiaoming'})
-            self.assertEqual(r.text, 'hello xiaoming')
-            print('test inner http ok')
+            asyncio.run(async_create_client())
         tServer = Process(target=create_server)
         tServer.start()
         time.sleep(1)
@@ -518,7 +523,7 @@ def create_http_client_timeout():
     tag = ''
     try:
         resp = client.call('testTimeout')
-    except requests.exceptions.ReadTimeout as ex:
+    except asyncio.exceptions.TimeoutError as ex:
         tag = 'http timeout'
     assert(  tag == 'http timeout')
     resp = client.call('sayHello', 'xiaoming')

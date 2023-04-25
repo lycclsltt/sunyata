@@ -1,6 +1,5 @@
 import hashlib
 import ujson
-import requests
 from sunyata.util import local_ip
 from dataclasses import dataclass
 import aiohttp
