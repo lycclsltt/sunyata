@@ -13,6 +13,7 @@ import asyncio
 import uvloop
 import inspect
 from sunyata.http.server import HttpServer
+from sunyata.table_writer import TableWriter
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
@@ -82,6 +83,12 @@ class RpcServer(object):
         logo = """"""
         print(logo)
 
+    def dumpRpcFuncs(self):
+        twHeaders = ['RPC Methods']
+        twRows = [ [elem] for elem in self.funcList ]
+        tw = TableWriter(twHeaders, list(twRows))
+        tw.dump()
+
 
 class SimpleTcpRpcServer(RpcServer):
     
@@ -123,6 +130,7 @@ class BlockTcpRpcServer(SimpleTcpRpcServer):
     def serve(self):
         self.protocal.transport.bind()
         self.printLogo()
+        self.dumpRpcFuncs()
         if self.discovery and self.discoveryConfig:
             self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
         while 1:
@@ -168,6 +176,7 @@ class HttpRpcServer(RpcServer):
 
     def serve(self):
         print('http rpc running on http://%s:%s' % (self.host, self.port) )
+        self.dumpRpcFuncs()
         asyncio.run(self.asyncServe())
 
 
@@ -255,9 +264,9 @@ class TcpRpcServer(BlockTcpRpcServer):
             tasks.append(tRegist)
         coro = asyncio.start_server(self.handle, self.host, self.port, loop=loop)
         tasks.append(coro)
-        rs = loop.run_until_complete(asyncio.gather(*tasks))
-        self.printLogo()
         print('tcp rpc running on tcp://%s:%s' % (self.host, self.port) )
+        self.dumpRpcFuncs()
+        rs = loop.run_until_complete(asyncio.gather(*tasks))
         try:
             loop.run_forever()
         except KeyboardInterrupt:
@@ -298,20 +307,46 @@ class UdpRpcServer(RpcServer):
                 self.protocal.transport.sendPeer(self.protocal.serialize(resp), addr = addr)
             except Exception as ex:
                 print('UDP handler exception:', ex)
-    
-    def serve(self):
-        self.startWorkers()
-        self.protocal.transport.bind()
-        self.printLogo()
-        print('udp rpc running on udp://%s:%s' % (self.host, self.port))
-        if self.discovery and self.discoveryConfig:
-            self.discovery.regist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)
+
+    async def handlePackage(self):
         while 1:
             try:
                 msg, cliAddr = self.protocal.transport.recv()
                 self.queue.put({'msg' : msg, 'addr' : cliAddr})
             except socket.timeout:
                 pass
+
+    async def asyncServe(self):
+        self.startWorkers()
+        self.protocal.transport.bind()
+        self.printLogo()
+        print('udp rpc running on udp://%s:%s' % (self.host, self.port))
+        self.dumpRpcFuncs()
+        tasks = []
+        if self.discovery and self.discoveryConfig:
+            tasks.append(asyncio.create_task(self.discovery.asyncRegist(self.discoveryConfig.serviceName, self.discoveryConfig.serviceHost, self.discoveryConfig.servicePort, ttlHeartBeat=True)))
+        tasks.append(asyncio.create_task(self.handlePackage()))
+        loop = asyncio.get_event_loop()
+        rs = loop.run_until_complete(asyncio.gather(*tasks))
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+        server = rs[-1]
+        # Close the server
+        server.close()
+        loop.run_until_complete(server.wait_closed())
+        loop.close()
+    
+    def serve(self):
+        asyncio.run(self.asyncServe())
+        
+        #while 1:
+        #    try:
+        #        msg, cliAddr = self.protocal.transport.recv()
+        #        self.queue.put({'msg' : msg, 'addr' : cliAddr})
+        #    except socket.timeout:
+        #        pass
 
 
 rpc = RpcServer.rpc

@@ -87,7 +87,7 @@ class RawHttpServer(object):
         return wrapper
     
     def dumpRoutes(self):
-        twHeaders = ['path', 'methods']
+        twHeaders = ['Path', 'Methods']
         twRows = []
         for path, httpRouter in self.routerMap.items():
             twRows.append([path, httpRouter.methods])
