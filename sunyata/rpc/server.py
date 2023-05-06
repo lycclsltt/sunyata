@@ -340,13 +340,6 @@ class UdpRpcServer(RpcServer):
     
     def serve(self):
         asyncio.run(self.asyncServe())
-        
-        #while 1:
-        #    try:
-        #        msg, cliAddr = self.protocal.transport.recv()
-        #        self.queue.put({'msg' : msg, 'addr' : cliAddr})
-        #    except socket.timeout:
-        #        pass
 
 
 rpc = RpcServer.rpc

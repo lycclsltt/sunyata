@@ -2,6 +2,7 @@ from multiprocessing import Process
 import functools
 import time
 import socket
+from dataclasses import dataclass
 
 
 def stdout_log(func):
@@ -127,3 +128,39 @@ def force_return_string(func):
         return str(ret)
 
     return wrapper
+
+
+FUNC_REQUESTNUM_MAP = {}
+
+
+@dataclass
+class RateLimitItem:
+    laststamp: int
+    count: int
+
+
+def ratelimit(perSecondMaxRequest):
+    if type(perSecondMaxRequest) != int or perSecondMaxRequest < 0:
+        raise Exception('ratelimit param perSecondMaxRequest is invalid')
+    def function(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            now = int(time.time())
+            global FUNC_REQUESTNUM_MAP
+            if func.__name__ in FUNC_REQUESTNUM_MAP:
+                ritem = FUNC_REQUESTNUM_MAP[func.__name__]
+                if now - ritem.laststamp >= 1:
+                    ritem.laststamp = now
+                    ritem.count = 1
+                    FUNC_REQUESTNUM_MAP[func.__name__] = ritem
+                else:
+                    FUNC_REQUESTNUM_MAP[func.__name__].count += 1
+            else:
+                FUNC_REQUESTNUM_MAP[func.__name__] = RateLimitItem(laststamp=now, count=1)
+            if FUNC_REQUESTNUM_MAP[func.__name__].count > perSecondMaxRequest:
+                raise Exception('execced per second max request %s' % perSecondMaxRequest)
+            ret = func(*args, **kwargs)
+            return ret
+        return wrapper
+
+    return function
