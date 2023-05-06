@@ -2,6 +2,7 @@ from sunyata.http.factory import HttpFactory
 from sunyata.http.status import *
 from sunyata.http.request_stream import RequestStream
 from sunyata.http.response import HttpResponse
+from sunyata.table_writer import TableWriter
 from traceback import format_exc
 from types import MethodType,FunctionType
 import asyncio
@@ -84,5 +85,14 @@ class RawHttpServer(object):
             cls.addRoute(path, func, methods)
             return func
         return wrapper
+    
+    def dumpRoutes(self):
+        twHeaders = ['path', 'methods']
+        twRows = []
+        for path, httpRouter in self.routerMap.items():
+            twRows.append([path, httpRouter.methods])
+        tw = TableWriter(twHeaders, twRows)
+        tw.dump()
+
 
 route = RawHttpServer.route
