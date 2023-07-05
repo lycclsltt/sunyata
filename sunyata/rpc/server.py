@@ -14,6 +14,7 @@ import uvloop
 import inspect
 from sunyata.http.server import HttpServer
 from sunyata.table_writer import TableWriter
+import time
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
@@ -26,6 +27,7 @@ class RpcServer(object):
         self.discoveryConfig = None
         self.discovery = None
         self.protocal = RpcProtocal()
+        self.accessLog = True
 
     @classmethod
     def regist(cls, func):
@@ -59,10 +61,15 @@ class RpcServer(object):
                 return FuncNotFoundException('func not found')
             methodObj = self.funcMap[func]
             args = tuple(args)
+            begin = time.time() * 1000
             if len(args) == 0 and len(kwargs) == 0:
                 resp = methodObj.call()
             else:
                 resp = methodObj.call(*args, **kwargs)
+            end = time.time() * 1000
+            cost = end - begin
+            if self.accessLog:
+                print("time:%s, method:%s, args:%s, cost:%sms" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()), func, str(args), round(cost, 6)))
             return resp
         except Exception as ex:
             return Exception('server exception, ' + str(ex))
