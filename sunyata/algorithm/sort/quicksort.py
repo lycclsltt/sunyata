@@ -1,7 +1,6 @@
 #coding=utf-8
 
 from sunyata.algorithm.sort.base import Sort
-import random
 
 class QuickSort(Sort):
     

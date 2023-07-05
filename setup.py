@@ -1,4 +1,4 @@
-DEFINE_VERSION = '0.0.39'
+DEFINE_VERSION = '0.0.40'
 from setuptools import setup
 
 requireList = [
