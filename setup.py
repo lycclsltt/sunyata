@@ -1,4 +1,4 @@
-DEFINE_VERSION = '0.0.40'
+DEFINE_VERSION = '0.0.41'
 from setuptools import setup
 
 requireList = [
@@ -7,6 +7,7 @@ requireList = [
     'uvloop==0.19.0',
     'uvicorn==0.18.0',
     'aiohttp==3.8.4',
+    'dataclasses-json==0.5.13',
     #'PyMySQL==0.10.1',
     #'DBUtils==1.3',
 ]
