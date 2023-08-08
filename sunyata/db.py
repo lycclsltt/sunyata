@@ -11,18 +11,6 @@ if sys.version[0:1] == '3': unicode = str
 
 class PoolDB(object):
 
-    __slots__ = (
-        'host',
-        'port',
-        'user',
-        'passwd',
-        'dbName',
-        'log',
-        'connectTimeout',
-        'readTimeout',
-        'minConnNum',
-    )
-
     def __init__(self,
                  host,
                  port,
