@@ -5,6 +5,7 @@ from sunyata.http.rawserver import RawHttpServer
 from sunyata.http.request import HttpRequest
 import sunyata.util as util
 import traceback
+import time
 import logging
 logging.basicConfig(format = '%(asctime)s|%(levelname)s|%(message)s', level=logging.DEBUG)
 
@@ -15,19 +16,18 @@ class HttpServer(RawHttpServer):
 
     def __init__(self, bind = '0.0.0.0', port=9989, accessLog=True):
         RawHttpServer.__init__(self, bind=bind, port=port)
-        self.config = uvicorn.Config("sunyata.http.server:HttpServer", host=self.bind, port=self.port, log_level='error')
+        self.config = uvicorn.Config(self, host=self.bind, port=self.port, log_level='error')
+        self.server = uvicorn.Server(self.config)
         self.accessLog = accessLog
 
     def serve(self):
-        server = uvicorn.Server(self.config)
         print('http running on http://%s:%s' % (self.bind, self.port) )
         self.dumpRoutes()
-        server.run()
+        self.server.run()
 
     async def asyncServe(self):
-        server = uvicorn.Server(self.config)
-        server.config.setup_event_loop()
-        await server.serve()
+        self.server.config.setup_event_loop()
+        await self.server.serve()
     
     async def genHttpRequest(self, scheme, httpVersion, method, path, queryString, headers, body, clientTuple):
         httpRequest = HttpRequest()
@@ -60,12 +60,12 @@ class HttpServer(RawHttpServer):
         for line in rawHeaders:
             headers[util.bytes2str(line[0])] = str(util.bytes2str(line[1]))
         return headers
-
+    
     async def __call__(self, scope, receive, send):
         assert scope['type'] == 'http'
         headers = await self.rawHeadersToDict(scope['headers'])
         body = await self.readBody(receive)
-        
+        begin = time.time()
         try:
             httpRequest = await self.genHttpRequest(
                 scope['scheme'],
@@ -79,10 +79,12 @@ class HttpServer(RawHttpServer):
             )
             httpResponse = await self.handleRequest(httpRequest)
         except Exception as ex:
-            print(str(ex) + ' ' + traceback.format_exc())
+            logging.error(str(ex) + ' ' + traceback.format_exc())
             httpResponse = HttpFactory.genHttpResponse(HttpStatus500, str(ex))
+        end = time.time()
         if self.accessLog:
-            logging.debug('|'.join([scope['client'][0] + ':' + str(scope['client'][1]), scope['method'], scope['scheme'], scope['path'], str(httpResponse.status.code)]))
+            cost = end - begin
+            logging.debug('|'.join([scope['client'][0] + ':' + str(scope['client'][1]), scope['method'], scope['scheme'], scope['path'], str(httpResponse.status.code), str(round(cost*1000, 6))+'ms']))
         await send(
             {
                 "type": "http.response.start",
