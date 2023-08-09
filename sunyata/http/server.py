@@ -5,15 +5,18 @@ from sunyata.http.rawserver import RawHttpServer
 from sunyata.http.request import HttpRequest
 import sunyata.util as util
 import traceback
+import logging
+logging.basicConfig(format = '%(asctime)s|%(levelname)s|%(message)s', level=logging.DEBUG)
 
 
 class HttpServer(RawHttpServer):
 
     routerMap = {}
 
-    def __init__(self, bind = '0.0.0.0', port=9989, log_level='error'):
+    def __init__(self, bind = '0.0.0.0', port=9989, accessLog=True):
         RawHttpServer.__init__(self, bind=bind, port=port)
-        self.config = uvicorn.Config("sunyata.http.server:HttpServer", host=self.bind, port=self.port, log_level=log_level)
+        self.config = uvicorn.Config("sunyata.http.server:HttpServer", host=self.bind, port=self.port, log_level='error')
+        self.accessLog = accessLog
 
     def serve(self):
         server = uvicorn.Server(self.config)
@@ -62,6 +65,7 @@ class HttpServer(RawHttpServer):
         assert scope['type'] == 'http'
         headers = await self.rawHeadersToDict(scope['headers'])
         body = await self.readBody(receive)
+        
         try:
             httpRequest = await self.genHttpRequest(
                 scope['scheme'],
@@ -77,6 +81,8 @@ class HttpServer(RawHttpServer):
         except Exception as ex:
             print(str(ex) + ' ' + traceback.format_exc())
             httpResponse = HttpFactory.genHttpResponse(HttpStatus500, str(ex))
+        if self.accessLog:
+            logging.debug('|'.join([scope['client'][0] + ':' + str(scope['client'][1]), scope['method'], scope['scheme'], scope['path'], str(httpResponse.status.code)]))
         await send(
             {
                 "type": "http.response.start",

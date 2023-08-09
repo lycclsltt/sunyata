@@ -1,10 +1,10 @@
-DEFINE_VERSION = '0.0.41'
+DEFINE_VERSION = '0.0.42'
 from setuptools import setup
 
 requireList = [
     'lz4==3.1.3',
     'ujson==1.35',
-    'uvloop==0.19.0',
+    'uvloop==0.17.0',
     'uvicorn==0.18.0',
     'aiohttp==3.8.4',
     'dataclasses-json==0.5.13',
