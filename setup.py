@@ -1,4 +1,4 @@
-DEFINE_VERSION = '0.0.44'
+DEFINE_VERSION = '0.0.45'
 from setuptools import setup
 
 requireList = [
@@ -7,10 +7,10 @@ requireList = [
     'uvloop==0.17.0',
     'uvicorn==0.18.0',
     'aiohttp==3.8.4',
-    'dataclasses-json==0.5.13',
-    'requests',
+    'requests==2.30.0',
     #'PyMySQL==0.10.1',
     #'DBUtils==1.3',
+     #'dataclasses-json==0.5.13',
 ]
 
 setup(
@@ -27,6 +27,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
     keywords='sunyata',
     packages=[
