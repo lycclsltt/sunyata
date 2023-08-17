@@ -25,6 +25,8 @@ from sunyata.http.server import HttpServer
 from multiprocessing import Process
 import asyncio
 import aiohttp
+from sunyata.http.middleware import Middleware
+import requests
 
 
 CONSUL_HOST = '192.168.19.103'
@@ -33,7 +35,7 @@ CONSUL_TOKEN = 'c594c65b-0f00-bc9b-5ba1-e8242e287f12'
 ETCD_HOST = '192.168.19.103'
 ETCD_PORT = 2379
 SLEEP = 2
-IS_TEST_DISCOVERY = True
+IS_TEST_DISCOVERY = False
 
 
 @rpc
@@ -570,6 +572,25 @@ def create_http_client_etcd_discovery():
         resp = client.call('sayHello', 'xiaoming')
         assert (resp == 'hello xiaoming')
 
+def create_http_server_with_middleware():
+    class TestMiddleware(Middleware):
+        def handle(self, request):
+            if request.headers.get('token') != 'test':
+                self.abort(403, 'invalid token')
+
+    def getUserName(request):
+        return 'tom'
+    
+    httpServerMiddle = HttpServer(port=10032)
+    httpServerMiddle.addRoute("/getUserName", getUserName)
+    httpServerMiddle.middlewares = [ TestMiddleware() ]
+    httpServerMiddle.serve()
+
+def create_http_client_totest_middle():
+    r = requests.get('http://127.0.0.1:10032/getUserName', headers={'token':'test'})
+    assert (r.status_code == 200)
+    assert (r.text == 'tom')
+
 if __name__ == '__main__':
     #测试HTTP
     tServer = Process(target=create_http_server)
@@ -614,6 +635,13 @@ if __name__ == '__main__':
     httpServer.start()
     time.sleep(SLEEP)
     httpClient = threading.Thread(target=create_http_client_etcd_discovery)
+    httpClient.start()
+    time.sleep(30)
+    #测试middleware
+    httpServer = Process(target=create_http_server_with_middleware)
+    httpServer.start()
+    time.sleep(SLEEP)
+    httpClient = threading.Thread(target=create_http_client_totest_middle)
     httpClient.start()
     time.sleep(30)
     print('all ok')

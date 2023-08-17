@@ -313,6 +313,41 @@ hs = HttpServer(bind='0.0.0.0', port=9989)
 hs.serve()
 ```
 
+
+## 中间件
+可以通过继承Middleware类，重写handle方法，添加中间件。所有请求的都会先经过多个中间件，可用于身份验证的场景，下面是一个例子。
+
+```python
+from sunyata.http.server import HttpServer, route
+from sunyata.http.middleware import Middleware
+import logging
+
+
+class LogMiddleware(Middleware):
+    
+    def handle(self, request):
+        logging.info('path:' + request.uri + ' method:' + request.method)
+
+
+class AuthMiddleware(Middleware):
+
+    def handle(self, request):
+        if request.headers.get('token') != 'abc':
+            self.abort(403, 'invalid token')
+
+
+@route('/api/v1/getUserName', methods=['POST', 'GET'])
+def getUserName(request):
+    return 'tom'
+
+app = HttpServer(port=9990, accessLog=True)
+app.middlewares = [
+    LogMiddleware(),
+    AuthMiddleware(),
+]
+app.serve()
+```
+
 ## 微服务案例
 下面是一个dns查询场景的微服务案例,dns_service.py负责提供底层dns查询服务,dns_web.py启动http api负责提供对外接口。dns_web与dns_service之间通过rpc进行通信。
 

@@ -81,8 +81,8 @@ class HttpServer(RawHttpServer):
         except Exception as ex:
             logging.error(str(ex) + ' ' + traceback.format_exc())
             httpResponse = HttpFactory.genHttpResponse(HttpStatus500, str(ex))
-        end = time.time()
         if self.accessLog:
+            end = time.time()
             cost = end - begin
             logging.debug('|'.join([scope['client'][0] + ':' + str(scope['client'][1]), scope['method'], scope['scheme'], scope['path'], str(httpResponse.status.code), str(round(cost*1000, 6))+'ms']))
         await send(

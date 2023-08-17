@@ -26,6 +26,7 @@ class RawHttpServer(object):
         super().__init__()
         self.bind = bind
         self.port = port
+        self.middlewares = []
     
     @classmethod
     def addRoute(cls, path, func, methods = None):
@@ -46,6 +47,11 @@ class RawHttpServer(object):
         if router.methods and httpRequest.method not in router.methods:
             return HttpFactory.genHttpResponse(HttpStatus405)
         try:
+            for middleware in self.middlewares:
+                middleware.resetResponse()
+                middleware.handle(httpRequest)
+                if middleware.resp:
+                    return middleware.resp
             if inspect.iscoroutinefunction(router.getFunc()):
                 resp = await router.getFunc()(httpRequest)
             else:
